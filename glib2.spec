@@ -3,7 +3,7 @@
 Summary: A library of handy utility functions
 Name: glib2
 Version: 2.28.8
-Release: 5%{?dist}
+Release: 9%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 URL: http://www.gtk.org
@@ -40,7 +40,8 @@ Patch4: Revert-deprecations-since-glib-2.22.patch
 # https://bugzilla.gnome.org/656039
 Patch5: GDBusProxy-thread-safety.patch
 
-Patch6: glib2-force-fam-for-remote-fs.patch
+Patch7: bug-1212722-gmain-source-reuse-for-qemu.patch
+Patch8: update-translations.patch
 
 %description
 GLib is the low-level core library that forms the basis for projects
@@ -192,6 +193,22 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_libdir}/lib*.a
 
 %changelog
+* Mon Jan 23 2017 Colin Walters <walters@redhat.com> - 2.28.8-9
+- Add patch to update translations
+  Resolves: #1333642
+
+* Wed Jan 11 2017 Colin Walters <walters@verbum.org> - 2.28.8-8
+- Revert use of FAM on NFS - introduces perf regressions for deployments
+  which are not using NFS for home directories; this is better handled
+  in RHEL7.
+  Resolves: #1399726
+  Reverts: #725178
+
+* Fri Jul 15 2016 Colin Walters <walters@redhat.com> - 2.28.8-6
+- Backport patch to avoid integer overflow on reuse of GMainContext
+  source ids, which qemu hits.
+  Resolves: #1212722
+
 * Wed Jan 20 2016 Colin Walters <walters@redhat.com> - 2.28.8-5
 - Force use of FAM on NFS
   Resolves: #725178
