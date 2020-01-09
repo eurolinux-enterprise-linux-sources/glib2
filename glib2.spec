@@ -3,7 +3,7 @@
 Summary: A library of handy utility functions
 Name: glib2
 Version: 2.28.8
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 URL: http://www.gtk.org
@@ -42,6 +42,8 @@ Patch5: GDBusProxy-thread-safety.patch
 
 Patch7: bug-1212722-gmain-source-reuse-for-qemu.patch
 Patch8: update-translations.patch
+
+Patch9: gunixmounts-Skip-accumulated-events-from-file-monito.patch
 
 %description
 GLib is the low-level core library that forms the basis for projects
@@ -193,6 +195,10 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_libdir}/lib*.a
 
 %changelog
+* Tue Feb 6 2018 Ondrej Holy <oholy@redhat.com> - 2.28.8-10
+- Skip accumulated events from file monitor
+  Resolves: #1154183
+
 * Mon Jan 23 2017 Colin Walters <walters@redhat.com> - 2.28.8-9
 - Add patch to update translations
   Resolves: #1333642

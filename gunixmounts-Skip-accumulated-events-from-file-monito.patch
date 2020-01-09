@@ -1,0 +1,64 @@
+From 2a60e3bbba362267892f3f68dbfdabe9e4dae047 Mon Sep 17 00:00:00 2001
+From: Ondrej Holy <oholy@redhat.com>
+Date: Mon, 15 Jan 2018 17:56:26 +0100
+Subject: [PATCH] gunixmounts: Skip accumulated events from file monitor
+
+Skip accumulated events from file monitor which we are not able to handle
+in a real time instead of emitting mounts_changed signal several times.
+This should behave equally to GIOChannel based monitoring. See Bug 792235.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=793006
+---
+ gio/gunixmounts.c | 22 ++++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
+
+diff --git a/gio/gunixmounts.c b/gio/gunixmounts.c
+index 054bfe7cf..3b2fe951e 100644
+--- a/gio/gunixmounts.c
++++ b/gio/gunixmounts.c
+@@ -135,6 +135,7 @@ struct _GUnixMountMonitor {
+ 
+   GFileMonitor *fstab_monitor;
+   GFileMonitor *mtab_monitor;
++  gint64 mtab_file_changed_id;
+ };
+ 
+ struct _GUnixMountMonitorClass {
+@@ -1260,6 +1261,17 @@ fstab_file_changed (GFileMonitor      *monitor,
+   g_signal_emit (mount_monitor, signals[MOUNTPOINTS_CHANGED], 0);
+ }
+ 
++static gboolean
++mtab_file_changed_cb (gpointer user_data)
++{
++  GUnixMountMonitor *mount_monitor = user_data;
++
++  mount_monitor->mtab_file_changed_id = 0;
++  g_signal_emit (mount_monitor, signals[MOUNTS_CHANGED], 0);
++
++  return FALSE;
++}
++
+ static void
+ mtab_file_changed (GFileMonitor      *monitor,
+ 		   GFile             *file,
+@@ -1275,7 +1287,15 @@ mtab_file_changed (GFileMonitor      *monitor,
+     return;
+   
+   mount_monitor = user_data;
+-  g_signal_emit (mount_monitor, signals[MOUNTS_CHANGED], 0);
++
++  /* Skip accumulated events from file monitor which we are not able to handle
++   * in a real time instead of emitting mounts_changed signal several times.
++   * This should behave equally to GIOChannel based monitoring. See Bug 792235.
++   */
++  if (mount_monitor->mtab_file_changed_id > 0)
++    return;
++
++  mount_monitor->mtab_file_changed_id = g_idle_add (mtab_file_changed_cb, user_data);
+ }
+ 
+ static void
+-- 
+2.15.1
+
