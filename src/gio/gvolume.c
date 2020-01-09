@@ -301,13 +301,15 @@ g_volume_should_automount (GVolume *volume)
  * @volume: a #GVolume.
  * @flags: flags affecting the operation
  * @mount_operation: (allow-none): a #GMountOperation or %NULL to avoid user interaction.
- * @cancellable: optional #GCancellable object, %NULL to ignore.
- * @callback: a #GAsyncReadyCallback, or %NULL.
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore.
+ * @callback: (allow-none): a #GAsyncReadyCallback, or %NULL.
  * @user_data: user data that gets passed to @callback
  * 
  * Mounts a volume. This is an asynchronous operation, and is
  * finished by calling g_volume_mount_finish() with the @volume
  * and #GAsyncResult returned in the @callback.
+ *
+ * Virtual: mount_fn
  **/
 void
 g_volume_mount (GVolume             *volume,
@@ -376,8 +378,8 @@ g_volume_mount_finish (GVolume       *volume,
  * g_volume_eject:
  * @volume: a #GVolume.
  * @flags: flags affecting the unmount if required for eject
- * @cancellable: optional #GCancellable object, %NULL to ignore.
- * @callback: a #GAsyncReadyCallback, or %NULL.
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore.
+ * @callback: (allow-none): a #GAsyncReadyCallback, or %NULL.
  * @user_data: user data that gets passed to @callback
  * 
  * Ejects a volume. This is an asynchronous operation, and is
@@ -449,8 +451,9 @@ g_volume_eject_finish (GVolume       *volume,
  * g_volume_eject_with_operation:
  * @volume: a #GVolume.
  * @flags: flags affecting the unmount if required for eject
- * @mount_operation: a #GMountOperation or %NULL to avoid user interaction.
- * @cancellable: optional #GCancellable object, %NULL to ignore.
+ * @mount_operation: (allow-none): a #GMountOperation or %NULL to
+ *     avoid user interaction.
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore.
  * @callback: a #GAsyncReadyCallback, or %NULL.
  * @user_data: user data passed to @callback.
  *
@@ -568,8 +571,8 @@ g_volume_get_identifier (GVolume    *volume,
  * that @volume has. Use g_volume_get_identifer() to obtain 
  * the identifiers themselves.
  *
- * Returns: a %NULL-terminated array of strings containing
- *   kinds of identifiers. Use g_strfreev() to free.
+ * Returns: (array zero-terminated=1) (transfer full): a %NULL-terminated array
+ *   of strings containing kinds of identifiers. Use g_strfreev() to free.
  */
 char **
 g_volume_enumerate_identifiers (GVolume *volume)
@@ -619,7 +622,7 @@ g_volume_enumerate_identifiers (GVolume *volume)
  * implementations to find the underlying mount to shadow, see
  * g_mount_is_shadowed() for more details.
  *
- * Returns: the activation root of @volume or %NULL. Use
+ * Returns: (transfer full): the activation root of @volume or %NULL. Use
  * g_object_unref() to free.
  *
  * Since: 2.18

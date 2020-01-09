@@ -14,7 +14,7 @@
  */
 
 /**
- * SECTION: gunixcredentialsmessage
+ * SECTION:gunixcredentialsmessage
  * @title: GUnixCredentialsMessage
  * @short_description: A GSocketControlMessage containing credentials
  * @include: gio/gunixcredentialsmessage.h
@@ -380,7 +380,7 @@ g_unix_credentials_message_new_with_credentials (GCredentials *credentials)
  *
  * Gets the credentials stored in @message.
  *
- * Returns: A #GCredentials instance. Do not free, it is owned by @message.
+ * Returns: (transfer none): A #GCredentials instance. Do not free, it is owned by @message.
  *
  * Since: 2.26
  */

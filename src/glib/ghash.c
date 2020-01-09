@@ -39,7 +39,7 @@
 
 
 /**
- * SECTION: hash_tables
+ * SECTION:hash_tables
  * @title: Hash Tables
  * @short_description: associations between keys and values so that
  *                     given a key the value can be found quickly
@@ -283,12 +283,13 @@ g_hash_table_set_shift_from_size (GHashTable *hash_table, gint size)
 /*
  * g_hash_table_lookup_node:
  * @hash_table: our #GHashTable
- * @key: the key to lookup against
+ * @key: the key to lookup against (may be %NULL)
  * @hash_return: optional key hash return location
  * Return value: index of the described #GHashNode
  *
- * Performs a lookup in the hash table.  Virtually all hash operations
- * will use this function internally.
+ * Performs a lookup in the hash table.
+ *
+ * Virtually all hash operations will use this function internally.
  *
  * This function first computes the hash value of the key using the
  * user's hash function.
@@ -825,7 +826,6 @@ GHashTable*
 g_hash_table_ref (GHashTable *hash_table)
 {
   g_return_val_if_fail (hash_table != NULL, NULL);
-  g_return_val_if_fail (hash_table->ref_count > 0, hash_table);
 
   g_atomic_int_add (&hash_table->ref_count, 1);
   return hash_table;
@@ -846,7 +846,6 @@ void
 g_hash_table_unref (GHashTable *hash_table)
 {
   g_return_if_fail (hash_table != NULL);
-  g_return_if_fail (hash_table->ref_count > 0);
 
   if (g_atomic_int_exchange_and_add (&hash_table->ref_count, -1) - 1 == 0)
     {
@@ -871,7 +870,6 @@ void
 g_hash_table_destroy (GHashTable *hash_table)
 {
   g_return_if_fail (hash_table != NULL);
-  g_return_if_fail (hash_table->ref_count > 0);
 
   g_hash_table_remove_all (hash_table);
   g_hash_table_unref (hash_table);
@@ -917,7 +915,8 @@ g_hash_table_lookup (GHashTable   *hash_table,
  * for example before calling g_hash_table_remove().
  *
  * You can actually pass %NULL for @lookup_key to test
- * whether the %NULL key exists.
+ * whether the %NULL key exists, provided the hash and equal functions
+ * of @hash_table are %NULL-safe.
  *
  * Return value: %TRUE if the key was found in the #GHashTable.
  **/
@@ -975,7 +974,6 @@ g_hash_table_insert_internal (GHashTable *hash_table,
   guint old_hash;
 
   g_return_if_fail (hash_table != NULL);
-  g_return_if_fail (hash_table->ref_count > 0);
 
   node_index = g_hash_table_lookup_node_for_insertion (hash_table, key, &key_hash);
   node = &hash_table->nodes [node_index];

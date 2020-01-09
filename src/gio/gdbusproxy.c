@@ -655,7 +655,7 @@ g_dbus_proxy_get_cached_property (GDBusProxy   *proxy,
  * g_dbus_proxy_set_cached_property:
  * @proxy: A #GDBusProxy
  * @property_name: Property name.
- * @value: Value for the property or %NULL to remove it from the cache.
+ * @value: (allow-none): Value for the property or %NULL to remove it from the cache.
  *
  * If @value is not %NULL, sets the cached value for the property with
  * name @property_name to the value in @value.
@@ -1140,8 +1140,7 @@ async_init_get_name_owner_cb (GDBusConnection *connection,
             }
           else
             {
-              g_simple_async_result_set_from_error (data->simple, error);
-              g_error_free (error);
+              g_simple_async_result_take_error (data->simple, error);
               g_simple_async_result_complete_in_idle (data->simple);
               async_init_data_free (data);
               goto out;
@@ -1265,8 +1264,7 @@ async_init_start_service_by_name_cb (GDBusConnection *connection,
 
  failed:
   g_warn_if_fail (error != NULL);
-  g_simple_async_result_set_from_error (data->simple, error);
-  g_error_free (error);
+  g_simple_async_result_take_error (data->simple, error);
   g_simple_async_result_complete_in_idle (data->simple);
   async_init_data_free (data);
 }
@@ -1453,8 +1451,7 @@ get_connection_cb (GObject       *source_object,
                                           data->callback,
                                           data->user_data,
                                           NULL);
-      g_simple_async_result_set_from_error (simple, error);
-      g_error_free (error);
+      g_simple_async_result_take_error (simple, error);
       g_simple_async_result_complete_in_idle (simple);
       g_object_unref (simple);
     }
@@ -1615,8 +1612,8 @@ initable_iface_init (GInitableIface *initable_iface)
  * g_dbus_proxy_new:
  * @connection: A #GDBusConnection.
  * @flags: Flags used when constructing the proxy.
- * @info: A #GDBusInterfaceInfo specifying the minimal interface that @proxy conforms to or %NULL.
- * @name: A bus name (well-known or unique) or %NULL if @connection is not a message bus connection.
+ * @info: (allow-none): A #GDBusInterfaceInfo specifying the minimal interface that @proxy conforms to or %NULL.
+ * @name: (allow-none): A bus name (well-known or unique) or %NULL if @connection is not a message bus connection.
  * @object_path: An object path.
  * @interface_name: A D-Bus interface name.
  * @cancellable: A #GCancellable or %NULL.
@@ -1785,7 +1782,7 @@ g_dbus_proxy_new_sync (GDBusConnection     *connection,
  * g_dbus_proxy_new_for_bus:
  * @bus_type: A #GBusType.
  * @flags: Flags used when constructing the proxy.
- * @info: A #GDBusInterfaceInfo specifying the minimal interface that @proxy conforms to or %NULL.
+ * @info: (allow-none): A #GDBusInterfaceInfo specifying the minimal interface that @proxy conforms to or %NULL.
  * @name: A bus name (well-known or unique).
  * @object_path: An object path.
  * @interface_name: A D-Bus interface name.
@@ -1850,7 +1847,8 @@ g_dbus_proxy_new_for_bus_finish (GAsyncResult  *res,
  * g_dbus_proxy_new_for_bus_sync:
  * @bus_type: A #GBusType.
  * @flags: Flags used when constructing the proxy.
- * @info: A #GDBusInterfaceInfo specifying the minimal interface that @proxy conforms to or %NULL.
+ * @info: (allow-none): A #GDBusInterfaceInfo specifying the minimal interface
+ *        that @proxy conforms to or %NULL.
  * @name: A bus name (well-known or unique).
  * @object_path: An object path.
  * @interface_name: A D-Bus interface name.
@@ -1905,7 +1903,7 @@ g_dbus_proxy_new_for_bus_sync (GBusType             bus_type,
  *
  * Gets the connection @proxy is for.
  *
- * Returns: A #GDBusConnection owned by @proxy. Do not free.
+ * Returns: (transfer none): A #GDBusConnection owned by @proxy. Do not free.
  *
  * Since: 2.26
  */
@@ -2077,7 +2075,7 @@ g_dbus_proxy_get_interface_info (GDBusProxy *proxy)
 /**
  * g_dbus_proxy_set_interface_info:
  * @proxy: A #GDBusProxy
- * @info: Minimum interface this proxy conforms to or %NULL to unset.
+ * @info: (allow-none): Minimum interface this proxy conforms to or %NULL to unset.
  *
  * Ensure that interactions with @proxy conform to the given
  * interface.  For example, when completing a method call, if the type
@@ -2148,9 +2146,7 @@ reply_cb (GDBusConnection *connection,
                                          &error);
   if (error != NULL)
     {
-      g_simple_async_result_set_from_error (simple,
-                                            error);
-      g_error_free (error);
+      g_simple_async_result_take_error (simple, error);
     }
   else
     {
@@ -2212,9 +2208,10 @@ get_destination_for_call (GDBusProxy *proxy)
  * g_dbus_proxy_call:
  * @proxy: A #GDBusProxy.
  * @method_name: Name of method to invoke.
- * @parameters: A #GVariant tuple with parameters for the signal or %NULL if not passing parameters.
+ * @parameters: (allow-none): A #GVariant tuple with parameters for the signal or %NULL if not passing parameters.
  * @flags: Flags from the #GDBusCallFlags enumeration.
- * @timeout_msec: The timeout in milliseconds or -1 to use the proxy default timeout.
+ * @timeout_msec: The timeout in milliseconds (with %G_MAXINT meaning
+ *                "infinite") or -1 to use the proxy default timeout.
  * @cancellable: A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL if you don't
  * care about the result of the method invocation.
@@ -2379,9 +2376,11 @@ g_dbus_proxy_call_finish (GDBusProxy    *proxy,
  * g_dbus_proxy_call_sync:
  * @proxy: A #GDBusProxy.
  * @method_name: Name of method to invoke.
- * @parameters: A #GVariant tuple with parameters for the signal or %NULL if not passing parameters.
+ * @parameters: (allow-none): A #GVariant tuple with parameters for the signal
+ *              or %NULL if not passing parameters.
  * @flags: Flags from the #GDBusCallFlags enumeration.
- * @timeout_msec: The timeout in milliseconds or -1 to use the proxy default timeout.
+ * @timeout_msec: The timeout in milliseconds (with %G_MAXINT meaning
+ *                "infinite") or -1 to use the proxy default timeout.
  * @cancellable: A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
  *

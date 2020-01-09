@@ -25,9 +25,9 @@ TEST_PROGS        += fileutils
 fileutils_SOURCES  = fileutils.c
 fileutils_LDADD	   = $(progs_ldadd)
 
-TEST_PROGS        += printf
-printf_SOURCES     = printf.c
-printf_LDADD       = $(progs_ldadd) -lm
+TEST_PROGS          += test-printf
+test_printf_SOURCES  = test-printf.c
+test_printf_LDADD    = $(progs_ldadd) -lm
 
 TEST_PROGS        += protocol
 protocol_SOURCES   = protocol.c
@@ -68,6 +68,10 @@ gvariant_LDADD      = $(progs_ldadd)
 
 TEST_PROGS         += mem-overflow
 mem_overflow_LDADD  = $(progs_ldadd)
+
+TEST_PROGS              += utf8-performance
+utf8_performance_SOURCES = utf8-performance.c
+utf8_performance_LDADD   = $(progs_ldadd)
 
 TEST_PROGS         += utils
 utils_LDADD         = $(progs_ldadd)
@@ -148,6 +152,13 @@ TEST_PROGS          += gdatetime
 gdatetime_SOURCES    = gdatetime.c
 gdatetime_LDADD      = $(progs_ldadd)
 
+TEST_PROGS          += timeout
+timeout_SOURCES      = timeout.c
+timeout_LDADD        = $(progs_ldadd)
+
+TEST_PROGS       += environment
+environment_LDADD = $(progs_ldadd)
+
 if OS_UNIX
 
 # some testing of gtester funcitonality
@@ -165,6 +176,7 @@ CLEANFILES = \
 EXTRA_DIST += \
 	4096-random-bytes	\
 	keyfiletest.ini		\
+	pages.ini		\
 	bookmarks.xbel
 
 dist-hook:

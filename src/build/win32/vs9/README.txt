@@ -7,19 +7,36 @@ the .in files needed, mainly config.h.win32.in into config.h.win32 and
 glibconfig.h.win32.in into glibconfig.h.win32. You will also need to
 expand the .vcprojin files here into .vcproj files.
 
-The only external dependency is proxy-libintl. Fetch the latest
-proxy-libintl-dev zipfile from
+The required dependencies are zlib and proxy-libintl. Fetch the latest
+proxy-libintl-dev and zlib-dev zipfiles from
 http://ftp.gnome.org/pub/GNOME/binaries/win32/dependencies/ for 32-bit
 builds, and correspondingly
 http://ftp.gnome.org/pub/GNOME/binaries/win64/dependencies/ for 64-bit
-builds. Set up the source tree as follows under some arbitrary top
+builds. 
+
+One may wish to build his/her own ZLib-It is recommended that ZLib is
+built using the win32/Makefile.msc makefile with VS9 with the ASM routines
+to avoid linking problems-see win32/Makefile.msc in ZLib for more details.
+
+One may optionally use his/her own PCRE installation by selecting the
+(BuildType)_ExtPCRE configuration, but please note the PCRE must be built
+with VS9 with unicode support using the /MD (release) or /MDd (debug)
+runtime option which corresponds to your GLib build flavour (release, debug).
+(These are the defaults set by CMAKE, which is used in recent versions of PCRE.)
+Not doing so will most probably result in unexpected crashes in 
+your programs due to the use of different CRTs.  If using a static PCRE
+build, add PCRE_STATIC to the "preprocessor definitions".
+Note that one may still continue to build with the bundled PCRE by selecting
+the (BuildType) configuration.
+
+Set up the source tree as follows under some arbitrary top
 folder <root>:
 
-<root>\glib\<this-glib-source-tree>
+<root>\<this-glib-source-tree>
 <root>\vs9\<PlatformName>
 
 *this* file you are now reading is thus located at
-<root>\glib\<this-glib-source-tree>\build\win32\vs9\README.
+<root>\<this-glib-source-tree>\build\win32\vs9\README.
 
 <PlatformName> is either Win32 or x64, as in VS9 project files.
 
@@ -36,3 +53,4 @@ project files higher in the stack are supposed to look for them, not
 from a specific GLib source tree.
 
 --Tor Lillqvist <tml@iki.fi>
+--Updated by Chun-wei Fan <fanc999@gmail.com>

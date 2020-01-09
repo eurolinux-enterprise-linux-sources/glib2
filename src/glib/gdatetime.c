@@ -54,11 +54,6 @@
 #include <unistd.h>
 #endif
 
-#ifndef G_OS_WIN32
-#include <sys/time.h>
-#include <time.h>
-#endif /* !G_OS_WIN32 */
-
 #include "gdatetime.h"
 
 #include "gatomic.h"
@@ -69,9 +64,14 @@
 #include "gstrfuncs.h"
 #include "gtestutils.h"
 #include "gthread.h"
-#include "gtimezoneprivate.h"
+#include "gtimezone.h"
 
 #include "glibintl.h"
+
+#ifndef G_OS_WIN32
+#include <sys/time.h>
+#include <time.h>
+#endif /* !G_OS_WIN32 */
 
 /**
  * SECTION:date-time
@@ -481,7 +481,7 @@ g_date_time_from_instant (GTimeZone *tz,
   GDateTime *datetime;
   gint64 offset;
 
-  if (instant < 0 || instant > 1000000000000000000)
+  if (instant < 0 || instant > G_GINT64_CONSTANT (1000000000000000000))
     return NULL;
 
   datetime = g_date_time_alloc (tz);
@@ -1319,8 +1319,8 @@ g_date_time_add_full (GDateTime *datetime,
  * #GCompareFunc-compatible comparison for #GDateTime<!-- -->'s. Both
  * #GDateTime<-- -->'s must be non-%NULL.
  *
- * Return value: 0 for equal, less than zero if dt1 is less than dt2, greater
- *   than zero if dt2 is greator than dt1.
+ * Return value: -1, 0 or 1 if @dt1 is less than, equal to or greater
+ *   than @dt2.
  *
  * Since: 2.26
  */
@@ -1409,7 +1409,7 @@ g_date_time_equal (gconstpointer dt1,
  * g_date_time_get_ymd:
  * @datetime: a #GDateTime.
  * @year: (out): the return location for the gregorian year, or %NULL.
- * @month: (out): the return location for the monty of the year, or %NULL.
+ * @month: (out): the return location for the month of the year, or %NULL.
  * @day: (out): the return location for the day of the month, or %NULL.
  *
  * Retrieves the Gregorian day, month, and year of a given #GDateTime.
@@ -1584,7 +1584,7 @@ g_date_time_get_day_of_month (GDateTime *datetime)
 /* Week of year / day of week getters {{{1 */
 /**
  * g_date_time_get_week_numbering_year:
- * @date: a #GDateTime
+ * @datetime: a #GDateTime
  *
  * Returns the ISO 8601 week-numbering year in which the week containing
  * @datetime falls.
@@ -2237,7 +2237,6 @@ g_date_time_format (GDateTime *datetime,
   GString  *outstr;
   gchar    *tmp;
   gunichar  c;
-  glong     utf8len;
   gboolean  in_mod;
 
   g_return_val_if_fail (datetime != NULL, NULL);
@@ -2245,10 +2244,9 @@ g_date_time_format (GDateTime *datetime,
   g_return_val_if_fail (g_utf8_validate (format, -1, NULL), NULL);
 
   outstr = g_string_sized_new (strlen (format) * 2);
-  utf8len = g_utf8_strlen (format, -1);
   in_mod = FALSE;
 
-  for (; *format; format = g_utf8_next_char(format))
+  for (; *format; format = g_utf8_next_char (format))
     {
       c = g_utf8_get_char (format);
 
@@ -2297,7 +2295,7 @@ g_date_time_format (GDateTime *datetime,
                   g_string_append_printf (outstr, "%02d", g_date_time_get_hour (datetime));
                   break;
                 case 'I':
-                  if (g_date_time_get_hour (datetime) == 0)
+                  if ((g_date_time_get_hour (datetime) % 12) == 0)
                     g_string_append (outstr, "12");
                   else
                     g_string_append_printf (outstr, "%02d", g_date_time_get_hour (datetime) % 12);
@@ -2309,7 +2307,7 @@ g_date_time_format (GDateTime *datetime,
                   g_string_append_printf (outstr, "%2d", g_date_time_get_hour (datetime));
                   break;
                 case 'l':
-                  if (g_date_time_get_hour (datetime) == 0)
+                  if ((g_date_time_get_hour (datetime) % 12) == 0)
                     g_string_append (outstr, "12");
                   else
                     g_string_append_printf (outstr, "%2d", g_date_time_get_hour (datetime) % 12);
@@ -2387,10 +2385,9 @@ g_date_time_format (GDateTime *datetime,
                       gint64 offset = g_date_time_get_utc_offset (datetime)
                                     / USEC_PER_SECOND;
 
-                      g_string_append_printf (outstr, "%c%02d%02d",
-                                              offset >= 0 ? '+' : '-',
+                      g_string_append_printf (outstr, "%+03d%02d",
                                               (int) offset / 3600,
-                                              (int) offset / 60 % 60);
+                                              (int) abs(offset) / 60 % 60);
                     }
                   else
                     g_string_append (outstr, "+0000");

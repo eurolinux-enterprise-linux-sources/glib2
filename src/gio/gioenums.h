@@ -572,6 +572,27 @@ typedef enum {
 
 
 /**
+ * GIOStreamSpliceFlags:
+ * @G_IO_STREAM_SPLICE_NONE: Do not close either stream.
+ * @G_IO_STREAM_SPLICE_CLOSE_STREAM1: Close the first stream after
+ *     the splice.
+ * @G_IO_STREAM_SPLICE_CLOSE_STREAM2: Close the second stream after
+ *     the splice.
+ * @G_IO_STREAM_SPLICE_WAIT_FOR_BOTH: Wait for both splice operations to finish
+ *     before calling the callback.
+ *
+ * GIOStreamSpliceFlags determine how streams should be spliced.
+ *
+ * Since: 2.28
+ **/
+typedef enum {
+  G_IO_STREAM_SPLICE_NONE          = 0,
+  G_IO_STREAM_SPLICE_CLOSE_STREAM1 = (1 << 0),
+  G_IO_STREAM_SPLICE_CLOSE_STREAM2 = (1 << 1),
+  G_IO_STREAM_SPLICE_WAIT_FOR_BOTH = (1 << 2)
+} GIOStreamSpliceFlags;
+
+/**
  * GEmblemOrigin:
  * @G_EMBLEM_ORIGIN_UNKNOWN: Emblem of unknown origin
  * @G_EMBLEM_ORIGIN_DEVICE: Emblem adds device-specific information
@@ -737,7 +758,7 @@ typedef enum {
  * or a socket created with socketpair()).
  *
  * For abstract sockets, there are two incompatible ways of naming
- * them: the man pages suggest using the entire <literal>struct
+ * them; the man pages suggest using the entire <literal>struct
  * sockaddr_un</literal> as the name, padding the unused parts of the
  * %sun_path field with zeroes; this corresponds to
  * %G_UNIX_SOCKET_ADDRESS_ABSTRACT_PADDED. However, many programs
@@ -1157,6 +1178,9 @@ typedef enum
 /**
  * GDBusSignalFlags:
  * @G_DBUS_SIGNAL_FLAGS_NONE: No flags set.
+ * @G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE: Don't actually send the AddMatch
+ * D-Bus call for this signal subscription.  This gives you more control
+ * over which match rules you add (but you must add them manually).
  *
  * Flags used when subscribing to signals via g_dbus_connection_signal_subscribe().
  *
@@ -1164,7 +1188,8 @@ typedef enum
  */
 typedef enum /*< flags >*/
 {
-  G_DBUS_SIGNAL_FLAGS_NONE = 0
+  G_DBUS_SIGNAL_FLAGS_NONE = 0,
+  G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE = (1<<0)
 } GDBusSignalFlags;
 
 /**
@@ -1215,6 +1240,148 @@ typedef enum
   G_DBUS_MESSAGE_BYTE_ORDER_BIG_ENDIAN    = 'B',
   G_DBUS_MESSAGE_BYTE_ORDER_LITTLE_ENDIAN = 'l'
 } GDBusMessageByteOrder;
+
+/**
+ * GApplicationFlags:
+ * @G_APPLICATION_FLAGS_NONE: Default
+ * @G_APPLICATION_IS_SERVICE: Run as a service. In this mode, registration
+ *      fails if the service is already running, and the application will
+ *      stay around for a while when the use count falls to zero.
+ * @G_APPLICATION_IS_LAUNCHER: Don't try to become the primary instance.
+ * @G_APPLICATION_HANDLES_OPEN: This application handles opening files (in
+ *     the primary instance). Note that this flag only affects the default
+ *     implementation of local_command_line(), and has no effect if
+ *     %G_APPLICATION_HANDLES_COMMAND_LINE is given.
+ *     See g_application_run() for details.
+ * @G_APPLICATION_HANDLES_COMMAND_LINE: This application handles command line
+ *     arguments (in the primary instance). Note that this flag only affect
+ *     the default implementation of local_command_line().
+ *     See g_application_run() for details.
+ * @G_APPLICATION_SEND_ENVIRONMENT: Send the environment of the
+ *     launching process to the primary instance. Set this flag if your
+ *     application is expected to behave differently depending on certain
+ *     environment variables. For instance, an editor might be expected
+ *     to use the <envar>GIT_COMMITTER_NAME</envar> environment variable
+ *     when editing a git commit message. The environment is available
+ *     to the #GApplication::command-line signal handler, via
+ *     g_application_command_line_getenv().
+ *
+ * Flags used to define the behaviour of a #GApplication.
+ *
+ * Since: 2.28
+ **/
+typedef enum
+{
+  G_APPLICATION_FLAGS_NONE,
+  G_APPLICATION_IS_SERVICE  =          (1 << 0),
+  G_APPLICATION_IS_LAUNCHER =          (1 << 1),
+
+  G_APPLICATION_HANDLES_OPEN =         (1 << 2),
+  G_APPLICATION_HANDLES_COMMAND_LINE = (1 << 3),
+  G_APPLICATION_SEND_ENVIRONMENT    =  (1 << 4)
+} GApplicationFlags;
+
+/**
+ * GTlsError:
+ * @G_TLS_ERROR_UNAVAILABLE: No TLS provider is available
+ * @G_TLS_ERROR_MISC: Miscellaneous TLS error
+ * @G_TLS_ERROR_BAD_CERTIFICATE: A certificate could not be parsed
+ * @G_TLS_ERROR_NOT_TLS: The TLS handshake failed because the
+ *   peer does not seem to be a TLS server.
+ * @G_TLS_ERROR_HANDSHAKE: The TLS handshake failed because the
+ *   peer's certificate was not acceptable.
+ * @G_TLS_ERROR_CERTIFICATE_REQUIRED: The TLS handshake failed because
+ *   the server requested a client-side certificate, but none was
+ *   provided. See g_tls_connection_set_certificate().
+ * @G_TLS_ERROR_EOF: The TLS connection was closed without proper
+ *   notice, which may indicate an attack. See
+ *   g_tls_connection_set_require_close_notify().
+ *
+ * An error code used with %G_TLS_ERROR in a #GError returned from a
+ * TLS-related routine.
+ *
+ * Since: 2.28
+ */
+typedef enum {
+  G_TLS_ERROR_UNAVAILABLE,
+  G_TLS_ERROR_MISC,
+  G_TLS_ERROR_BAD_CERTIFICATE,
+  G_TLS_ERROR_NOT_TLS,
+  G_TLS_ERROR_HANDSHAKE,
+  G_TLS_ERROR_CERTIFICATE_REQUIRED,
+  G_TLS_ERROR_EOF
+} GTlsError;
+
+/**
+ * GTlsCertificateFlags:
+ * @G_TLS_CERTIFICATE_UNKNOWN_CA: The signing certificate authority is
+ *   not known.
+ * @G_TLS_CERTIFICATE_BAD_IDENTITY: The certificate does not match the
+ *   expected identity of the site that it was retrieved from.
+ * @G_TLS_CERTIFICATE_NOT_ACTIVATED: The certificate's activation time
+ *   is still in the future
+ * @G_TLS_CERTIFICATE_EXPIRED: The certificate has expired
+ * @G_TLS_CERTIFICATE_REVOKED: The certificate has been revoked
+ *   according to the #GTlsContext's certificate revocation list.
+ * @G_TLS_CERTIFICATE_INSECURE: The certificate's algorithm is
+ *   considered insecure.
+ * @G_TLS_CERTIFICATE_GENERIC_ERROR: Some other error occurred validating
+ *   the certificate
+ * @G_TLS_CERTIFICATE_VALIDATE_ALL: the combination of all of the above
+ *   flags
+ *
+ * A set of flags describing TLS certification validation. This can be
+ * used to set which validation steps to perform (eg, with
+ * g_tls_client_connection_set_validation_flags()), or to describe why
+ * a particular certificate was rejected (eg, in
+ * #GTlsConnection::accept-certificate).
+ *
+ * Since: 2.28
+ */
+typedef enum {
+  G_TLS_CERTIFICATE_UNKNOWN_CA    = (1 << 0),
+  G_TLS_CERTIFICATE_BAD_IDENTITY  = (1 << 1),
+  G_TLS_CERTIFICATE_NOT_ACTIVATED = (1 << 2),
+  G_TLS_CERTIFICATE_EXPIRED       = (1 << 3),
+  G_TLS_CERTIFICATE_REVOKED       = (1 << 4),
+  G_TLS_CERTIFICATE_INSECURE      = (1 << 5),
+  G_TLS_CERTIFICATE_GENERIC_ERROR = (1 << 6),
+
+  G_TLS_CERTIFICATE_VALIDATE_ALL  = 0x007f
+} GTlsCertificateFlags;
+
+/**
+ * GTlsAuthenticationMode:
+ * @G_TLS_AUTHENTICATION_NONE: client authentication not required
+ * @G_TLS_AUTHENTICATION_REQUESTED: client authentication is requested
+ * @G_TLS_AUTHENTICATION_REQUIRED: client authentication is required
+ *
+ * The client authentication mode for a #GTlsServerConnection.
+ *
+ * Since: 2.28
+ */
+typedef enum {
+  G_TLS_AUTHENTICATION_NONE,
+  G_TLS_AUTHENTICATION_REQUESTED,
+  G_TLS_AUTHENTICATION_REQUIRED
+} GTlsAuthenticationMode;
+
+/**
+ * GTlsRehandshakeMode:
+ * @G_TLS_REHANDSHAKE_NEVER: Never allow rehandshaking
+ * @G_TLS_REHANDSHAKE_SAFELY: Allow safe rehandshaking only
+ * @G_TLS_REHANDSHAKE_UNSAFELY: Allow unsafe rehandshaking
+ *
+ * When to allow rehandshaking. See
+ * g_tls_connection_set_rehandshake_mode().
+ *
+ * Since: 2.28
+ */
+typedef enum {
+  G_TLS_REHANDSHAKE_NEVER,
+  G_TLS_REHANDSHAKE_SAFELY,
+  G_TLS_REHANDSHAKE_UNSAFELY
+} GTlsRehandshakeMode;
 
 G_END_DECLS
 

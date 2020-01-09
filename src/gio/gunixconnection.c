@@ -18,7 +18,7 @@
 #include "glibintl.h"
 
 /**
- * SECTION: gunixconnection
+ * SECTION:gunixconnection
  * @title: GUnixConnection
  * @short_description: A UNIX domain GSocketConnection
  * @include: gio/gunixconnection.h
@@ -304,7 +304,7 @@ gboolean                g_unix_connection_create_pair                   (GUnixCo
 /**
  * g_unix_connection_send_credentials:
  * @connection: A #GUnixConnection.
- * @cancellable: A #GCancellable or %NULL.
+ * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
  *
  * Passes the credentials of the current user the receiving side
@@ -372,7 +372,7 @@ g_unix_connection_send_credentials (GUnixConnection      *connection,
 /**
  * g_unix_connection_receive_credentials:
  * @connection: A #GUnixConnection.
- * @cancellable: A #GCancellable or %NULL.
+ * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
  *
  * Receives credentials from the sending end of the connection.  The
@@ -386,7 +386,7 @@ g_unix_connection_send_credentials (GUnixConnection      *connection,
  * Other ways to exchange credentials with a foreign peer includes the
  * #GUnixCredentialsMessage type and g_socket_get_credentials() function.
  *
- * Returns: Received credentials on success (free with
+ * Returns: (transfer full): Received credentials on success (free with
  * g_object_unref()), %NULL if @error is set.
  *
  * Since: 2.26

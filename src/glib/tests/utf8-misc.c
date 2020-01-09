@@ -124,7 +124,7 @@ test_unichar_validate (void)
 static void
 test_unichar_character_type (void)
 {
-  gint i;
+  guint i;
   struct {
     GUnicodeType type;
     gunichar     c;
@@ -170,7 +170,7 @@ test_unichar_character_type (void)
 static void
 test_unichar_break_type (void)
 {
-  gint i;
+  guint i;
   struct {
     GUnicodeBreakType type;
     gunichar          c;
@@ -191,7 +191,8 @@ test_unichar_break_type (void)
     { G_UNICODE_BREAK_HYPHEN,              0x002D },
     { G_UNICODE_BREAK_NON_STARTER,         0x17D6 },
     { G_UNICODE_BREAK_OPEN_PUNCTUATION,    0x0028 },
-    { G_UNICODE_BREAK_CLOSE_PUNCTUATION,   0x0029 },
+    { G_UNICODE_BREAK_CLOSE_PARANTHESIS,   0x0029 },
+    { G_UNICODE_BREAK_CLOSE_PUNCTUATION,   0x007D },
     { G_UNICODE_BREAK_QUOTATION,           0x0022 },
     { G_UNICODE_BREAK_EXCLAMATION,         0x0021 },
     { G_UNICODE_BREAK_IDEOGRAPHIC,         0x2E80 },
@@ -222,13 +223,13 @@ test_unichar_break_type (void)
 static void
 test_unichar_script (void)
 {
-  gint i;
+  guint i;
   struct {
     GUnicodeScript script;
     gunichar          c;
   } examples[] = {
     { G_UNICODE_SCRIPT_COMMON,                  0x002A },
-    /* { G_UNICODE_SCRIPT_INHERITED,               0x1CED }, 5.2 addition */
+    { G_UNICODE_SCRIPT_INHERITED,               0x1CED },
     { G_UNICODE_SCRIPT_INHERITED,               0x0670 },
     { G_UNICODE_SCRIPT_ARABIC,                  0x060D },
     { G_UNICODE_SCRIPT_ARMENIAN,                0x0559 },
@@ -268,7 +269,7 @@ test_unichar_script (void)
     { G_UNICODE_SCRIPT_THAANA,                  0x07B1 },
     { G_UNICODE_SCRIPT_THAI,                    0x0E31 },
     { G_UNICODE_SCRIPT_TIBETAN,                 0x0FD4 },
-    /* { G_UNICODE_SCRIPT_CANADIAN_ABORIGINAL,     0x1400 }, 5.2 addition */
+    { G_UNICODE_SCRIPT_CANADIAN_ABORIGINAL,     0x1400 },
     { G_UNICODE_SCRIPT_CANADIAN_ABORIGINAL,     0x1401 },
     { G_UNICODE_SCRIPT_YI,                      0xA015 },
     { G_UNICODE_SCRIPT_TAGALOG,                 0x1700 },
@@ -290,7 +291,7 @@ test_unichar_script (void)
     { G_UNICODE_SCRIPT_SYLOTI_NAGRI,            0xA800 },
     { G_UNICODE_SCRIPT_OLD_PERSIAN,            0x103D0 },
     { G_UNICODE_SCRIPT_KHAROSHTHI,             0x10A3F },
-    /* G_UNICODE_SCRIPT_UNKNOWN */
+    { G_UNICODE_SCRIPT_UNKNOWN,              0x1111111 },
     { G_UNICODE_SCRIPT_BALINESE,                0x1B04 },
     { G_UNICODE_SCRIPT_CUNEIFORM,              0x12000 },
     { G_UNICODE_SCRIPT_PHOENICIAN,             0x10900 },
@@ -307,7 +308,6 @@ test_unichar_script (void)
     { G_UNICODE_SCRIPT_CARIAN,                 0x102A0 },
     { G_UNICODE_SCRIPT_LYCIAN,                 0x10280 },
     { G_UNICODE_SCRIPT_LYDIAN,                 0x1093F },
-/* 5.2 additions
     { G_UNICODE_SCRIPT_AVESTAN,                0x10B00 },
     { G_UNICODE_SCRIPT_BAMUM,                   0xA6A0 },
     { G_UNICODE_SCRIPT_EGYPTIAN_HIEROGLYPHS,   0x13000 },
@@ -319,11 +319,13 @@ test_unichar_script (void)
     { G_UNICODE_SCRIPT_LISU,                    0xA4D0 },
     { G_UNICODE_SCRIPT_MEETEI_MAYEK,            0xABE5 },
     { G_UNICODE_SCRIPT_OLD_SOUTH_ARABIAN,      0x10A60 },
-    { G_UNICODE_SCRIPT_OLD_TURKISH,            0x10C00 },
+    { G_UNICODE_SCRIPT_OLD_TURKIC,             0x10C00 },
     { G_UNICODE_SCRIPT_SAMARITAN,               0x0800 },
     { G_UNICODE_SCRIPT_TAI_THAM,                0x1A20 },
-    { G_UNICODE_SCRIPT_TAI_VIET,                0xAA80 }
-*/
+    { G_UNICODE_SCRIPT_TAI_VIET,                0xAA80 },
+    { G_UNICODE_SCRIPT_BATAK,                   0x1BC0 },
+    { G_UNICODE_SCRIPT_BRAHMI,                 0x11000 },
+    { G_UNICODE_SCRIPT_MANDAIC,                 0x0840 }
   };
   for (i = 0; i < G_N_ELEMENTS (examples); i++)
     {
@@ -334,7 +336,7 @@ test_unichar_script (void)
 static void
 test_combining_class (void)
 {
-  gint i;
+  guint i;
   struct {
     gint class;
     gunichar          c;
@@ -370,7 +372,7 @@ test_combining_class (void)
     { 232, 0x302C },
     { 233, 0x0362 },
     { 234, 0x0360 },
-    /* { 234, 0x1DCD }, 5.1 addition */
+    { 234, 0x1DCD },
     { 240, 0x0345 }
   };
   for (i = 0; i < G_N_ELEMENTS (examples); i++)
@@ -425,6 +427,88 @@ test_title (void)
   g_assert (g_unichar_totitle ('A') == 'A');
 }
 
+static void
+test_wide (void)
+{
+  guint i;
+  struct {
+    gunichar c;
+    enum {
+      NOT_WIDE,
+      WIDE_CJK,
+      WIDE
+    } wide;
+  } examples[] = {
+    /* Neutral */
+    {   0x0000, NOT_WIDE },
+    {   0x0483, NOT_WIDE },
+    {   0x0641, NOT_WIDE },
+    {   0xFFFC, NOT_WIDE },
+    {  0x10000, NOT_WIDE },
+    {  0xE0001, NOT_WIDE },
+
+    /* Narrow */
+    {   0x0020, NOT_WIDE },
+    {   0x0041, NOT_WIDE },
+    {   0x27E6, NOT_WIDE },
+
+    /* Halfwidth */
+    {   0x20A9, NOT_WIDE },
+    {   0xFF61, NOT_WIDE },
+    {   0xFF69, NOT_WIDE },
+    {   0xFFEE, NOT_WIDE },
+
+    /* Ambiguous */
+    {   0x00A1, WIDE_CJK },
+    {   0x00BE, WIDE_CJK },
+    {   0x02DD, WIDE_CJK },
+    {   0x2020, WIDE_CJK },
+    {   0xFFFD, WIDE_CJK },
+    {   0x00A1, WIDE_CJK },
+    {  0x1F100, WIDE_CJK },
+    {  0xE0100, WIDE_CJK },
+    { 0x100000, WIDE_CJK },
+    { 0x10FFFD, WIDE_CJK },
+
+    /* Fullwidth */
+    {   0x3000, WIDE },
+    {   0xFF60, WIDE },
+
+    /* Wide */
+    {   0x2329, WIDE },
+    {   0x3001, WIDE },
+    {   0xFE69, WIDE },
+    {  0x30000, WIDE },
+    {  0x3FFFD, WIDE },
+
+    /* Default Wide blocks */
+    {   0x4DBF, WIDE },
+    {   0x9FFF, WIDE },
+    {   0xFAFF, WIDE },
+    {  0x2A6DF, WIDE },
+    {  0x2B73F, WIDE },
+    {  0x2B81F, WIDE },
+    {  0x2FA1F, WIDE },
+
+    /* Uniode-5.2 character additions */
+    /* Wide */
+    {   0x115F, WIDE },
+
+    /* Uniode-6.0 character additions */
+    /* Wide */
+    {  0x2B740, WIDE },
+    {  0x1B000, WIDE },
+
+    { 0x111111, NOT_WIDE }
+  };
+
+  for (i = 0; i < G_N_ELEMENTS (examples); i++)
+    {
+      g_assert (g_unichar_iswide (examples[i].c) == (examples[i].wide == WIDE));
+      g_assert (g_unichar_iswide_cjk (examples[i].c) == (examples[i].wide != NOT_WIDE));
+    }
+};
+
 int
 main (int   argc,
       char *argv[])
@@ -443,6 +527,7 @@ main (int   argc,
   g_test_add_func ("/unicode/mirror", test_mirror);
   g_test_add_func ("/unicode/mark", test_mark);
   g_test_add_func ("/unicode/title", test_title);
+  g_test_add_func ("/unicode/wide", test_wide);
 
   return g_test_run();
 }

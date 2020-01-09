@@ -8,7 +8,7 @@
 <link rel="up" href="chapter-gtype.html" title="The GLib Dynamic Type System">
 <link rel="prev" href="gtype-instantiable-classed.html" title="Instantiable classed types: objects">
 <link rel="next" href="chapter-gobject.html" title="The GObject base class">
-<meta name="generator" content="GTK-Doc V1.15 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.17 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -19,7 +19,7 @@
 <th width="100%" align="center">GObject Reference Manual</th>
 <td><a accesskey="n" href="chapter-gobject.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr></table>
-<div class="sect1" title="Non-instantiable classed types: interfaces">
+<div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="gtype-non-instantiable-classed"></a>Non-instantiable classed types: interfaces</h2></div></div></div>
 <p>
@@ -30,13 +30,13 @@
           control your CD player, MP3 player or anything that uses these symbols.
           To declare an interface you have to register a non-instantiable
           classed type which derives from 
-          <span class="type"><a class="link" href="gobject-Type-Information.html#GTypeInterface" title="GTypeInterface">GTypeInterface</a></span>. The following piece of code declares such an interface.
+          <a class="link" href="gobject-Type-Information.html#GTypeInterface" title="struct GTypeInterface"><span class="type">GTypeInterface</span></a>. The following piece of code declares such an interface.
 </p>
 <pre class="programlisting">
-#define MAMAN_IBAZ_TYPE                (maman_ibaz_get_type ())
-#define MAMAN_IBAZ(obj)                (G_TYPE_CHECK_INSTANCE_CAST ((obj), MAMAN_IBAZ_TYPE, MamanIbaz))
-#define MAMAN_IS_IBAZ(obj)             (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MAMAN_IBAZ_TYPE))
-#define MAMAN_IBAZ_GET_INTERFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), MAMAN_IBAZ_TYPE, MamanIbazInterface))
+#define MAMAN_TYPE_IBAZ                (maman_ibaz_get_type ())
+#define MAMAN_IBAZ(obj)                (G_TYPE_CHECK_INSTANCE_CAST ((obj), MAMAN_TYPE_IBAZ, MamanIbaz))
+#define MAMAN_IS_IBAZ(obj)             (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MAMAN_TYPE_IBAZ))
+#define MAMAN_IBAZ_GET_INTERFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), MAMAN_TYPE_IBAZ, MamanIbazInterface))
 
 typedef struct _MamanIbaz MamanIbaz; /* dummy object */
 typedef struct _MamanIbazInterface MamanIbazInterface;
@@ -68,7 +68,7 @@ void maman_ibaz_do_action (MamanIbaz *self)
         </p>
 <p>
           An interface is defined by only one structure which must contain as first member
-          a <span class="type"><a class="link" href="gobject-Type-Information.html#GTypeInterface" title="GTypeInterface">GTypeInterface</a></span> structure. The interface structure is expected to
+          a <a class="link" href="gobject-Type-Information.html#GTypeInterface" title="struct GTypeInterface"><span class="type">GTypeInterface</span></a> structure. The interface structure is expected to
           contain the function pointers of the interface methods. It is good style to 
           define helper functions for each of the interface methods which simply call
           the interface' method directly: <code class="function">maman_ibaz_do_action</code>
@@ -77,7 +77,7 @@ void maman_ibaz_do_action (MamanIbaz *self)
 <p>
           Once an interface type is registered, you must register implementations for these
           interfaces. The function named <code class="function">maman_baz_get_type</code> registers
-          a new GType named MamanBaz which inherits from <span class="type"><a class="link" href="gobject-The-Base-Object-Type.html#GObject">GObject</a></span> and which
+          a new GType named MamanBaz which inherits from <a class="link" href="gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a> and which
           implements the interface <span class="type">MamanIBaz</span>.
 </p>
 <pre class="programlisting">
@@ -120,7 +120,7 @@ maman_baz_get_type (void)
                                    "MamanBazType",
                                    &amp;info, 0);
     g_type_add_interface_static (type,
-                                 MAMAN_IBAZ_TYPE,
+                                 MAMAN_TYPE_IBAZ,
                                  &amp;ibaz_info);
   }
   return type;
@@ -133,7 +133,7 @@ maman_baz_get_type (void)
           a given type implements also <span class="type">FooInterface</span> 
           (<code class="function">foo_interface_get_type</code> returns the type of 
           <span class="type">FooInterface</span>).
-                The <span class="type"><a class="link" href="gobject-Type-Information.html#GInterfaceInfo" title="GInterfaceInfo">GInterfaceInfo</a></span> structure holds
+                The <a class="link" href="gobject-Type-Information.html#GInterfaceInfo" title="struct GInterfaceInfo"><span class="type">GInterfaceInfo</span></a> structure holds
           information about the implementation of the interface:
 </p>
 <pre class="programlisting">
@@ -154,7 +154,7 @@ G_DEFINE_INTERFACE (MamanBaz, maman_baz, G_TYPE_OBJECT)
 </pre>
 <p>
         </p>
-<div class="sect2" title="Interface Initialization">
+<div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="gtype-non-instantiable-classed-init"></a>Interface Initialization</h3></div></div></div>
 <p>
@@ -251,7 +251,7 @@ maman_ibaz_base_init (gpointer g_iface)
           following section (<a class="xref" href="gtype-non-instantiable-classed.html#gtype-non-instantiable-classed-dest" title="Interface Destruction">the section called “Interface Destruction”</a>).
         </p>
 </div>
-<div class="sect2" title="Interface Destruction">
+<div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="gtype-non-instantiable-classed-dest"></a>Interface Destruction</h3></div></div></div>
 <p>
@@ -311,6 +311,6 @@ maman_ibaz_base_init (gpointer g_iface)
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.15</div>
+          Generated by GTK-Doc V1.17</div>
 </body>
 </html>

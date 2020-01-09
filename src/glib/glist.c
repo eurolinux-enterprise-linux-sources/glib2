@@ -35,7 +35,7 @@
 #include "gtestutils.h"
 
 /**
- * SECTION: linked_lists_double
+ * SECTION:linked_lists_double
  * @title: Doubly-Linked Lists
  * @short_description: linked lists containing integer values or
  *                     pointers to data, with the ability to iterate
@@ -172,7 +172,8 @@ g_list_alloc (void)
  *
  * <note><para>
  * If list elements contain dynamically-allocated memory, 
- * they should be freed first.
+ * you should either use g_list_free_full() or free them manually
+ * first.
  * </para></note>
  */
 void
@@ -197,6 +198,24 @@ void
 g_list_free_1 (GList *list)
 {
   _g_list_free1 (list);
+}
+
+/**
+ * g_list_free_full:
+ * @list: a pointer to a #GList
+ * @free_func: the function to be called to free each element's data
+ *
+ * Convenience method, which frees all the memory used by a #GList, and
+ * calls the specified destroy function on every element's data.
+ *
+ * Since: 2.28
+ */
+void
+g_list_free_full (GList          *list,
+		  GDestroyNotify  free_func)
+{
+  g_list_foreach (list, (GFunc) free_func, NULL);
+  g_list_free (list);
 }
 
 /**

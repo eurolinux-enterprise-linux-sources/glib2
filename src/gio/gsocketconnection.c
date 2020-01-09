@@ -60,8 +60,7 @@
  * Since: 2.22
  */
 
-G_DEFINE_TYPE (GSocketConnection,
-	       g_socket_connection, G_TYPE_IO_STREAM);
+G_DEFINE_TYPE (GSocketConnection, g_socket_connection, G_TYPE_IO_STREAM);
 
 enum
 {
@@ -141,7 +140,7 @@ g_socket_connection_get_socket (GSocketConnection *connection)
  *
  * Try to get the local address of a socket connection.
  *
- * Returns: a #GSocketAddress or %NULL on error.
+ * Returns: (transfer full): a #GSocketAddress or %NULL on error.
  *     Free the returned object with g_object_unref().
  *
  * Since: 2.22
@@ -160,7 +159,7 @@ g_socket_connection_get_local_address (GSocketConnection  *connection,
  *
  * Try to get the remote address of a socket connection.
  *
- * Returns: a #GSocketAddress or %NULL on error.
+ * Returns: (transfer full): a #GSocketAddress or %NULL on error.
  *     Free the returned object with g_object_unref().
  *
  * Since: 2.22
@@ -332,10 +331,9 @@ g_socket_connection_close_async (GIOStream           *stream,
   if (class->close_fn &&
       !class->close_fn (stream, cancellable, &error))
     {
-      g_simple_async_report_gerror_in_idle (G_OBJECT (stream),
+      g_simple_async_report_take_gerror_in_idle (G_OBJECT (stream),
 					    callback, user_data,
 					    error);
-      g_error_free (error);
       return;
     }
 
@@ -504,7 +502,7 @@ g_socket_connection_factory_lookup_type (GSocketFamily family,
  * Creates a #GSocketConnection subclass of the right type for
  * @socket.
  *
- * Returns: a #GSocketConnection
+ * Returns: (transfer full): a #GSocketConnection
  *
  * Since: 2.22
  */

@@ -8,7 +8,7 @@
 <link rel="up" href="index.html" title="GIO Reference Manual">
 <link rel="prev" href="extending-gio.html" title="Extending GIO">
 <link rel="next" href="file_ops.html" title="File Operations">
-<meta name="generator" content="GTK-Doc V1.15 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.17 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -19,9 +19,9 @@
 <th width="100%" align="center">GIO Reference Manual</th>
 <td><a accesskey="n" href="file_ops.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr></table>
-<div class="part" title="Part II. API Reference">
+<div class="part">
 <div class="titlepage"><div><div><h1 class="title">
-<a name="id521313"></a>Part II. API Reference</h1></div></div></div>
+<a name="id296810"></a>Part II. API Reference</h1></div></div></div>
 <div class="toc">
 <p><b>Table of Contents</b></p>
 <dl>
@@ -49,6 +49,10 @@
 <dt><span class="chapter"><a href="file_mon.html">File System Monitoring</a></span></dt>
 <dd><dl><dt>
 <span class="refentrytitle"><a href="GFileMonitor.html">GFileMonitor</a></span><span class="refpurpose"> — File Monitor</span>
+</dt></dl></dd>
+<dt><span class="chapter"><a href="utils.html">File-related Utilities</a></span></dt>
+<dd><dl><dt>
+<span class="refentrytitle"><a href="GFilenameCompleter.html">GFilenameCompleter</a></span><span class="refpurpose"> — Filename Completer</span>
 </dt></dl></dd>
 <dt><span class="chapter"><a href="async.html">Asynchronous I/O</a></span></dt>
 <dd><dl>
@@ -142,6 +146,12 @@
 <dt>
 <span class="refentrytitle"><a href="gio-GConverterOutputstream.html">GConverterOutputstream</a></span><span class="refpurpose"> — Converter Output Stream</span>
 </dt>
+<dt>
+<span class="refentrytitle"><a href="GPollableInputStream.html">GPollableInputStream</a></span><span class="refpurpose"> — Interface for pollable input streams</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GPollableOutputStream.html">GPollableOutputStream</a></span><span class="refpurpose"> — Interface for pollable output streams</span>
+</dt>
 </dl></dd>
 <dt><span class="chapter"><a href="types.html">File types and applications</a></span></dt>
 <dd><dl>
@@ -152,7 +162,7 @@
 <span class="refentrytitle"><a href="GAppInfo.html">GAppInfo</a></span><span class="refpurpose"> — Application information and launch contexts</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="gio-Desktop-file-based-GAppInfo.html">Desktop file based GAppInfo</a></span><span class="refpurpose"> — Application information from desktop files</span>
+<span class="refentrytitle"><a href="gio-Desktop-file-based-GAppInfo.html">GDesktopAppInfo</a></span><span class="refpurpose"> — Application information from desktop files</span>
 </dt>
 </dl></dd>
 <dt><span class="chapter"><a href="volume_mon.html">Volumes and Drives</a></span></dt>
@@ -255,7 +265,10 @@ socket communication</span>
 <span class="refentrytitle"><a href="GUnixConnection.html">GUnixConnection</a></span><span class="refpurpose"> — A UNIX domain GSocketConnection</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="GTcpConnection.html">GTcpConnection</a></span><span class="refpurpose"> — a TCP GSocketConnection</span>
+<span class="refentrytitle"><a href="GTcpConnection.html">GTcpConnection</a></span><span class="refpurpose"> — A TCP GSocketConnection</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GTcpWrapperConnection.html">GTcpWrapperConnection</a></span><span class="refpurpose"> — wrapper for non-GSocketConnection-based, GSocket-based GIOStreams</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="GSocketListener.html">GSocketListener</a></span><span class="refpurpose"> — Helper for accepting network client connections</span>
@@ -265,6 +278,27 @@ socket communication</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="GThreadedSocketService.html">GThreadedSocketService</a></span><span class="refpurpose"> — A threaded GSocketService</span>
+</dt>
+</dl></dd>
+<dt><span class="chapter"><a href="tls.html">TLS (SSL) support</a></span></dt>
+<dd><dl>
+<dt>
+<span class="refentrytitle"><a href="gio-TLS-Overview.html">TLS Overview</a></span><span class="refpurpose"> — TLS (aka SSL) support for GSocketConnection</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GTlsCertificate.html">GTlsCertificate</a></span><span class="refpurpose"> — TLS certificate</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GTlsConnection.html">GTlsConnection</a></span><span class="refpurpose"> — TLS connection type</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GTlsClientConnection.html">GTlsClientConnection</a></span><span class="refpurpose"> — TLS client-side connection</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GTlsServerConnection.html">GTlsServerConnection</a></span><span class="refpurpose"> — TLS server-side connection</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GTlsBackend.html">GTlsBackend</a></span><span class="refpurpose"> — TLS backend implementation</span>
 </dt>
 </dl></dd>
 <dt><span class="chapter"><a href="resolver.html">DNS resolution</a></span></dt>
@@ -285,7 +319,7 @@ socket communication</span>
 <span class="refentrytitle"><a href="GNetworkService.html">GNetworkService</a></span><span class="refpurpose"> — A GSocketConnectable for resolving SRV records</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="gio-GSrvTarget.html">GSrvTarget</a></span><span class="refpurpose"> — DNS SRV record target</span>
+<span class="refentrytitle"><a href="GSrvTarget.html">GSrvTarget</a></span><span class="refpurpose"> — DNS SRV record target</span>
 </dt>
 </dl></dd>
 <dt><span class="chapter"><a href="gdbus-lowlevel.html">Lowlevel D-Bus Support</a></span></dt>
@@ -300,7 +334,7 @@ socket communication</span>
 <span class="refentrytitle"><a href="gio-D-Bus-Introspection-Data.html">D-Bus Introspection Data</a></span><span class="refpurpose"> — Node and interface description data structures</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="gio-GDBusError.html">GDBusError</a></span><span class="refpurpose"> — Mapping D-Bus errors to and from <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a></span>
+<span class="refentrytitle"><a href="GDBusError.html">GDBusError</a></span><span class="refpurpose"> — Mapping D-Bus errors to and from GError</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="GDBusMessage.html">GDBusMessage</a></span><span class="refpurpose"> — D-Bus Message</span>
@@ -330,27 +364,44 @@ socket communication</span>
 <span class="refentrytitle"><a href="GDBusProxy.html">GDBusProxy</a></span><span class="refpurpose"> — Client-side proxies</span>
 </dt>
 </dl></dd>
-<dt><span class="chapter"><a href="utils.html">Utilities</a></span></dt>
-<dd><dl><dt>
-<span class="refentrytitle"><a href="GFilenameCompleter.html">GFilenameCompleter</a></span><span class="refpurpose"> — Filename Completer</span>
-</dt></dl></dd>
 <dt><span class="chapter"><a href="settings.html">Settings</a></span></dt>
 <dd><dl>
 <dt>
-<span class="refentrytitle"><a href="GSettings.html">GSettings</a></span><span class="refpurpose"> — a high-level API for application settings</span>
+<span class="refentrytitle"><a href="GSettings.html">GSettings</a></span><span class="refpurpose"> — High-level API for application settings</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="GSettingsBackend.html">GSettingsBackend</a></span><span class="refpurpose"> — an interface for settings backend implementations</span>
+<span class="refentrytitle"><a href="GSettingsBackend.html">GSettingsBackend</a></span><span class="refpurpose"> — Interface for settings backend implementations</span>
 </dt>
 </dl></dd>
 <dt><span class="chapter"><a href="permissions.html">Permissions</a></span></dt>
 <dd><dl>
 <dt>
-<span class="refentrytitle"><a href="GPermission.html">GPermission</a></span><span class="refpurpose"> — an object representing the permission to perform
+<span class="refentrytitle"><a href="GPermission.html">GPermission</a></span><span class="refpurpose"> — An object representing the permission to perform
                     a certain action</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="GSimplePermission.html">GSimplePermission</a></span><span class="refpurpose"> — a GPermission that doesn't change value</span>
+<span class="refentrytitle"><a href="GSimplePermission.html">GSimplePermission</a></span><span class="refpurpose"> — A GPermission that doesn't change value</span>
+</dt>
+</dl></dd>
+<dt><span class="chapter"><a href="application.html">Application support</a></span></dt>
+<dd><dl>
+<dt>
+<span class="refentrytitle"><a href="GActionGroup.html">GActionGroup</a></span><span class="refpurpose"> — A group of actions</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GSimpleActionGroup.html">GSimpleActionGroup</a></span><span class="refpurpose"> — A simple GActionGroup implementation</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GAction.html">GAction</a></span><span class="refpurpose"> — An action</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GSimpleAction.html">GSimpleAction</a></span><span class="refpurpose"> — A simple GSimpleAction</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GApplication.html">GApplication</a></span><span class="refpurpose"> — Core application class</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GApplicationCommandLine.html">GApplicationCommandLine</a></span><span class="refpurpose"> — A command-line invocation of an application</span>
 </dt>
 </dl></dd>
 <dt><span class="chapter"><a href="extending.html">Extending GIO</a></span></dt>
@@ -371,7 +422,7 @@ socket communication</span>
 <span class="refentrytitle"><a href="gio-querymodules.html">gio-querymodules</a></span><span class="refpurpose"> — GIO module cache creation</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="gsettings.html">gsettings</a></span><span class="refpurpose"> — GSettings configuration tool</span>
+<span class="refentrytitle"><a href="gsettings-tool.html">gsettings</a></span><span class="refpurpose"> — GSettings configuration tool</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="glib-compile-schemas.html">glib-compile-schemas</a></span><span class="refpurpose"> — GSettings schema compiler</span>
@@ -385,6 +436,6 @@ socket communication</span>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.15</div>
+          Generated by GTK-Doc V1.17</div>
 </body>
 </html>

@@ -73,8 +73,26 @@ test_language_names (void)
 }
 
 static void
+test_locale_variants (void)
+{
+  char **v;
+
+  v = g_get_locale_variants ("fr_BE");
+  g_assert (strv_check ((const gchar * const *) v, "fr_BE", "fr", NULL));
+  g_strfreev (v);
+
+  v = g_get_locale_variants ("sr_SR@latin");
+  g_assert (strv_check ((const gchar * const *) v, "sr_SR@latin", "sr@latin", "sr_SR", "sr", NULL));
+  g_strfreev (v);
+}
+
+static void
 test_version (void)
 {
+  g_print ("(header %d.%d.%d library %d.%d.%d) ",
+                  GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION, GLIB_MICRO_VERSION,
+                  glib_major_version, glib_minor_version, glib_micro_version);
+
   g_assert (glib_check_version (GLIB_MAJOR_VERSION,
                                 GLIB_MINOR_VERSION,
                                 GLIB_MICRO_VERSION) == NULL);
@@ -90,9 +108,12 @@ test_version (void)
   g_assert (glib_check_version (GLIB_MAJOR_VERSION,
                                 GLIB_MINOR_VERSION + 1,
                                 0) != NULL);
+  /* don't use + 1 here, since a +/-1 difference can
+   * happen due to post-release version bumps in git
+   */
   g_assert (glib_check_version (GLIB_MAJOR_VERSION,
                                 GLIB_MINOR_VERSION,
-                                GLIB_MICRO_VERSION + 1) != NULL);
+                                GLIB_MICRO_VERSION + 3) != NULL);
 }
 
 static const gchar *argv0;
@@ -145,6 +166,7 @@ main (int   argc,
   g_test_bug_base ("http://bugzilla.gnome.org/");
 
   g_test_add_func ("/utils/language-names", test_language_names);
+  g_test_add_func ("/utils/locale-variants", test_locale_variants);
   g_test_add_func ("/utils/version", test_version);
   g_test_add_func ("/utils/appname", test_appname);
   g_test_add_func ("/utils/tmpdir", test_tmpdir);

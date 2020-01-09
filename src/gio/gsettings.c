@@ -42,10 +42,27 @@
 
 /**
  * SECTION:gsettings
- * @short_description: a high-level API for application settings
+ * @short_description: High-level API for application settings
  *
  * The #GSettings class provides a convenient API for storing and retrieving
  * application settings.
+ *
+ * Reads and writes can be considered to be non-blocking.  Reading
+ * settings with #GSettings is typically extremely fast: on
+ * approximately the same order of magnitude (but slower than) a
+ * #GHashTable lookup.  Writing settings is also extremely fast in terms
+ * of time to return to your application, but can be extremely expensive
+ * for other threads and other processes.  Many settings backends
+ * (including dconf) have lazy initialisation which means in the common
+ * case of the user using their computer without modifying any settings
+ * a lot of work can be avoided.  For dconf, the D-Bus service doesn't
+ * even need to be started in this case.  For this reason, you should
+ * only ever modify #GSettings keys in response to explicit user action.
+ * Particular care should be paid to ensure that modifications are not
+ * made during startup -- for example, when settings the initial value
+ * of preferences widgets.  The built-in g_settings_bind() functionality
+ * is careful not to write settings in response to notify signals as a
+ * result of modifications that it makes to widgets.
  *
  * When creating a GSettings instance, you have to specify a schema
  * that describes the keys in your settings and their types and default
@@ -79,16 +96,31 @@
  * described by the following DTD:
  * |[<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" parse="text" href="../../../../gio/gschema.dtd"><xi:fallback>FIXME: MISSING XINCLUDE CONTENT</xi:fallback></xi:include>]|
  *
+ * glib-compile-schemas expects schema files to have the extension <filename>.gschema.xml</filename>
+ *
  * At runtime, schemas are identified by their id (as specified
  * in the <tag class="attribute">id</tag> attribute of the
  * <tag class="starttag">schema</tag> element). The
  * convention for schema ids is to use a dotted name, similar in
- * style to a DBus bus name, e.g. "org.gnome.font-rendering".
+ * style to a D-Bus bus name, e.g. "org.gnome.SessionManager". In particular,
+ * if the settings are for a specific service that owns a D-Bus bus name,
+ * the D-Bus bus name and schema id should match. For schemas which deal
+ * with settings not associated with one named application, the id should
+ * not use StudlyCaps, e.g. "org.gnome.font-rendering".
  *
- * <example><title>Default values</title>
+ * In addition to #GVariant types, keys can have types that have enumerated
+ * types. These can be described by a <tag class="starttag">choice</tag>,
+ * <tag class="starttag">enum</tag> or <tag class="starttag">flags</tag> element, see
+ * <xref linkend="schema-enumerated"/>. The underlying type of
+ * such a key is string, but you can use g_settings_get_enum(),
+ * g_settings_set_enum(), g_settings_get_flags(), g_settings_set_flags()
+ * access the numeric values corresponding to the string value of enum
+ * and flags keys.
+ *
+ * <example id="schema-default-values"><title>Default values</title>
  * <programlisting><![CDATA[
  * <schemalist>
- *   <schema id="org.gtk.test" path="/tests/" gettext-domain="test">
+ *   <schema id="org.gtk.Test" path="/tests/" gettext-domain="test">
  *
  *     <key name="greeting" type="s">
  *       <default l10n="messages">"Hello, earthlings"</default>
@@ -106,7 +138,7 @@
  * </schemalist>
  * ]]></programlisting></example>
  *
- * <example><title>Ranges, choices and enumerated types</title>
+ * <example id="schema-enumerated"><title>Ranges, choices and enumerated types</title>
  * <programlisting><![CDATA[
  * <schemalist>
  *
@@ -115,7 +147,13 @@
  *     <value nick="second" value="2"/>
  *   </enum>
  *
- *   <schema id="org.gtk.test">
+ *   <enum id="myflags">
+ *     <value nick="flag1" value="1"/>
+ *     <value nick="flag2" value="2"/>
+ *     <value nick="flag3" value="4"/>
+ *   </enum>
+ *
+ *   <schema id="org.gtk.Test">
  *
  *     <key name="key-with-range" type="i">
  *       <range min="1" max="100"/>
@@ -139,6 +177,9 @@
  *       <default>'first'</default>
  *     </key>
  *
+ *     <key name='flags-key' flags='myflags'>
+ *       <default>["flag1",flag2"]</default>
+ *     </key>
  *   </schema>
  * </schemalist>
  * ]]></programlisting></example>
@@ -160,6 +201,10 @@
  *     key1='string'
  *     key2=1.5
  *     </programlisting></informalexample>
+ *   </para>
+ *   <para>
+ *     glib-compile-schemas expects schema files to have the extension
+ *     <filename>.gschema.override</filename>
  *   </para>
  * </refsect2>
  *
@@ -204,6 +249,7 @@ enum
   PROP_BACKEND,
   PROP_PATH,
   PROP_HAS_UNAPPLIED,
+  PROP_DELAY_APPLY
 };
 
 enum
@@ -265,7 +311,17 @@ settings_backend_changed (GObject             *target,
   gboolean ignore_this;
   gint i;
 
-  g_assert (settings->priv->backend == backend);
+  /* We used to assert here:
+   *
+   *   settings->priv->backend == backend
+   *
+   * but it could be the case that a notification is queued for delivery
+   * while someone calls g_settings_delay() (which changes the backend).
+   *
+   * Since the delay backend would just pass that straight through
+   * anyway, it doesn't make sense to try to detect this case.
+   * Therefore, we just accept it.
+   */
 
   for (i = 0; key[i] == settings->priv->path[i]; i++);
 
@@ -289,8 +345,6 @@ settings_backend_path_changed (GObject          *target,
   GSettings *settings = G_SETTINGS (target);
   gboolean ignore_this;
 
-  g_assert (settings->priv->backend == backend);
-
   if (g_str_has_prefix (settings->priv->path, path))
     g_signal_emit (settings, g_settings_signals[SIGNAL_CHANGE_EVENT],
                    0, NULL, 0, &ignore_this);
@@ -306,8 +360,6 @@ settings_backend_keys_changed (GObject             *target,
   GSettings *settings = G_SETTINGS (target);
   gboolean ignore_this;
   gint i;
-
-  g_assert (settings->priv->backend == backend);
 
   for (i = 0; settings->priv->path[i] &&
               settings->priv->path[i] == path[i]; i++);
@@ -349,8 +401,6 @@ settings_backend_writable_changed (GObject          *target,
   gboolean ignore_this;
   gint i;
 
-  g_assert (settings->priv->backend == backend);
-
   for (i = 0; key[i] == settings->priv->path[i]; i++);
 
   if (settings->priv->path[i] == '\0' &&
@@ -366,8 +416,6 @@ settings_backend_path_writable_changed (GObject          *target,
 {
   GSettings *settings = G_SETTINGS (target);
   gboolean ignore_this;
-
-  g_assert (settings->priv->backend == backend);
 
   if (g_str_has_prefix (settings->priv->path, path))
     g_signal_emit (settings, g_settings_signals[SIGNAL_WRITABLE_CHANGE_EVENT],
@@ -417,12 +465,20 @@ g_settings_get_property (GObject    *object,
       g_value_set_string (value, settings->priv->schema_name);
       break;
 
+     case PROP_BACKEND:
+      g_value_set_object (value, settings->priv->backend);
+      break;
+
      case PROP_PATH:
       g_value_set_string (value, settings->priv->path);
       break;
 
      case PROP_HAS_UNAPPLIED:
       g_value_set_boolean (value, g_settings_get_has_unapplied (settings));
+      break;
+
+     case PROP_DELAY_APPLY:
+      g_value_set_boolean (value, settings->priv->delayed != NULL);
       break;
 
      default:
@@ -540,7 +596,8 @@ g_settings_class_init (GSettingsClass *class)
   /**
    * GSettings::change-event:
    * @settings: the object on which the signal was emitted
-   * @keys: an array of #GQuark<!-- -->s for the changed keys, or %NULL
+   * @keys: (array length=n_keys) (element-type GQuark) (allow-none):
+   *        an array of #GQuark<!-- -->s for the changed keys, or %NULL
    * @n_keys: the length of the @keys array, or 0
    * @returns: %TRUE to stop other handlers from being invoked for the
    *           event. FALSE to propagate the event further.
@@ -585,7 +642,7 @@ g_settings_class_init (GSettingsClass *class)
   g_settings_signals[SIGNAL_WRITABLE_CHANGED] =
     g_signal_new ("writable-changed", G_TYPE_SETTINGS,
                   G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
-                  G_STRUCT_OFFSET (GSettingsClass, changed),
+                  G_STRUCT_OFFSET (GSettingsClass, writable_changed),
                   NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE,
                   1, G_TYPE_STRING | G_SIGNAL_TYPE_STATIC_SCOPE);
 
@@ -674,6 +731,20 @@ g_settings_class_init (GSettingsClass *class)
                            FALSE,
                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
+   /**
+    * GSettings:delay-apply:
+    *
+    * Whether the #GSettings object is in 'delay-apply' mode. See
+    * g_settings_delay() for details.
+    *
+    * Since: 2.28
+    */
+   g_object_class_install_property (object_class, PROP_DELAY_APPLY,
+     g_param_spec_boolean ("delay-apply",
+                           P_("Delay-apply mode"),
+                           P_("Whether this settings object is in 'delay-apply' mode"),
+                           FALSE,
+                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 }
 
 /* Construction (new, new_with_path, etc.) {{{1 */
@@ -925,8 +996,8 @@ g_settings_type_check (GSettingsKeyInfo *info,
 }
 
 static gboolean
-g_settings_range_check (GSettingsKeyInfo *info,
-                        GVariant         *value)
+g_settings_key_info_range_check (GSettingsKeyInfo *info,
+                                 GVariant         *value)
 {
   if (info->minimum == NULL && info->strinfo == NULL)
     return TRUE;
@@ -940,7 +1011,7 @@ g_settings_range_check (GSettingsKeyInfo *info,
       g_variant_iter_init (&iter, value);
       while (ok && (child = g_variant_iter_next_value (&iter)))
         {
-          ok = g_settings_range_check (info, child);
+          ok = g_settings_key_info_range_check (info, child);
           g_variant_unref (child);
         }
 
@@ -964,7 +1035,7 @@ g_settings_range_fixup (GSettingsKeyInfo *info,
 {
   const gchar *target;
 
-  if (g_settings_range_check (info, value))
+  if (g_settings_key_info_range_check (info, value))
     return g_variant_ref (value);
 
   if (info->strinfo == NULL)
@@ -1062,7 +1133,7 @@ g_settings_get_translated_default (GSettingsKeyInfo *info)
       g_error_free (error);
     }
 
-  else if (!g_settings_range_check (info, value))
+  else if (!g_settings_key_info_range_check (info, value))
     {
       g_warning ("Translated default `%s' for key `%s' in schema `%s' "
                  "is outside of valid range", info->unparsed, info->key,
@@ -1458,8 +1529,28 @@ g_settings_set_value (GSettings   *settings,
   g_return_val_if_fail (key != NULL, FALSE);
 
   g_settings_get_key_info (&info, settings, key);
-  g_return_val_if_fail (g_settings_type_check (&info, value), FALSE);
-  g_return_val_if_fail (g_settings_range_check (&info, value), FALSE);
+
+  if (!g_settings_type_check (&info, value))
+    {
+      g_critical ("g_settings_set_value: key '%s' in '%s' expects type '%s', but a GVariant of type '%s' was given",
+                  key,
+                  settings->priv->schema_name,
+                  g_variant_type_peek_string (info.type),
+                  g_variant_get_type_string (value));
+
+        return FALSE;
+      }
+
+  if (!g_settings_key_info_range_check (&info, value))
+    {
+      g_warning ("g_settings_set_value: value for key '%s' in schema '%s' "
+                 "is outside of valid range",
+                 key,
+                 settings->priv->schema_name);
+
+        return FALSE;
+    }
+
   g_settings_free_key_info (&info);
 
   return g_settings_write_to_backend (&info, value);
@@ -1541,10 +1632,10 @@ g_settings_set (GSettings   *settings,
  * g_settings_get_mapped:
  * @settings: a #GSettings object
  * @key: the key to get the value for
- * @mapping: the function to map the value in the settings database to
- *           the value used by the application
+ * @mapping: (scope call): the function to map the value in the
+ *           settings database to the value used by the application
  * @user_data: user data for @mapping
- * @returns: the result, which may be %NULL
+ * @returns: (transfer full): the result, which may be %NULL
  *
  * Gets the value that is stored at @key in @settings, subject to
  * application-level validation/mapping.
@@ -1840,9 +1931,9 @@ g_settings_set_boolean (GSettings  *settings,
  * g_settings_get_strv:
  * @settings: a #GSettings object
  * @key: the key to get the value for
- * @returns: a newly-allocated, %NULL-terminated array of strings
- *
- * Gets the value that is stored at @key in @settings.
+ * @returns: (array zero-terminated=1) (transfer full): a
+ * newly-allocated, %NULL-terminated array of strings, the value that
+ * is stored at @key in @settings.
  *
  * A convenience variant of g_settings_get() for string arrays.
  *
@@ -1869,7 +1960,7 @@ g_settings_get_strv (GSettings   *settings,
  * g_settings_set_strv:
  * @settings: a #GSettings object
  * @key: the name of the key to set
- * @value: (allow-none): the value to set it to, or %NULL
+ * @value: (allow-none) (array zero-terminated=1): the value to set it to, or %NULL
  * @returns: %TRUE if setting the key succeeded,
  *     %FALSE if the key was not writable
  *
@@ -1928,6 +2019,8 @@ g_settings_delay (GSettings *settings)
   g_settings_backend_watch (settings->priv->backend,
                             &listener_vtable, G_OBJECT (settings),
                             settings->priv->main_context);
+
+  g_object_notify (G_OBJECT (settings), "delay-apply");
 }
 
 /**
@@ -1994,7 +2087,7 @@ g_settings_get_has_unapplied (GSettings *settings)
            G_DELAYED_SETTINGS_BACKEND (settings->priv->backend));
 }
 
-/* Extra API (reset, sync, get_child, is_writable, list_*) {{{1 */
+/* Extra API (reset, sync, get_child, is_writable, list_*, ranges) {{{1 */
 /**
  * g_settings_reset:
  * @settings: a #GSettings object
@@ -2068,10 +2161,10 @@ g_settings_is_writable (GSettings   *settings,
  * g_settings_get_child:
  * @settings: a #GSettings object
  * @name: the name of the 'child' schema
- * @returns: a 'child' settings object
+ * @returns: (transfer full): a 'child' settings object
  *
  * Creates a 'child' settings object which has a base path of
- * <replaceable>base-path</replaceable>/@name", where
+ * <replaceable>base-path</replaceable>/@name, where
  * <replaceable>base-path</replaceable> is the base path of @settings.
  *
  * The schema for the child settings object must have been declared
@@ -2111,7 +2204,7 @@ g_settings_get_child (GSettings   *settings,
 /**
  * g_settings_list_keys:
  * @settings: a #GSettings object
- * @returns: a list of the keys on @settings
+ * @returns: (transfer full) (element-type utf8): a list of the keys on @settings
  *
  * Introspects the list of keys on @settings.
  *
@@ -2147,7 +2240,7 @@ g_settings_list_keys (GSettings *settings)
 /**
  * g_settings_list_children:
  * @settings: a #GSettings object
- * @returns: a list of the children on @settings
+ * @returns: (transfer full) (element-type utf8): a list of the children on @settings
  *
  * Gets the list of children on @settings.
  *
@@ -2158,7 +2251,7 @@ g_settings_list_keys (GSettings *settings)
  * time and you should connect to the "children-changed" signal to watch
  * for those changes.  Note that there is a race condition here: you may
  * request a child after listing it only for it to have been destroyed
- * in the meantime.  For this reason, g_settings_get_chuld() may return
+ * in the meantime.  For this reason, g_settings_get_child() may return
  * %NULL even for a child that was listed by this function.
  *
  * For GSettings objects that are not lists, you should probably not be
@@ -2195,6 +2288,123 @@ g_settings_list_children (GSettings *settings)
   strv[j] = NULL;
 
   return strv;
+}
+
+/**
+ * g_settings_get_range:
+ * @settings: a #GSettings
+ * @key: the key to query the range of
+ * @returns: a #GVariant describing the range
+ *
+ * Queries the range of a key.
+ *
+ * This function will return a #GVariant that fully describes the range
+ * of values that are valid for @key.
+ *
+ * The type of #GVariant returned is <literal>(sv)</literal>.  The
+ * string describes the type of range restriction in effect.  The type
+ * and meaning of the value contained in the variant depends on the
+ * string.
+ *
+ * If the string is <literal>'type'</literal> then the variant contains
+ * an empty array.  The element type of that empty array is the expected
+ * type of value and all values of that type are valid.
+ *
+ * If the string is <literal>'enum'</literal> then the variant contains
+ * an array enumerating the possible values.  Each item in the array is
+ * a possible valid value and no other values are valid.
+ *
+ * If the string is <literal>'flags'</literal> then the variant contains
+ * an array.  Each item in the array is a value that may appear zero or
+ * one times in an array to be used as the value for this key.  For
+ * example, if the variant contained the array <literal>['x',
+ * 'y']</literal> then the valid values for the key would be
+ * <literal>[]</literal>, <literal>['x']</literal>,
+ * <literal>['y']</literal>, <literal>['x', 'y']</literal> and
+ * <literal>['y', 'x']</literal>.
+ *
+ * Finally, if the string is <literal>'range'</literal> then the variant
+ * contains a pair of like-typed values -- the minimum and maximum
+ * permissible values for this key.
+ *
+ * This information should not be used by normal programs.  It is
+ * considered to be a hint for introspection purposes.  Normal programs
+ * should already know what is permitted by their own schema.  The
+ * format may change in any way in the future -- but particularly, new
+ * forms may be added to the possibilities described above.
+ *
+ * It is a programmer error to give a @key that isn't contained in the
+ * schema for @settings.
+ *
+ * You should free the returned value with g_variant_unref() when it is
+ * no longer needed.
+ *
+ * Since: 2.28
+ **/
+GVariant *
+g_settings_get_range (GSettings   *settings,
+                      const gchar *key)
+{
+  GSettingsKeyInfo info;
+  const gchar *type;
+  GVariant *range;
+
+  g_settings_get_key_info (&info, settings, key);
+
+  if (info.minimum)
+    {
+      range = g_variant_new ("(**)", info.minimum, info.maximum);
+      type = "range";
+    }
+  else if (info.strinfo)
+    {
+      range = strinfo_enumerate (info.strinfo, info.strinfo_length);
+      type = info.is_flags ? "flags" : "enum";
+    }
+  else
+    {
+      range = g_variant_new_array (info.type, NULL, 0);
+      type = "type";
+    }
+
+  g_settings_free_key_info (&info);
+
+  return g_variant_ref_sink (g_variant_new ("(sv)", type, range));
+}
+
+/**
+ * g_settings_range_check:
+ * @settings: a #GSettings
+ * @key: the key to check
+ * @value: the value to check
+ * @returns: %TRUE if @value is valid for @key
+ *
+ * Checks if the given @value is of the correct type and within the
+ * permitted range for @key.
+ *
+ * This API is not intended to be used by normal programs -- they should
+ * already know what is permitted by their own schemas.  This API is
+ * meant to be used by programs such as editors or commandline tools.
+ *
+ * It is a programmer error to give a @key that isn't contained in the
+ * schema for @settings.
+ *
+ * Since: 2.28
+ **/
+gboolean
+g_settings_range_check (GSettings   *settings,
+                        const gchar *key,
+                        GVariant    *value)
+{
+  GSettingsKeyInfo info;
+  gboolean good;
+
+  g_settings_get_key_info (&info, settings, key);
+  good = g_settings_type_check (&info, value) &&
+         g_settings_key_info_range_check (&info, value);
+  g_settings_free_key_info (&info);
+
+  return good;
 }
 
 /* Binding {{{1 */
@@ -2352,7 +2562,7 @@ g_settings_binding_property_changed (GObject          *object,
           return;
         }
 
-      if (!g_settings_range_check (&binding->info, variant))
+      if (!g_settings_key_info_range_check (&binding->info, variant))
         {
           g_critical ("GObject property `%s' on a `%s' object is out of "
                       "schema-specified range for key `%s' of `%s': %s",
@@ -2393,7 +2603,7 @@ g_settings_bind_invert_boolean_set_mapping (const GValue       *value,
  * g_settings_bind:
  * @settings: a #GSettings object
  * @key: the key to bind
- * @object: a #GObject
+ * @object: (type GObject.Object): a #GObject
  * @property: the name of the property to bind
  * @flags: flags for the binding
  *
@@ -2444,10 +2654,10 @@ g_settings_bind (GSettings          *settings,
 }
 
 /**
- * g_settings_bind_with_mapping:
+ * g_settings_bind_with_mapping: (skip)
  * @settings: a #GSettings object
  * @key: the key to bind
- * @object: a #GObject
+ * @object: (type GObject.Object): a #GObject
  * @property: the name of the property to bind
  * @flags: flags for the binding
  * @get_mapping: a function that gets called to convert values
@@ -2660,7 +2870,7 @@ g_settings_binding_writable_changed (GSettings   *settings,
  * g_settings_bind_writable:
  * @settings: a #GSettings object
  * @key: the key to bind
- * @object: a #GObject
+ * @object: (type GObject.Object):a #GObject
  * @property: the name of a boolean property to bind
  * @inverted: whether to 'invert' the value
  *

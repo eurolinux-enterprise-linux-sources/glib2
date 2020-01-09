@@ -75,7 +75,8 @@ g_icon_default_init (GIconInterface *iface)
  * @icon: #gconstpointer to an icon object.
  * 
  * Gets a hash for an icon.
- * 
+ *
+ * Virtual: hash
  * Returns: a #guint containing a hash for the @icon, suitable for 
  * use in a #GHashTable or similar data structure.
  **/
@@ -198,6 +199,7 @@ g_icon_to_string_tokenized (GIcon *icon, GString *s)
  * </para></listitem>
  * </itemizedlist>
  *
+ * Virtual: to_tokens
  * Returns: An allocated NUL-terminated UTF8 string or %NULL if @icon can't
  * be serialized. Use g_free() to free.
  *
@@ -395,8 +397,8 @@ ensure_builtin_icon_types (void)
  * implementations you need to ensure that each #GType is registered
  * with the type system prior to calling g_icon_new_for_string().
  *
- * Returns: An object implementing the #GIcon interface or %NULL if
- * @error is set.
+ * Returns: (transfer full): An object implementing the #GIcon
+ *          interface or %NULL if @error is set.
  *
  * Since: 2.20
  **/

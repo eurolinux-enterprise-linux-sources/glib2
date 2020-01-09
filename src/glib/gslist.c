@@ -34,7 +34,7 @@
 #include "gtestutils.h"
 
 /**
- * SECTION: linked_lists_single
+ * SECTION:linked_lists_single
  * @title: Singly-Linked Lists
  * @short_description: linked lists containing integer values or
  *                     pointers to data, limited to iterating over the
@@ -159,6 +159,12 @@ g_slist_alloc (void)
  *
  * Frees all of the memory used by a #GSList.
  * The freed elements are returned to the slice allocator.
+ *
+ * <note><para>
+ * If list elements contain dynamically-allocated memory,
+ * you should either use g_slist_free_full() or free them manually
+ * first.
+ * </para></note>
  */
 void
 g_slist_free (GSList *list)
@@ -184,6 +190,24 @@ void
 g_slist_free_1 (GSList *list)
 {
   _g_slist_free1 (list);
+}
+
+/**
+ * g_slist_free_full:
+ * @list: a pointer to a #GSList
+ * @free_func: the function to be called to free each element's data
+ *
+ * Convenience method, which frees all the memory used by a #GSList, and
+ * calls the specified destroy function on every element's data.
+ *
+ * Since: 2.28
+ **/
+void
+g_slist_free_full (GSList         *list,
+		   GDestroyNotify  free_func)
+{
+  g_slist_foreach (list, (GFunc) free_func, NULL);
+  g_slist_free (list);
 }
 
 /**

@@ -41,15 +41,6 @@
 #include <locale.h>
 #include <errno.h>
 
-#ifdef G_OS_WIN32
-#include <process.h>		/* For getpid() */
-#include <io.h>
-#  define STRICT		/* Strict typing, please */
-#  define _WIN32_WINDOWS 0x0401 /* to get IsDebuggerPresent */
-#  include <windows.h>
-#  undef STRICT
-#endif
-
 #include "gmessages.h"
 
 #include "gbacktrace.h"
@@ -62,6 +53,15 @@
 #include "gthreadprivate.h"
 #include "gstrfuncs.h"
 #include "gstring.h"
+
+#ifdef G_OS_WIN32
+#include <process.h>		/* For getpid() */
+#include <io.h>
+#  define STRICT		/* Strict typing, please */
+#  define _WIN32_WINDOWS 0x0401 /* to get IsDebuggerPresent */
+#  include <windows.h>
+#  undef STRICT
+#endif
 
 
 /* --- structures --- */
@@ -506,7 +506,7 @@ g_logv (const gchar   *log_domain,
 	       * in an out-of-memory situation
 	       */
 	      gchar buffer[1025];
-              gsize size;
+              gsize size G_GNUC_UNUSED;
               va_list args2;
 
               G_VA_COPY (args2, args1);

@@ -153,6 +153,7 @@ GLIB_LINK_FLAGS = @GLIB_LINK_FLAGS@
 GLIB_MAJOR_VERSION = @GLIB_MAJOR_VERSION@
 GLIB_MICRO_VERSION = @GLIB_MICRO_VERSION@
 GLIB_MINOR_VERSION = @GLIB_MINOR_VERSION@
+GLIB_RT_LIBS = @GLIB_RT_LIBS@
 GLIB_RUNTIME_LIBDIR = @GLIB_RUNTIME_LIBDIR@
 GLIB_VERSION = @GLIB_VERSION@
 GLIB_WIN32_STATIC_COMPILATION_DEFINE = @GLIB_WIN32_STATIC_COMPILATION_DEFINE@
@@ -208,6 +209,7 @@ LT_RELEASE = @LT_RELEASE@
 LT_REVISION = @LT_REVISION@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
@@ -267,6 +269,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -328,7 +331,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = \
 	dirent 	\
-	vs9
+	vs9     \
+	vs10
 
 EXTRA_DIST = \
 	make.msc 	\

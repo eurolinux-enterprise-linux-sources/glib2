@@ -2,18 +2,19 @@
 
 Summary: A library of handy utility functions
 Name: glib2
-Version: 2.26.1
-Release: 7%{?dist}
+Version: 2.28.8
+Release: 4%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 URL: http://www.gtk.org
 #VCS: git:git://git.gnome.org/glib
-Source: http://download.gnome.org/sources/glib/2.26/glib-%{version}.tar.bz2
+Source: http://download.gnome.org/sources/glib/2.28/glib-%{version}.tar.bz2
 Source1: update-gio-modules
 Source2: glib2.sh
 Source3: glib2.csh
 BuildRequires: pkgconfig >= 1:0.14
 BuildRequires: gamin-devel
+BuildRequires: git
 BuildRequires: gettext
 BuildRequires: libattr-devel
 BuildRequires: libselinux-devel
@@ -27,10 +28,17 @@ BuildRequires: gtk-doc
 # required for GIO content-type support
 Requires: shared-mime-info
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=648498
-Patch0: glib-2.22.5-gio-hide-dot-mounts.patch
 Patch1: Build-Drop-gtk-doc-requirement.patch
 Patch2: Remove-usr-bin-gsettings-and-g_settings_-symbols.patch
+Patch3: support-gconf-uri-handlers.patch
+Patch4: Revert-deprecations-since-glib-2.22.patch
+
+# An amalgamation of patches from:
+# https://bugzilla.gnome.org/651133
+# https://bugzilla.gnome.org/656282
+# https://bugzilla.gnome.org/656173
+# https://bugzilla.gnome.org/656039
+Patch5: GDBusProxy-thread-safety.patch
 
 %description
 GLib is the low-level core library that forms the basis for projects
@@ -67,16 +75,19 @@ The glib2-static package includes static libraries of the GLib library.
 
 %prep
 %setup -q -n glib-%{version}
-%patch0 -p1 -b .dot-mounts
-%patch1 -p1
-%patch2 -p1
+git init
+if [ -z "$GIT_COMMITTER_NAME" ]; then
+    git config user.email "devel@fedoraproject.org"
+    git config user.name "Fedora Devel"
+fi
+git add .
+git commit -a -m "%{version} baseline"
+git am -p1 %{patches} < /dev/null
 
 # For gsettings patch
 rm -f configure
 
 %build
-# Gross hack to work around https://bugzilla.redhat.com/show_bug.cgi?id=1025311
-cp -a docs docs.orig
 # Support builds of both git snapshots and tarballs packed with autogoo
 (if ! test -x configure; then NOCONFIGURE=1 ./autogen.sh; CONFIGFLAGS=--enable-gtk-doc; fi;
  %configure $CONFIGFLAGS \
@@ -85,8 +96,6 @@ cp -a docs docs.orig
 	   --with-runtime-libdir=../../%{_lib})
 
 make %{?_smp_mflags}
-
-(cd docs.orig && find . -name '*.html' | while read fname; do cp -p $fname ../docs/$(dirname $fname); done)
 
 # truncate NEWS
 awk '/^Overview of Changes/ { seen+=1 }
@@ -136,7 +145,6 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_sysconfdir}/profile.d/*
 %{_sysconfdir}/bash_completion.d/*.sh
 %dir %{_datadir}/glib-2.0
-%dir %{_datadir}/glib-2.0/schemas
 %dir %{_libdir}/gio
 %dir %{_libdir}/gio/modules
 %{_libdir}/gio/modules/libgiofam.so
@@ -157,7 +165,6 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_libdir}/pkgconfig/*
 %{_datadir}/glib-2.0/gdb
 %{_datadir}/glib-2.0/gettext
-%{_datadir}/glib-2.0/schemas/gschema.dtd
 %exclude %{_datadir}/glib-2.0/gdb/*.pyo
 %exclude %{_datadir}/glib-2.0/gdb/*.pyc
 %{_bindir}/glib-genmarshal
@@ -183,17 +190,33 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_libdir}/lib*.a
 
 %changelog
-* Fri Feb 15 2014 Colin Walters <walters@redhat.com> - 2.26.1-7
+* Tue Sep 09 2014 Matthew Barnes <mbarnes@redhat.com> - 2.28.8-4
+- Improve thread-safety of GDBusProxy.
+  Resolves: rhbz#1128848
+
+* Fri Sep 05 2014 Matthew Barnes <mbarnes@redhat.com> - 2.28.8-3
+- Revert deprecations picked up through rebases to avoid further bugs
+  like rhbz#1136304 (devhelp).
+
+* Thu Aug 28 2014 Ray Strode <rstrode@redhat.com> - 2.28.8-2
+- Add back support for gconf based uri handlers
+  Resolves: rhbz#1120611
+
+* Tue Jun 10 2014 Colin Walters <walters@redhat.com> - 2.28.8-1
+- Rebase to 2.28 
+  Resolves: rhbz#1101398
+
+* Fri Feb 15 2014 Colin Walters <walters@redhat.com> - 2.26.1-8
 - Split off a separate -doc package (as is done currently in RHEL7)
   to avoid multilib conflicts with gtk-doc.
-  Resolves: rhbz#1065429
+  Resolves: rhbz#1036097
 
 * Tue Dec 03 2013 Colin Walters <walters@redhat.com> - 2.26.1-4
 - Remove /usr/bin/gsettings and g_settings_*() symbols; many
   projects such as OpenJDK and VMWare Workstation conflate the
   existence of these symbols with the presence of gsettings-desktop-schemas
   schemas such as org.gnome.system.proxy.
-  Resolves: rhbz#1065429
+  Resolves: rhbz#1035941
 
 * Tue Aug 27 2013 Colin Walters <walters@redhat.com> - 2.26.1-3
 - Explicitly disable systemtap for this rebase; I am not aware

@@ -14,7 +14,7 @@ The official web site is:
   http://www.gtk.org/
 
 Information about mailing lists can be found at
-  http://www.gtk.org/mailinglists.html
+  http://www.gtk.org/mailing-lists.html
 
 To subscribe: mail -s subscribe gtk-list-request@gnome.org < /dev/null
 (Send mail to gtk-list-request@gnome.org with the subject "subscribe")
@@ -23,6 +23,18 @@ Installation
 ============
 
 See the file 'INSTALL'
+
+Notes about GLib 2.28
+=====================
+
+* The GApplication API has changed compared to the version that was
+  included in the 2.25 development snapshots. Existing users will need
+  adjustments.
+
+Notes about GLib 2.26
+=====================
+
+* Nothing noteworthy.
 
 Notes about GLib 2.24
 =====================

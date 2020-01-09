@@ -100,7 +100,7 @@ g_app_info_default_init (GAppInfoInterface *iface)
  * 
  * Creates a duplicate of a #GAppInfo.
  *
- * Returns: a duplicate of @appinfo.
+ * Returns: (transfer full): a duplicate of @appinfo.
  **/
 GAppInfo *
 g_app_info_dup (GAppInfo *appinfo)
@@ -308,6 +308,33 @@ g_app_info_set_as_default_for_type (GAppInfo    *appinfo,
   return (* iface->set_as_default_for_type) (appinfo, content_type, error);
 }
 
+/**
+ * g_app_info_set_as_last_used_for_type:
+ * @appinfo: a #GAppInfo.
+ * @content_type: the content type.
+ * @error: a #GError.
+ * 
+ * Sets the application as the last used application for a given type.
+ * This will make the application appear as first in the list returned by
+ * #g_app_info_get_recommended_for_type, regardless of the default application
+ * for that content type.
+ *
+ * Returns: %TRUE on success, %FALSE on error.
+ **/
+gboolean
+g_app_info_set_as_last_used_for_type (GAppInfo    *appinfo,
+                                      const char  *content_type,
+                                      GError     **error)
+{
+  GAppInfoIface *iface;
+  
+  g_return_val_if_fail (G_IS_APP_INFO (appinfo), FALSE);
+  g_return_val_if_fail (content_type != NULL, FALSE);
+
+  iface = G_APP_INFO_GET_IFACE (appinfo);
+
+  return (* iface->set_as_last_used_for_type) (appinfo, content_type, error);
+}
 
 /**
  * g_app_info_set_as_default_for_extension:
@@ -476,13 +503,13 @@ g_app_info_get_icon (GAppInfo *appinfo)
  * a textual uri you want to pass in as argument, consider using
  * g_app_info_launch_uris() instead.
  *
- * On UNIX, this function sets the <envvar>GIO_LAUNCHED_DESKTOP_FILE</envvar>
+ * On UNIX, this function sets the <envar>GIO_LAUNCHED_DESKTOP_FILE</envar>
  * environment variable with the path of the launched desktop file and
- * <envvar>GIO_LAUNCHED_DESKTOP_FILE_PID</envvar> to the process
+ * <envar>GIO_LAUNCHED_DESKTOP_FILE_PID</envar> to the process
  * id of the launched process. This can be used to ignore
- * <envvar>GIO_LAUNCHED_DESKTOP_FILE</envvar>, should it be inherited
- * by further processes. The <envvar>DISPLAY</envvar> and
- * <envvar>DESKTOP_STARTUP_ID</envvar> environment variables are also
+ * <envar>GIO_LAUNCHED_DESKTOP_FILE</envar>, should it be inherited
+ * by further processes. The <envar>DISPLAY</envar> and
+ * <envar>DESKTOP_STARTUP_ID</envar> environment variables are also
  * set, based on information provided in @launch_context.
  *
  * Returns: %TRUE on successful launch, %FALSE otherwise.
@@ -548,7 +575,7 @@ g_app_info_supports_files (GAppInfo *appinfo)
 /**
  * g_app_info_launch_uris:
  * @appinfo: a #GAppInfo
- * @uris: (element-type char*): a #GList containing URIs to launch.
+ * @uris: (element-type utf8): a #GList containing URIs to launch.
  * @launch_context: (allow-none): a #GAppLaunchContext or %NULL
  * @error: a #GError
  * 
@@ -605,7 +632,7 @@ g_app_info_should_show (GAppInfo *appinfo)
 /**
  * g_app_info_launch_default_for_uri:
  * @uri: the uri to show
- * @launch_context: an optional #GAppLaunchContext.
+ * @launch_context: (allow-none): an optional #GAppLaunchContext.
  * @error: a #GError.
  *
  * Utility function that launches the default application
@@ -681,7 +708,8 @@ g_app_info_can_delete (GAppInfo *appinfo)
  * On some platforms, there may be a difference between user-defined
  * #GAppInfo<!-- -->s which can be deleted, and system-wide ones which
  * cannot. See g_app_info_can_delete().
- * 
+ *
+ * Virtual: do_delete
  * Returns: %TRUE if @appinfo has been deleted
  *
  * Since: 2.20
@@ -732,11 +760,11 @@ g_app_launch_context_init (GAppLaunchContext *launch_context)
  * g_app_launch_context_get_display:
  * @context: a #GAppLaunchContext
  * @info: a #GAppInfo
- * @files: a #GList of #GFile objects
+ * @files: (element-type GFile): a #GList of #GFile objects
  *
  * Gets the display string for the @context. This is used to ensure new
  * applications are started on the same display as the launching
- * application, by setting the <envvar>DISPLAY</envvar> environment variable.
+ * application, by setting the <envar>DISPLAY</envar> environment variable.
  *
  * Returns: a display string for the display.
  **/
@@ -762,10 +790,10 @@ g_app_launch_context_get_display (GAppLaunchContext *context,
  * g_app_launch_context_get_startup_notify_id:
  * @context: a #GAppLaunchContext
  * @info: a #GAppInfo
- * @files: a #GList of of #GFile objects
+ * @files: (element-type GFile): a #GList of of #GFile objects
  * 
  * Initiates startup notification for the application and returns the
- * <envvar>DESKTOP_STARTUP_ID</envvar> for the launched operation,
+ * <envar>DESKTOP_STARTUP_ID</envar> for the launched operation,
  * if supported.
  *
  * Startup notification IDs are defined in the <ulink

@@ -176,7 +176,7 @@ parse_nego_reply (const guint8 *data,
       case SOCKS5_AUTH_NO_ACCEPT:
       default:
 	g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_PROXY_AUTH_FAILED,
-			     _("The SOCKSv5 require an authentication method that is not "
+			     _("The SOCKSv5 proxy requires an authentication method that is not "
 			       "supported by GLib."));
 	return FALSE;
 	break;
@@ -399,7 +399,7 @@ parse_connect_reply (const guint8 *data, gint *atype, GError **error)
 
       default: /* Unknown error */
 	g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_PROXY_FAILED,
-			     _("Unkown SOCKSv5 proxy error."));
+			     _("Unknown SOCKSv5 proxy error."));
 	return FALSE;
 	break;
     }
@@ -599,9 +599,7 @@ static void
 complete_async_from_error (ConnectAsyncData *data, GError *error)
 {
   GSimpleAsyncResult *simple = data->simple;
-  g_simple_async_result_set_from_error (data->simple,
-					error);
-  g_error_free (error);
+  g_simple_async_result_take_error (data->simple, error);
   g_simple_async_result_set_op_res_gpointer (simple, NULL, NULL);
   g_simple_async_result_complete (simple);
   g_object_unref (simple);

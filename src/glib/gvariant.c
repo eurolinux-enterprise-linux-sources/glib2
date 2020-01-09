@@ -36,7 +36,7 @@
 
 
 /**
- * SECTION: gvariant
+ * SECTION:gvariant
  * @title: GVariant
  * @short_description: strongly typed value datatype
  * @see_also: GVariantType
@@ -65,8 +65,8 @@
  * small constant time, usually touching only a single memory page.
  * Serialised #GVariant data can also be sent over the network.
  *
- * #GVariant is largely compatible with DBus.  Almost all types of
- * #GVariant instances can be sent over DBus.  See #GVariantType for
+ * #GVariant is largely compatible with D-Bus.  Almost all types of
+ * #GVariant instances can be sent over D-Bus.  See #GVariantType for
  * exceptions.
  *
  * For convenience to C programmers, #GVariant features powerful
@@ -315,8 +315,8 @@ g_variant_new_from_trusted (const GVariantType *type,
 
 /**
  * g_variant_new_boolean:
- * @boolean: a #gboolean value
- * @returns: a floating reference to a new boolean #GVariant instance
+ * @value: a #gboolean value
+ * @returns: (transfer none): a floating reference to a new boolean #GVariant instance
  *
  * Creates a new boolean #GVariant instance -- either %TRUE or %FALSE.
  *
@@ -373,8 +373,8 @@ g_variant_get_boolean (GVariant *value)
 
 /**
  * g_variant_new_byte:
- * @byte: a #guint8 value
- * @returns: a floating reference to a new byte #GVariant instance
+ * @value: a #guint8 value
+ * @returns: (transfer none): a floating reference to a new byte #GVariant instance
  *
  * Creates a new byte #GVariant instance.
  *
@@ -396,8 +396,8 @@ NUMERIC_TYPE (BYTE, byte, guchar)
 
 /**
  * g_variant_new_int16:
- * @int16: a #gint16 value
- * @returns: a floating reference to a new int16 #GVariant instance
+ * @value: a #gint16 value
+ * @returns: (transfer none): a floating reference to a new int16 #GVariant instance
  *
  * Creates a new int16 #GVariant instance.
  *
@@ -419,8 +419,8 @@ NUMERIC_TYPE (INT16, int16, gint16)
 
 /**
  * g_variant_new_uint16:
- * @uint16: a #guint16 value
- * @returns: a floating reference to a new uint16 #GVariant instance
+ * @value: a #guint16 value
+ * @returns: (transfer none): a floating reference to a new uint16 #GVariant instance
  *
  * Creates a new uint16 #GVariant instance.
  *
@@ -442,8 +442,8 @@ NUMERIC_TYPE (UINT16, uint16, guint16)
 
 /**
  * g_variant_new_int32:
- * @int32: a #gint32 value
- * @returns: a floating reference to a new int32 #GVariant instance
+ * @value: a #gint32 value
+ * @returns: (transfer none): a floating reference to a new int32 #GVariant instance
  *
  * Creates a new int32 #GVariant instance.
  *
@@ -465,8 +465,8 @@ NUMERIC_TYPE (INT32, int32, gint32)
 
 /**
  * g_variant_new_uint32:
- * @uint32: a #guint32 value
- * @returns: a floating reference to a new uint32 #GVariant instance
+ * @value: a #guint32 value
+ * @returns: (transfer none): a floating reference to a new uint32 #GVariant instance
  *
  * Creates a new uint32 #GVariant instance.
  *
@@ -488,8 +488,8 @@ NUMERIC_TYPE (UINT32, uint32, guint32)
 
 /**
  * g_variant_new_int64:
- * @int64: a #gint64 value
- * @returns: a floating reference to a new int64 #GVariant instance
+ * @value: a #gint64 value
+ * @returns: (transfer none): a floating reference to a new int64 #GVariant instance
  *
  * Creates a new int64 #GVariant instance.
  *
@@ -511,8 +511,8 @@ NUMERIC_TYPE (INT64, int64, gint64)
 
 /**
  * g_variant_new_uint64:
- * @uint64: a #guint64 value
- * @returns: a floating reference to a new uint64 #GVariant instance
+ * @value: a #guint64 value
+ * @returns: (transfer none): a floating reference to a new uint64 #GVariant instance
  *
  * Creates a new uint64 #GVariant instance.
  *
@@ -534,14 +534,14 @@ NUMERIC_TYPE (UINT64, uint64, guint64)
 
 /**
  * g_variant_new_handle:
- * @handle: a #gint32 value
- * @returns: a floating reference to a new handle #GVariant instance
+ * @value: a #gint32 value
+ * @returns: (transfer none): a floating reference to a new handle #GVariant instance
  *
  * Creates a new handle #GVariant instance.
  *
  * By convention, handles are indexes into an array of file descriptors
- * that are sent alongside a DBus message.  If you're not interacting
- * with DBus, you probably don't need them.
+ * that are sent alongside a D-Bus message.  If you're not interacting
+ * with D-Bus, you probably don't need them.
  *
  * Since: 2.24
  **/
@@ -556,8 +556,8 @@ NUMERIC_TYPE (UINT64, uint64, guint64)
  * than %G_VARIANT_TYPE_HANDLE.
  *
  * By convention, handles are indexes into an array of file descriptors
- * that are sent alongside a DBus message.  If you're not interacting
- * with DBus, you probably don't need them.
+ * that are sent alongside a D-Bus message.  If you're not interacting
+ * with D-Bus, you probably don't need them.
  *
  * Since: 2.24
  **/
@@ -565,8 +565,8 @@ NUMERIC_TYPE (HANDLE, handle, gint32)
 
 /**
  * g_variant_new_double:
- * @floating: a #gdouble floating point value
- * @returns: a floating reference to a new double #GVariant instance
+ * @value: a #gdouble floating point value
+ * @returns: (transfer none): a floating reference to a new double #GVariant instance
  *
  * Creates a new double #GVariant instance.
  *
@@ -591,7 +591,7 @@ NUMERIC_TYPE (DOUBLE, double, gdouble)
  * g_variant_new_maybe:
  * @child_type: (allow-none): the #GVariantType of the child, or %NULL
  * @child: (allow-none): the child value, or %NULL
- * @returns: a floating reference to a new #GVariant maybe instance
+ * @returns: (transfer none): a floating reference to a new #GVariant maybe instance
  *
  * Depending on if @child is %NULL, either wraps @child inside of a
  * maybe container or creates a Nothing instance for the given @type.
@@ -647,7 +647,7 @@ g_variant_new_maybe (const GVariantType *child_type,
 /**
  * g_variant_get_maybe:
  * @value: a maybe-typed value
- * @returns: (allow-none): the contents of @value, or %NULL
+ * @returns: (allow-none) (transfer full): the contents of @value, or %NULL
  *
  * Given a maybe-typed #GVariant instance, extract its value.  If the
  * value is Nothing, then this function returns %NULL.
@@ -667,8 +667,8 @@ g_variant_get_maybe (GVariant *value)
 
 /**
  * g_variant_new_variant:
- * @value: a #GVariance instance
- * @returns: a floating reference to a new variant #GVariant instance
+ * @value: a #GVariant instance
+ * @returns: (transfer none): a floating reference to a new variant #GVariant instance
  *
  * Boxes @value.  The result is a #GVariant instance representing a
  * variant containing the original value.
@@ -692,8 +692,8 @@ g_variant_new_variant (GVariant *value)
 
 /**
  * g_variant_get_variant:
- * @value: a variant #GVariance instance
- * @returns: the item contained in the variant
+ * @value: a variant #GVariant instance
+ * @returns: (transfer full): the item contained in the variant
  *
  * Unboxes @value.  The result is the #GVariant instance that was
  * contained in @value.
@@ -714,7 +714,7 @@ g_variant_get_variant (GVariant *value)
  * @children: (allow-none) (array length=n_children): an array of
  *            #GVariant pointers, the children
  * @n_children: the length of @children
- * @returns: a floating reference to a new #GVariant array
+ * @returns: (transfer none): a floating reference to a new #GVariant array
  *
  * Creates a new #GVariant array from @children.
  *
@@ -801,7 +801,7 @@ g_variant_make_tuple_type (GVariant * const *children,
  * g_variant_new_tuple:
  * @children: (array length=n_children): the items to make the tuple out of
  * @n_children: the length of @children
- * @returns: a floating reference to a new #GVariant tuple
+ * @returns: (transfer none): a floating reference to a new #GVariant tuple
  *
  * Creates a new tuple #GVariant out of the items in @children.  The
  * type is determined from the types of @children.  No entry in the
@@ -860,15 +860,13 @@ g_variant_make_dict_entry_type (GVariant *key,
 }
 
 /**
- * g_variant_new_dict_entry:
+ * g_variant_new_dict_entry: (constructor)
  * @key: a basic #GVariant, the key
  * @value: a #GVariant, the value
- * @returns: a floating reference to a new dictionary entry #GVariant
+ * @returns: (transfer none): a floating reference to a new dictionary entry #GVariant
  *
- * Creates a new dictionary entry #GVariant.  @key and @value must be
- * non-%NULL.
- *
- * @key must be a value of a basic type (ie: not a container).
+ * Creates a new dictionary entry #GVariant. @key and @value must be
+ * non-%NULL. @key must be a value of a basic type (ie: not a container).
  *
  * If the @key or @value are floating references (see g_variant_ref_sink()),
  * the new instance takes ownership of them as if via g_variant_ref_sink().
@@ -899,9 +897,153 @@ g_variant_new_dict_entry (GVariant *key,
 }
 
 /**
+ * g_variant_lookup: (skip)
+ * @dictionary: a dictionary #GVariant
+ * @key: the key to lookup in the dictionary
+ * @format_string: a GVariant format string
+ * @...: the arguments to unpack the value into
+ *
+ * Looks up a value in a dictionary #GVariant.
+ *
+ * This function is a wrapper around g_variant_lookup_value() and
+ * g_variant_get().  In the case that %NULL would have been returned,
+ * this function returns %FALSE.  Otherwise, it unpacks the returned
+ * value and returns %TRUE.
+ *
+ * See g_variant_get() for information about @format_string.
+ *
+ * Returns: %TRUE if a value was unpacked
+ *
+ * Since: 2.28
+ */
+gboolean
+g_variant_lookup (GVariant    *dictionary,
+                  const gchar *key,
+                  const gchar *format_string,
+                  ...)
+{
+  GVariantType *type;
+  GVariant *value;
+
+  /* flatten */
+  g_variant_get_data (dictionary);
+
+  type = g_variant_format_string_scan_type (format_string, NULL, NULL);
+  value = g_variant_lookup_value (dictionary, key, type);
+  g_variant_type_free (type);
+
+  if (value)
+    {
+      va_list ap;
+
+      va_start (ap, format_string);
+      g_variant_get_va (value, format_string, NULL, &ap);
+      g_variant_unref (value);
+      va_end (ap);
+
+      return TRUE;
+    }
+
+  else
+    return FALSE;
+}
+
+/**
+ * g_variant_lookup_value:
+ * @dictionary: a dictionary #GVariant
+ * @key: the key to lookup in the dictionary
+ * @expected_type: (allow-none): a #GVariantType, or %NULL
+ *
+ * Looks up a value in a dictionary #GVariant.
+ *
+ * This function works with dictionaries of the type
+ * <literal>a{s*}</literal> (and equally well with type
+ * <literal>a{o*}</literal>, but we only further discuss the string case
+ * for sake of clarity).
+ *
+ * In the event that @dictionary has the type <literal>a{sv}</literal>,
+ * the @expected_type string specifies what type of value is expected to
+ * be inside of the variant.  If the value inside the variant has a
+ * different type then %NULL is returned.  In the event that @dictionary
+ * has a value type other than <literal>v</literal> then @expected_type
+ * must directly match the key type and it is used to unpack the value
+ * directly or an error occurs.
+ *
+ * In either case, if @key is not found in @dictionary, %NULL is
+ * returned.
+ *
+ * If the key is found and the value has the correct type, it is
+ * returned.  If @expected_type was specified then any non-%NULL return
+ * value will have this type.
+ *
+ * Returns: (transfer full): the value of the dictionary key, or %NULL
+ *
+ * Since: 2.28
+ */
+GVariant *
+g_variant_lookup_value (GVariant           *dictionary,
+                        const gchar        *key,
+                        const GVariantType *expected_type)
+{
+  GVariantIter iter;
+  GVariant *entry;
+  GVariant *value;
+
+  g_return_val_if_fail (g_variant_is_of_type (dictionary,
+                                              G_VARIANT_TYPE ("a{s*}")) ||
+                        g_variant_is_of_type (dictionary,
+                                              G_VARIANT_TYPE ("a{o*}")),
+                        NULL);
+
+  g_variant_iter_init (&iter, dictionary);
+
+  while ((entry = g_variant_iter_next_value (&iter)))
+    {
+      GVariant *entry_key;
+      gboolean matches;
+
+      entry_key = g_variant_get_child_value (entry, 0);
+      matches = strcmp (g_variant_get_string (entry_key, NULL), key) == 0;
+      g_variant_unref (entry_key);
+
+      if (matches)
+        break;
+
+      g_variant_unref (entry);
+    }
+
+  if (entry == NULL)
+    return NULL;
+
+  value = g_variant_get_child_value (entry, 1);
+  g_variant_unref (entry);
+
+  if (g_variant_is_of_type (value, G_VARIANT_TYPE_VARIANT))
+    {
+      GVariant *tmp;
+
+      tmp = g_variant_get_variant (value);
+      g_variant_unref (value);
+
+      if (expected_type && !g_variant_is_of_type (tmp, expected_type))
+        {
+          g_variant_unref (tmp);
+          tmp = NULL;
+        }
+
+      value = tmp;
+    }
+
+  g_return_val_if_fail (expected_type == NULL || value == NULL ||
+                        g_variant_is_of_type (value, expected_type), NULL);
+
+  return value;
+}
+
+/**
  * g_variant_get_fixed_array:
  * @value: a #GVariant array with fixed-sized elements
- * @n_elements: a pointer to the location to store the number of items
+ * @n_elements: (out): a pointer to the location to store the number of items
  * @element_size: the size of each element
  * @returns: (array length=n_elements): a pointer to the fixed array
  *
@@ -974,7 +1116,7 @@ g_variant_get_fixed_array (GVariant *value,
 /**
  * g_variant_new_string:
  * @string: a normal utf8 nul-terminated string
- * @returns: a floating reference to a new string #GVariant instance
+ * @returns: (transfer none): a floating reference to a new string #GVariant instance
  *
  * Creates a string #GVariant with the contents of @string.
  *
@@ -995,10 +1137,10 @@ g_variant_new_string (const gchar *string)
 /**
  * g_variant_new_object_path:
  * @object_path: a normal C nul-terminated string
- * @returns: a floating reference to a new object path #GVariant instance
+ * @returns: (transfer none): a floating reference to a new object path #GVariant instance
  *
- * Creates a DBus object path #GVariant with the contents of @string.
- * @string must be a valid DBus object path.  Use
+ * Creates a D-Bus object path #GVariant with the contents of @string.
+ * @string must be a valid D-Bus object path.  Use
  * g_variant_is_object_path() if you're not sure.
  *
  * Since: 2.24
@@ -1015,10 +1157,10 @@ g_variant_new_object_path (const gchar *object_path)
 /**
  * g_variant_is_object_path:
  * @string: a normal C nul-terminated string
- * @returns: %TRUE if @string is a DBus object path
+ * @returns: %TRUE if @string is a D-Bus object path
  *
- * Determines if a given string is a valid DBus object path.  You
- * should ensure that a string is a valid DBus object path before
+ * Determines if a given string is a valid D-Bus object path.  You
+ * should ensure that a string is a valid D-Bus object path before
  * passing it to g_variant_new_object_path().
  *
  * A valid object path starts with '/' followed by zero or more
@@ -1039,10 +1181,10 @@ g_variant_is_object_path (const gchar *string)
 /**
  * g_variant_new_signature:
  * @signature: a normal C nul-terminated string
- * @returns: a floating reference to a new signature #GVariant instance
+ * @returns: (transfer none): a floating reference to a new signature #GVariant instance
  *
- * Creates a DBus type signature #GVariant with the contents of
- * @string.  @string must be a valid DBus type signature.  Use
+ * Creates a D-Bus type signature #GVariant with the contents of
+ * @string.  @string must be a valid D-Bus type signature.  Use
  * g_variant_is_signature() if you're not sure.
  *
  * Since: 2.24
@@ -1059,13 +1201,13 @@ g_variant_new_signature (const gchar *signature)
 /**
  * g_variant_is_signature:
  * @string: a normal C nul-terminated string
- * @returns: %TRUE if @string is a DBus type signature
+ * @returns: %TRUE if @string is a D-Bus type signature
  *
- * Determines if a given string is a valid DBus type signature.  You
- * should ensure that a string is a valid DBus type signature before
+ * Determines if a given string is a valid D-Bus type signature.  You
+ * should ensure that a string is a valid D-Bus type signature before
  * passing it to g_variant_new_signature().
  *
- * DBus type signatures consist of zero or more definite #GVariantType
+ * D-Bus type signatures consist of zero or more definite #GVariantType
  * strings in sequence.
  *
  * Since: 2.24
@@ -1081,9 +1223,9 @@ g_variant_is_signature (const gchar *string)
 /**
  * g_variant_get_string:
  * @value: a string #GVariant instance
- * @length: (allow-none) (default NULL) (out): a pointer to a #gsize,
+ * @length: (allow-none) (default 0) (out): a pointer to a #gsize,
  *          to store the length
- * @returns: the constant string, utf8 encoded
+ * @returns: (transfer none): the constant string, utf8 encoded
  *
  * Returns the string value of a #GVariant instance with a string
  * type.  This includes the types %G_VARIANT_TYPE_STRING,
@@ -1160,8 +1302,8 @@ g_variant_get_string (GVariant *value,
 /**
  * g_variant_dup_string:
  * @value: a string #GVariant instance
- * @length: a pointer to a #gsize, to store the length
- * @returns: a newly allocated string, utf8 encoded
+ * @length: (out): a pointer to a #gsize, to store the length
+ * @returns: (transfer full): a newly allocated string, utf8 encoded
  *
  * Similar to g_variant_get_string() except that instead of returning
  * a constant string, the string is duplicated.
@@ -1183,7 +1325,7 @@ g_variant_dup_string (GVariant *value,
  * g_variant_new_strv:
  * @strv: (array length=length) (element-type utf8): an array of strings
  * @length: the length of @strv, or -1
- * @returns: a new floating #GVariant instance
+ * @returns: (transfer none): a new floating #GVariant instance
  *
  * Constructs an array of strings #GVariant from the given array of
  * strings.
@@ -1215,8 +1357,8 @@ g_variant_new_strv (const gchar * const *strv,
 /**
  * g_variant_get_strv:
  * @value: an array of strings #GVariant
- * @length: (allow-none): the length of the result, or %NULL
- * @returns: (array length=length) (transfer container): an array of constant
+ * @length: (out) (allow-none): the length of the result, or %NULL
+ * @returns: (array length=length zero-terminated=1) (transfer container): an array of constant
  * strings
  *
  * Gets the contents of an array of strings #GVariant.  This call
@@ -1265,8 +1407,8 @@ g_variant_get_strv (GVariant *value,
 /**
  * g_variant_dup_strv:
  * @value: an array of strings #GVariant
- * @length: (allow-none): the length of the result, or %NULL
- * @returns: (array length=length): an array of strings
+ * @length: (out) (allow-none): the length of the result, or %NULL
+ * @returns: (array length=length zero-terminated=1) (transfer full): an array of strings
  *
  * Gets the contents of an array of strings #GVariant.  This call
  * makes a deep copy; the return result should be released with
@@ -1312,8 +1454,8 @@ g_variant_dup_strv (GVariant *value,
 
 /**
  * g_variant_new_bytestring:
- * @string: a normal nul-terminated string in no particular encoding
- * @returns: a floating reference to a new bytestring #GVariant instance
+ * @string: (array zero-terminated=1): a normal nul-terminated string in no particular encoding
+ * @returns: (transfer none): a floating reference to a new bytestring #GVariant instance
  *
  * Creates an array-of-bytes #GVariant with the contents of @string.
  * This function is just like g_variant_new_string() except that the
@@ -1336,7 +1478,7 @@ g_variant_new_bytestring (const gchar *string)
 /**
  * g_variant_get_bytestring:
  * @value: an array-of-bytes #GVariant instance
- * @returns: the constant string
+ * @returns: (transfer none) (array zero-terminated=1): the constant string
  *
  * Returns the string value of a #GVariant instance with an
  * array-of-bytes type.  The string has no particular encoding.
@@ -1377,9 +1519,9 @@ g_variant_get_bytestring (GVariant *value)
 /**
  * g_variant_dup_bytestring:
  * @value: an array-of-bytes #GVariant instance
- * @length: (allow-none) (default NULL): a pointer to a #gsize, to store
+ * @length: (out) (allow-none) (default NULL): a pointer to a #gsize, to store
  *          the length (not including the nul terminator)
- * @returns: a newly allocated string
+ * @returns: (transfer full) (array zero-terminated=1): a newly allocated string
  *
  * Similar to g_variant_get_bytestring() except that instead of
  * returning a constant string, the string is duplicated.
@@ -1411,7 +1553,7 @@ g_variant_dup_bytestring (GVariant *value,
  * g_variant_new_bytestring_array:
  * @strv: (array length=length): an array of strings
  * @length: the length of @strv, or -1
- * @returns: a new floating #GVariant instance
+ * @returns: (transfer none): a new floating #GVariant instance
  *
  * Constructs an array of bytestring #GVariant from the given array of
  * strings.
@@ -1443,8 +1585,8 @@ g_variant_new_bytestring_array (const gchar * const *strv,
 /**
  * g_variant_get_bytestring_array:
  * @value: an array of array of bytes #GVariant ('aay')
- * @length: (allow-none): the length of the result, or %NULL
- * @returns: (array length=length): an array of constant strings
+ * @length: (out) (allow-none): the length of the result, or %NULL
+ * @returns: (array length=length) (transfer container): an array of constant strings
  *
  * Gets the contents of an array of array of bytes #GVariant.  This call
  * makes a shallow copy; the return result should be released with
@@ -1492,8 +1634,8 @@ g_variant_get_bytestring_array (GVariant *value,
 /**
  * g_variant_dup_bytestring_array:
  * @value: an array of array of bytes #GVariant ('aay')
- * @length: (allow-none): the length of the result, or %NULL
- * @returns: (array length=length): an array of strings
+ * @length: (out) (allow-none): the length of the result, or %NULL
+ * @returns: (array length=length) (transfer full): an array of strings
  *
  * Gets the contents of an array of array of bytes #GVariant.  This call
  * makes a deep copy; the return result should be released with
@@ -1640,9 +1782,9 @@ g_variant_is_container (GVariant *value)
  * @G_VARIANT_CLASS_DOUBLE: The #GVariant is a double precision floating 
  *                          point value.
  * @G_VARIANT_CLASS_STRING: The #GVariant is a normal string.
- * @G_VARIANT_CLASS_OBJECT_PATH: The #GVariant is a DBus object path 
+ * @G_VARIANT_CLASS_OBJECT_PATH: The #GVariant is a D-Bus object path 
  *                               string.
- * @G_VARIANT_CLASS_SIGNATURE: The #GVariant is a DBus signature string.
+ * @G_VARIANT_CLASS_SIGNATURE: The #GVariant is a D-Bus signature string.
  * @G_VARIANT_CLASS_VARIANT: The #GVariant is a variant.
  * @G_VARIANT_CLASS_MAYBE: The #GVariant is a maybe-typed value.
  * @G_VARIANT_CLASS_ARRAY: The #GVariant is an array.
@@ -1662,8 +1804,11 @@ g_variant_classify (GVariant *value)
 }
 
 /* Pretty printer {{{1 */
+/* This function is not introspectable because if @string is NULL, 
+   @returns is (transfer full), otherwise it is (transfer none), which
+   is not supported by GObjectIntrospection */
 /**
- * g_variant_print_string:
+ * g_variant_print_string: (skip)
  * @value: a #GVariant
  * @string: (allow-none) (default NULL): a #GString, or %NULL
  * @type_annotate: %TRUE if type information should be included in
@@ -2086,9 +2231,11 @@ g_variant_print_string (GVariant *value,
  * @value: a #GVariant
  * @type_annotate: %TRUE if type information should be included in
  *                 the output
- * @returns: a newly-allocated string holding the result.
+ * @returns: (transfer full): a newly-allocated string holding the result.
  *
  * Pretty-prints @value in the format understood by g_variant_parse().
+ *
+ * The format is described <link linkend='gvariant-text'>here</link>.
  *
  * If @type_annotate is %TRUE, then type information is included in
  * the output.
@@ -2398,7 +2545,7 @@ struct heap_iter
 /**
  * g_variant_iter_new:
  * @value: a container #GVariant
- * @returns: a new heap-allocated #GVariantIter
+ * @returns: (transfer full): a new heap-allocated #GVariantIter
  *
  * Creates a heap-allocated #GVariantIter for iterating over the items
  * in @value.
@@ -2426,7 +2573,7 @@ g_variant_iter_new (GVariant *value)
 }
 
 /**
- * g_variant_iter_init:
+ * g_variant_iter_init: (skip)
  * @iter: a pointer to a #GVariantIter
  * @value: a container #GVariant
  * @returns: the number of items in @value
@@ -2456,7 +2603,7 @@ g_variant_iter_init (GVariantIter *iter,
 /**
  * g_variant_iter_copy:
  * @iter: a #GVariantIter
- * @returns: a new heap-allocated #GVariantIter
+ * @returns: (transfer full): a new heap-allocated #GVariantIter
  *
  * Creates a new heap-allocated #GVariantIter to iterate over the
  * container that was being iterated over by @iter.  Iteration begins on
@@ -2507,7 +2654,7 @@ g_variant_iter_n_children (GVariantIter *iter)
 
 /**
  * g_variant_iter_free:
- * @iter: a heap-allocated #GVariantIter
+ * @iter: (transfer full): a heap-allocated #GVariantIter
  *
  * Frees a heap-allocated #GVariantIter.  Only call this function on
  * iterators that were returned by g_variant_iter_new() or
@@ -2529,7 +2676,7 @@ g_variant_iter_free (GVariantIter *iter)
 /**
  * g_variant_iter_next_value:
  * @iter: a #GVariantIter
- * @returns: (allow-none): a #GVariant, or %NULL
+ * @returns: (allow-none) (transfer full): a #GVariant, or %NULL
  *
  * Gets the next item in the container.  If no more items remain then
  * %NULL is returned.
@@ -2653,7 +2800,7 @@ struct heap_builder
 /**
  * g_variant_builder_new:
  * @type: a container type
- * @returns: a #GVariantBuilder
+ * @returns: (transfer full): a #GVariantBuilder
  *
  * Allocates and initialises a new #GVariantBuilder.
  *
@@ -2682,7 +2829,7 @@ g_variant_builder_new (const GVariantType *type)
 
 /**
  * g_variant_builder_unref:
- * @builder: a #GVariantBuilder allocated by g_variant_builder_new()
+ * @builder: (transfer full): a #GVariantBuilder allocated by g_variant_builder_new()
  *
  * Decreases the reference count on @builder.
  *
@@ -2711,7 +2858,7 @@ g_variant_builder_unref (GVariantBuilder *builder)
 /**
  * g_variant_builder_ref:
  * @builder: a #GVariantBuilder allocated by g_variant_builder_new()
- * @returns: a new reference to @builder
+ * @returns: (transfer full): a new reference to @builder
  *
  * Increases the reference count on @builder.
  *
@@ -2731,7 +2878,7 @@ g_variant_builder_ref (GVariantBuilder *builder)
 }
 
 /**
- * g_variant_builder_clear:
+ * g_variant_builder_clear: (skip)
  * @builder: a #GVariantBuilder
  *
  * Releases all memory associated with a #GVariantBuilder without
@@ -2742,7 +2889,7 @@ g_variant_builder_ref (GVariantBuilder *builder)
  * through.  This function need not be called if you call
  * g_variant_builder_end() and it also doesn't need to be called on
  * builders allocated with g_variant_builder_new (see
- * g_variant_builder_free() for that).
+ * g_variant_builder_unref() for that).
  *
  * This function leaves the #GVariantBuilder structure set to all-zeros.
  * It is valid to call this function on either an initialised
@@ -2779,7 +2926,7 @@ g_variant_builder_clear (GVariantBuilder *builder)
 }
 
 /**
- * g_variant_builder_init:
+ * g_variant_builder_init: (skip)
  * @builder: a #GVariantBuilder
  * @type: a container type
  *
@@ -2913,6 +3060,9 @@ g_variant_builder_make_room (struct stack_builder *builder)
  * putting different types of items into an array, putting the wrong
  * types or number of items in a tuple, putting more than one value into
  * a variant, etc.
+ *
+ * If @value is a floating reference (see g_variant_ref_sink()),
+ * the @builder instance takes ownership of @value.
  *
  * Since: 2.24
  **/
@@ -3496,33 +3646,58 @@ g_variant_valist_new_nnp (const gchar **str,
   switch (*(*str)++)
     {
     case 'a':
+      if (ptr != NULL)
+        {
+          const GVariantType *type;
+          GVariant *value;
+
+          value = g_variant_builder_end (ptr);
+          type = g_variant_get_type (value);
+
+          if G_UNLIKELY (!g_variant_type_is_array (type))
+            g_error ("g_variant_new: expected array GVariantBuilder but "
+                     "the built value has type `%s'",
+                     g_variant_get_type_string (value));
+
+          type = g_variant_type_element (type);
+
+          if G_UNLIKELY (!g_variant_type_is_subtype_of (type, (GVariantType *) *str))
+            g_error ("g_variant_new: expected GVariantBuilder array element "
+                     "type `%s' but the built value has element type `%s'",
+                     g_variant_type_dup_string ((GVariantType *) *str),
+                     g_variant_get_type_string (value) + 1);
+
+          g_variant_type_string_scan (*str, NULL, str);
+
+          return value;
+        }
+      else
+
+        /* special case: NULL pointer for empty array */
+        {
+          const GVariantType *type = (GVariantType *) *str;
+
+          g_variant_type_string_scan (*str, NULL, str);
+
+          if G_UNLIKELY (!g_variant_type_is_definite (type))
+            g_error ("g_variant_new: NULL pointer given with indefinite "
+                     "array type; unable to determine which type of empty "
+                     "array to construct.");
+
+          return g_variant_new_array (type, NULL, 0);
+        }
+
+    case 's':
       {
-        const GVariantType *type;
         GVariant *value;
 
-        value = g_variant_builder_end (ptr);
-        type = g_variant_get_type (value);
+        value = g_variant_new_string (ptr);
 
-        if G_UNLIKELY (!g_variant_type_is_array (type))
-          g_error ("g_variant_new: expected array GVariantBuilder but "
-                   "the built value has type `%s'",
-                   g_variant_get_type_string (value));
-
-        type = g_variant_type_element (type);
-
-        if G_UNLIKELY (!g_variant_type_is_subtype_of (type, (GVariantType *) *str))
-          g_error ("g_variant_new: expected GVariantBuilder array element "
-                   "type `%s' but the built value has element type `%s'",
-                   g_variant_type_dup_string ((GVariantType *) *str),
-                   g_variant_get_type_string (value) + 1);
-
-        g_variant_type_string_scan (*str, NULL, str);
+        if (value == NULL)
+          value = g_variant_new_string ("[Invalid UTF-8]");
 
         return value;
       }
-
-    case 's':
-      return g_variant_new_string (ptr);
 
     case 'o':
       return g_variant_new_object_path (ptr);
@@ -3986,7 +4161,7 @@ g_variant_valist_get (const gchar **str,
 
 /* User-facing API {{{2 */
 /**
- * g_variant_new:
+ * g_variant_new: (skip)
  * @format_string: a #GVariant format string
  * @...: arguments, as per @format_string
  * @returns: a new floating #GVariant instance
@@ -4027,7 +4202,7 @@ g_variant_new (const gchar *format_string,
 }
 
 /**
- * g_variant_new_va:
+ * g_variant_new_va: (skip)
  * @format_string: a string that is prefixed with a format string
  * @endptr: (allow-none) (default NULL): location to store the end pointer,
  *          or %NULL
@@ -4089,7 +4264,7 @@ g_variant_new_va (const gchar  *format_string,
 }
 
 /**
- * g_variant_get:
+ * g_variant_get: (skip)
  * @value: a #GVariant instance
  * @format_string: a #GVariant format string
  * @...: arguments, as per @format_string
@@ -4127,7 +4302,7 @@ g_variant_get (GVariant    *value,
 }
 
 /**
- * g_variant_get_va:
+ * g_variant_get_va: (skip)
  * @value: a #GVariant
  * @format_string: a string that is prefixed with a format string
  * @endptr: (allow-none) (default NULL): location to store the end pointer,
@@ -4179,7 +4354,7 @@ g_variant_get_va (GVariant     *value,
 /* Varargs-enabled Utility Functions {{{1 */
 
 /**
- * g_variant_builder_add:
+ * g_variant_builder_add: (skp)
  * @builder: a #GVariantBuilder
  * @format_string: a #GVariant varargs format string
  * @...: arguments, as per @format_string
@@ -4229,7 +4404,7 @@ g_variant_builder_add (GVariantBuilder *builder,
 }
 
 /**
- * g_variant_get_child:
+ * g_variant_get_child: (skip)
  * @value: a container #GVariant
  * @index_: the index of the child to deconstruct
  * @format_string: a #GVariant format string
@@ -4262,7 +4437,7 @@ g_variant_get_child (GVariant    *value,
 }
 
 /**
- * g_variant_iter_next:
+ * g_variant_iter_next: (skip)
  * @iter: a #GVariantIter
  * @format_string: a GVariant format string
  * @...: the arguments to unpack the value into
@@ -4339,7 +4514,7 @@ g_variant_iter_next (GVariantIter *iter,
 }
 
 /**
- * g_variant_iter_loop:
+ * g_variant_iter_loop: (skip)
  * @iter: a #GVariantIter
  * @format_string: a GVariant format string
  * @...: the arguments to unpack the value into
@@ -4509,7 +4684,7 @@ g_variant_deep_copy (GVariant *value)
 /**
  * g_variant_get_normal_form:
  * @value: a #GVariant
- * @returns: a trusted #GVariant
+ * @returns: (transfer full): a trusted #GVariant
  *
  * Gets a #GVariant instance that has the same value as @value and is
  * trusted to be in normal form.
@@ -4547,7 +4722,7 @@ g_variant_get_normal_form (GVariant *value)
 /**
  * g_variant_byteswap:
  * @value: a #GVariant
- * @returns: the byteswapped form of @value
+ * @returns: (transfer full): the byteswapped form of @value
  *
  * Performs a byteswapping operation on the contents of @value.  The
  * result is that all multi-byte numeric data contained in @value is
@@ -4604,12 +4779,12 @@ g_variant_byteswap (GVariant *value)
 /**
  * g_variant_new_from_data:
  * @type: a definite #GVariantType
- * @data: the serialised data
+ * @data: (array length=size) (element-type guint8): the serialised data
  * @size: the size of @data
  * @trusted: %TRUE if @data is definitely in normal form
- * @notify: function to call when @data is no longer needed
+ * @notify: (scope async): function to call when @data is no longer needed
  * @user_data: data for @notify
- * @returns: a new floating #GVariant of type @type
+ * @returns: (transfer none): a new floating #GVariant of type @type
  *
  * Creates a new #GVariant instance from serialised data.
  *

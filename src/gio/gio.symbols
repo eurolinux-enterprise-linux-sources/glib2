@@ -24,6 +24,46 @@ g_vfs_get_local
 #endif
 #endif
 
+#if IN_HEADER(__G_APPLICATION_H__)
+#if IN_FILE(__G_APPLICATION_C__)
+g_application_get_type G_GNUC_CONST
+g_application_activate
+g_application_flags_get_type
+g_application_get_application_id
+g_application_get_flags
+g_application_get_inactivity_timeout
+g_application_get_is_registered
+g_application_get_is_remote
+g_application_hold
+g_application_id_is_valid
+g_application_new
+g_application_open
+g_application_register
+g_application_release
+g_application_run
+g_application_set_action_group
+g_application_set_application_id
+g_application_set_flags
+g_application_set_inactivity_timeout
+#endif
+#endif
+
+#if IN_HEADER(__G_APPLICATION_COMMAND_LINE_H__)
+#if IN_FILE(__G_APPLICATION_COMMAND_LINE_C__)
+g_application_command_line_get_arguments
+g_application_command_line_get_cwd
+g_application_command_line_get_environ
+g_application_command_line_getenv
+g_application_command_line_get_exit_status
+g_application_command_line_get_is_remote
+g_application_command_line_get_platform_data
+g_application_command_line_get_type
+g_application_command_line_print
+g_application_command_line_printerr
+g_application_command_line_set_exit_status
+#endif
+#endif
+
 #if IN_HEADER(__G_APP_INFO_H__)
 #if IN_FILE(__G_APP_INFO_C__)
 g_app_info_get_type G_GNUC_CONST
@@ -44,6 +84,7 @@ g_app_info_launch_uris
 g_app_info_should_show
 g_app_info_set_as_default_for_type
 g_app_info_set_as_default_for_extension
+g_app_info_set_as_last_used_for_type
 g_app_info_add_supports_type
 g_app_info_can_remove_supports_type
 g_app_info_remove_supports_type
@@ -63,6 +104,8 @@ g_app_info_get_all
 g_app_info_get_all_for_type
 g_app_info_get_default_for_type
 g_app_info_get_default_for_uri_scheme
+g_app_info_get_fallback_for_type
+g_app_info_get_recommended_for_type
 g_app_info_reset_type_associations
 #endif
 #endif
@@ -76,6 +119,8 @@ g_app_info_get_all
 g_app_info_get_all_for_type
 g_app_info_get_default_for_type
 g_app_info_get_default_for_uri_scheme
+g_app_info_get_fallback_for_type
+g_app_info_get_recommended_for_type
 g_app_info_reset_type_associations
 #endif
 #endif
@@ -88,11 +133,12 @@ g_desktop_app_info_new_from_filename
 g_desktop_app_info_new_from_keyfile
 g_desktop_app_info_new
 g_desktop_app_info_get_filename
-g_desktop_app_info_get_type G_GNUC_CONST
 g_desktop_app_info_get_is_hidden
-g_desktop_app_info_set_desktop_env
+g_desktop_app_info_get_type G_GNUC_CONST
+g_desktop_app_info_launch_uris_as_manager
 g_desktop_app_info_lookup_get_type G_GNUC_CONST
 g_desktop_app_info_lookup_get_default_for_uri_scheme
+g_desktop_app_info_set_desktop_env
 #endif
 #endif
 #endif
@@ -151,6 +197,7 @@ g_cancellable_reset
 g_cancellable_cancel
 g_cancellable_connect
 g_cancellable_disconnect
+g_cancellable_source_new
 #endif
 #endif
 
@@ -620,6 +667,8 @@ g_io_stream_is_closed
 g_io_stream_has_pending
 g_io_stream_set_pending
 g_io_stream_clear_pending
+g_io_stream_splice_async
+g_io_stream_splice_finish
 #endif
 #endif
 
@@ -752,6 +801,7 @@ g_simple_async_result_get_type  G_GNUC_CONST
 g_simple_async_result_new
 g_simple_async_result_new_error
 g_simple_async_result_new_from_error
+g_simple_async_result_new_take_error
 g_simple_async_result_set_op_res_gpointer
 g_simple_async_result_get_op_res_gpointer
 g_simple_async_result_set_op_res_gssize
@@ -764,12 +814,14 @@ g_simple_async_result_complete
 g_simple_async_result_complete_in_idle
 g_simple_async_result_run_in_thread
 g_simple_async_result_set_from_error
+g_simple_async_result_take_error
 g_simple_async_result_propagate_error
 g_simple_async_result_set_error
 g_simple_async_result_set_error_va
 g_simple_async_result_is_valid
 g_simple_async_report_error_in_idle
 g_simple_async_report_gerror_in_idle
+g_simple_async_report_take_gerror_in_idle
 #endif
 #endif
 
@@ -987,6 +1039,7 @@ g_file_query_info_flags_get_type G_GNUC_CONST
 g_file_type_get_type G_GNUC_CONST
 g_filesystem_preview_type_get_type G_GNUC_CONST
 g_io_error_enum_get_type G_GNUC_CONST
+g_io_stream_splice_flags_get_type G_GNUC_CONST
 g_mount_mount_flags_get_type G_GNUC_CONST
 g_mount_operation_result_get_type G_GNUC_CONST
 g_drive_start_flags_get_type G_GNUC_CONST
@@ -1021,6 +1074,9 @@ g_dbus_signal_flags_get_type G_GNUC_CONST
 g_dbus_send_message_flags_get_type G_GNUC_CONST
 g_credentials_type_get_type G_GNUC_CONST
 g_dbus_message_byte_order_get_type G_GNUC_CONST
+g_tls_authentication_mode_get_type G_GNUC_CONST
+g_tls_certificate_flags_get_type G_GNUC_CONST
+g_tls_rehandshake_mode_get_type G_GNUC_CONST
 #endif
 #endif
 
@@ -1032,6 +1088,7 @@ g_emblemed_icon_new
 g_emblemed_icon_get_icon
 g_emblemed_icon_get_emblems
 g_emblemed_icon_add_emblem
+g_emblemed_icon_clear_emblems
 #endif
 #endif
 
@@ -1325,6 +1382,7 @@ g_socket_control_message_serialize
 #if IN_HEADER(__G_SOCKET_CLIENT_H__)
 #if IN_FILE(__G_SOCKET_CLIENT_C__)
 g_socket_client_get_type G_GNUC_CONST
+g_socket_client_add_application_proxy
 g_socket_client_connect
 g_socket_client_connect_async
 g_socket_client_connect_finish
@@ -1337,20 +1395,23 @@ g_socket_client_connect_to_service_finish
 g_socket_client_connect_to_uri
 g_socket_client_connect_to_uri_async
 g_socket_client_connect_to_uri_finish
+g_socket_client_get_enable_proxy
 g_socket_client_get_family
 g_socket_client_get_local_address
 g_socket_client_get_protocol
 g_socket_client_get_socket_type
 g_socket_client_get_timeout
-g_socket_client_get_enable_proxy
+g_socket_client_get_tls
+g_socket_client_get_tls_validation_flags
 g_socket_client_new
+g_socket_client_set_enable_proxy
 g_socket_client_set_family
 g_socket_client_set_local_address
 g_socket_client_set_protocol
 g_socket_client_set_socket_type
 g_socket_client_set_timeout
-g_socket_client_set_enable_proxy
-g_socket_client_add_application_proxy
+g_socket_client_set_tls
+g_socket_client_set_tls_validation_flags
 #endif
 #endif
 
@@ -1486,18 +1547,26 @@ g_settings_backend_path_changed
 g_settings_backend_path_writable_changed
 g_settings_backend_writable_changed
 g_settings_backend_changed_tree
-#endif
+g_settings_backend_get_default
 #endif
 
-#if IN_HEADER(__G_SETTINGS_BACKEND_H__)
 #if IN_FILE(__G_KEYFILE_SETTINGS_BACKEND_C__)
 g_keyfile_settings_backend_new
+#endif
+
+#if IN_FILE(__G_MEMORY_SETTINGS_BACKEND_C__)
+g_memory_settings_backend_new
+#endif
+
+#if IN_FILE(__G_NULL_SETTINGS_BACKEND_C__)
+g_null_settings_backend_new
 #endif
 #endif
 
 #if IN_HEADER(__G_SETTINGS_H__)
 #if IN_FILE(__G_SETTINGS_SCHEMA_C__)
 g_settings_list_schemas
+g_settings_list_relocatable_schemas
 #endif
 
 #if IN_FILE(__G_SETTINGS_C__)
@@ -1539,6 +1608,8 @@ g_settings_sync
 g_settings_list_keys
 g_settings_list_children
 g_settings_get_mapped
+g_settings_get_range
+g_settings_range_check
 #endif
 #endif
 
@@ -1854,5 +1925,153 @@ g_permission_release_finish
 #if IN_FILE(__G_SIMPLE_PERMISSION_C__)
 g_simple_permission_get_type
 g_simple_permission_new
+#endif
+#endif
+
+#if IN_HEADER(__G_ACTION_GROUP_H__)
+#if IN_FILE(__G_ACTION_GROUP_C__)
+g_action_group_action_added
+g_action_group_action_enabled_changed
+g_action_group_action_removed
+g_action_group_action_state_changed
+g_action_group_activate_action
+g_action_group_get_action_enabled
+g_action_group_get_action_parameter_type
+g_action_group_get_action_state
+g_action_group_get_action_state_hint
+g_action_group_get_action_state_type
+g_action_group_get_type
+g_action_group_has_action
+g_action_group_list_actions
+g_action_group_change_action_state
+#endif
+#endif
+
+#if IN_HEADER(__G_ACTION_H__)
+#if IN_FILE(__G_ACTION_C__)
+g_action_activate
+g_action_get_enabled
+g_action_get_name
+g_action_get_parameter_type
+g_action_get_state
+g_action_get_state_hint
+g_action_get_state_type
+g_action_get_type
+g_action_set_state
+#endif
+#endif
+
+#if IN_HEADER(__G_SIMPLE_ACTION_GROUP_H__)
+#if IN_FILE(__G_SIMPLE_ACTION_GROUP_C__)
+g_simple_action_group_get_type G_GNUC_CONST
+g_simple_action_group_insert
+g_simple_action_group_lookup
+g_simple_action_group_new
+g_simple_action_group_remove
+#endif
+#endif
+
+#if IN_HEADER(__G_SIMPLE_ACTION_H__)
+#if IN_FILE(__G_SIMPLE_ACTION_C__)
+g_simple_action_get_parameter_type
+g_simple_action_get_type
+g_simple_action_new
+g_simple_action_new_stateful
+g_simple_action_set_enabled
+#endif
+#endif
+
+#if IN_HEADER(__G_POLLABLE_INPUT_STREAM_H__)
+#if IN_FILE(__G_POLLABLE_INPUT_STREAM_C__)
+g_pollable_input_stream_get_type G_GNUC_CONST
+g_pollable_input_stream_can_poll
+g_pollable_input_stream_create_source
+g_pollable_input_stream_is_readable
+g_pollable_input_stream_read_nonblocking
+g_pollable_source_new
+#endif
+#endif
+
+#if IN_HEADER(__G_POLLABLE_OUTPUT_STREAM_H__)
+#if IN_FILE(__G_POLLABLE_OUTPUT_STREAM_C__)
+g_pollable_output_stream_get_type G_GNUC_CONST
+g_pollable_output_stream_can_poll
+g_pollable_output_stream_create_source
+g_pollable_output_stream_is_writable
+g_pollable_output_stream_write_nonblocking
+#endif
+#endif
+
+#if IN_HEADER(__G_TCP_WRAPPER_CONNECTION_H__)
+#if IN_FILE(__G_TCP_WRAPPER_CONNECTION_C__)
+g_tcp_wrapper_connection_get_type G_GNUC_CONST
+g_tcp_wrapper_connection_get_base_io_stream
+g_tcp_wrapper_connection_new
+#endif
+#endif
+
+#if IN_HEADER(__G_TLS_BACKEND_H__)
+#if IN_FILE(__G_TLS_BACKEND_C__)
+g_tls_backend_get_certificate_type
+g_tls_backend_get_client_connection_type
+g_tls_backend_get_default
+g_tls_backend_get_server_connection_type
+g_tls_backend_get_type G_GNUC_CONST
+g_tls_backend_supports_tls
+g_tls_error_get_type G_GNUC_CONST
+g_tls_error_quark
+#endif
+#endif
+
+#if IN_HEADER(__G_TLS_CERTIFICATE_H__)
+#if IN_FILE(__G_TLS_CERTIFICATE_C__)
+g_tls_certificate_get_issuer
+g_tls_certificate_get_type G_GNUC_CONST
+g_tls_certificate_list_new_from_file
+g_tls_certificate_new_from_file
+g_tls_certificate_new_from_files
+g_tls_certificate_new_from_pem
+g_tls_certificate_verify
+#endif
+#endif
+
+#if IN_HEADER(__G_TLS_CONNECTION_H__)
+#if IN_FILE(__G_TLS_CONNECTION_C__)
+g_tls_connection_emit_accept_certificate
+g_tls_connection_get_certificate
+g_tls_connection_get_peer_certificate
+g_tls_connection_get_peer_certificate_errors
+g_tls_connection_get_rehandshake_mode
+g_tls_connection_get_require_close_notify
+g_tls_connection_get_use_system_certdb
+g_tls_connection_get_type G_GNUC_CONST
+g_tls_connection_handshake
+g_tls_connection_handshake_async
+g_tls_connection_handshake_finish
+g_tls_connection_set_certificate
+g_tls_connection_set_rehandshake_mode
+g_tls_connection_set_require_close_notify
+g_tls_connection_set_use_system_certdb
+#endif
+#endif
+
+#if IN_HEADER(__G_TLS_CLIENT_CONNECTION_H__)
+#if IN_FILE(__G_TLS_CLIENT_CONNECTION_C__)
+g_tls_client_connection_get_accepted_cas
+g_tls_client_connection_get_server_identity
+g_tls_client_connection_get_type G_GNUC_CONST
+g_tls_client_connection_get_use_ssl3
+g_tls_client_connection_get_validation_flags
+g_tls_client_connection_new
+g_tls_client_connection_set_server_identity
+g_tls_client_connection_set_use_ssl3
+g_tls_client_connection_set_validation_flags
+#endif
+#endif
+
+#if IN_HEADER(__G_TLS_SERVER_CONNECTION_H__)
+#if IN_FILE(__G_TLS_SERVER_CONNECTION_C__)
+g_tls_server_connection_get_type G_GNUC_CONST
+g_tls_server_connection_new
 #endif
 #endif

@@ -257,6 +257,7 @@ GParameter
 g_object_ref
 g_object_unref
 g_object_ref_sink
+g_clear_object
 GInitiallyUnowned
 GInitiallyUnownedClass
 G_TYPE_INITIALLY_UNOWNED
@@ -375,6 +376,7 @@ g_array_get_type
 g_byte_array_get_type
 g_ptr_array_get_type
 g_error_get_type
+g_date_time_get_type
 g_variant_get_gtype
 g_variant_type_get_gtype
 </SECTION>
@@ -789,6 +791,7 @@ g_signal_remove_emission_hook
 g_signal_parse_name
 g_signal_get_invocation_hint
 g_signal_type_cclosure_new
+g_signal_accumulator_first_wins
 g_signal_accumulator_true_handled
 <SUBSECTION Private>
 g_signal_handlers_destroy
@@ -826,6 +829,7 @@ g_closure_set_marshal
 g_closure_add_marshal_guards
 g_closure_set_meta_marshal
 g_source_set_closure
+g_source_set_dummy_callback
 G_TYPE_IO_CHANNEL
 G_TYPE_IO_CONDITION
 

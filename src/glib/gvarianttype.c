@@ -31,19 +31,19 @@
 
 
 /**
- * SECTION: gvarianttype
+ * SECTION:gvarianttype
  * @title: GVariantType
  * @short_description: introduction to the GVariant type system
  * @see_also: #GVariantType, #GVariant
  *
  * This section introduces the GVariant type system.  It is based, in
- * large part, on the DBus type system, with two major changes and some minor
+ * large part, on the D-Bus type system, with two major changes and some minor
  * lifting of restrictions.  The <ulink
  * url='http://dbus.freedesktop.org/doc/dbus-specification.html'>DBus
  * specification</ulink>, therefore, provides a significant amount of
  * information that is useful when working with GVariant.
  *
- * The first major change with respect to the DBus type system is the
+ * The first major change with respect to the D-Bus type system is the
  * introduction of maybe (or "nullable") types.  Any type in GVariant can be
  * converted to a maybe type, in which case, "nothing" (or "null") becomes a
  * valid value.  Maybe types have been added by introducing the
@@ -51,8 +51,8 @@
  *
  * The second major change is that the GVariant type system supports the
  * concept of "indefinite types" -- types that are less specific than
- * the normal types found in DBus.  For example, it is possible to speak
- * of "an array of any type" in GVariant, where the DBus type system
+ * the normal types found in D-Bus.  For example, it is possible to speak
+ * of "an array of any type" in GVariant, where the D-Bus type system
  * would require you to speak of "an array of integers" or "an array of
  * strings".  Indefinite types have been added by introducing the
  * characters "<literal>*</literal>", "<literal>?</literal>" and
@@ -62,15 +62,15 @@
  * types are lifted along with the restriction that dictionary entries
  * may only appear nested inside of arrays.
  *
- * Just as in DBus, GVariant types are described with strings ("type
+ * Just as in D-Bus, GVariant types are described with strings ("type
  * strings").  Subject to the differences mentioned above, these strings
- * are of the same form as those found in DBus.  Note, however: DBus
+ * are of the same form as those found in DBus.  Note, however: D-Bus
  * always works in terms of messages and therefore individual type
  * strings appear nowhere in its interface.  Instead, "signatures"
  * are a concatenation of the strings of the type of each argument in a
  * message.  GVariant deals with single values directly so GVariant type
  * strings always describe the type of exactly one value.  This means
- * that a DBus signature string is generally not a valid GVariant type
+ * that a D-Bus signature string is generally not a valid GVariant type
  * string -- except in the case that it is the signature of a message
  * containing exactly one argument.
  *
@@ -79,11 +79,12 @@
  * indefinite type as its type, but values can exist that have types
  * that are subtypes of indefinite types.  That is to say,
  * g_variant_get_type() will never return an indefinite type, but
- * calling g_variant_is_a() with an indefinite type may return %TRUE.
- * For example, you can not have a value that represents "an array of no
- * particular type", but you can have an "array of integers" which
- * certainly matches the type of "an array of no particular type", since
- * "array of integers" is a subtype of "array of no particular type".
+ * calling g_variant_is_of_type() with an indefinite type may return
+ * %TRUE.  For example, you can not have a value that represents "an
+ * array of no particular type", but you can have an "array of integers"
+ * which certainly matches the type of "an array of no particular type",
+ * since "array of integers" is a subtype of "array of no particular
+ * type".
  *
  * This is similar to how instances of abstract classes may not
  * directly exist in other type systems, but instances of their
@@ -281,7 +282,7 @@
  *       <para>
  *        the type string of %G_VARIANT_TYPE_HANDLE; a signed 32 bit
  *        value that, by convention, is used as an index into an array
- *        of file descriptors that are sent alongside a DBus message.
+ *        of file descriptors that are sent alongside a D-Bus message.
  *       </para>
  *      </entry>
  *     </row>
@@ -319,7 +320,7 @@
  *      <entry>
  *       <para>
  *        the type string of %G_VARIANT_TYPE_OBJECT_PATH; a string in
- *        the form of a DBus object path.
+ *        the form of a D-Bus object path.
  *       </para>
  *      </entry>
  *     </row>
@@ -332,7 +333,7 @@
  *      <entry>
  *       <para>
  *        the type string of %G_VARIANT_TYPE_STRING; a string in the
- *        form of a DBus type signature.
+ *        form of a D-Bus type signature.
  *       </para>
  *      </entry>
  *     </row>
@@ -615,7 +616,7 @@ g_variant_type_free (GVariantType *type)
 /**
  * g_variant_type_copy:
  * @type: a #GVariantType
- * @returns: a new #GVariantType
+ * @returns: (transfer full): a new #GVariantType
  *
  * Makes a copy of a #GVariantType.  It is appropriate to call
  * g_variant_type_free() on the return value.  @type may not be %NULL.
@@ -642,7 +643,7 @@ g_variant_type_copy (const GVariantType *type)
 /**
  * g_variant_type_new:
  * @type_string: a valid GVariant type string
- * @returns: a new #GVariantType
+ * @returns: (transfer full): a new #GVariantType
  *
  * Creates a new #GVariantType corresponding to the type string given
  * by @type_string.  It is appropriate to call g_variant_type_free() on
@@ -699,8 +700,12 @@ g_variant_type_get_string_length (const GVariantType *type)
   return index;
 }
 
+/*
+  This function is not introspectable, it returns something that
+  is not an array and neither a string
+*/
 /**
- * g_variant_type_peek_string:
+ * g_variant_type_peek_string: (skip)
  * @type: a #GVariantType
  * @returns: the corresponding type string (not nul-terminated)
  *
@@ -723,7 +728,7 @@ g_variant_type_peek_string (const GVariantType *type)
 /**
  * g_variant_type_dup_string:
  * @type: a #GVariantType
- * @returns: the corresponding type string
+ * @returns: (transfer full): the corresponding type string
  *
  * Returns a newly-allocated copy of the type string corresponding to
  * @type.  The returned string is nul-terminated.  It is appropriate to
@@ -977,7 +982,7 @@ g_variant_type_is_variant (const GVariantType *type)
 
 /**
  * g_variant_type_hash:
- * @type: a #GVariantType
+ * @type: (type GVariantType): a #GVariantType
  * @returns: the hash value
  *
  * Hashes @type.
@@ -1009,8 +1014,8 @@ g_variant_type_hash (gconstpointer type)
 
 /**
  * g_variant_type_equal:
- * @type1: a #GVariantType
- * @type2: a #GVariantType
+ * @type1: (type GVariantType): a #GVariantType
+ * @type2: (type GVariantType): a #GVariantType
  * @returns: %TRUE if @type1 and @type2 are exactly equal
  *
  * Compares @type1 and @type2 for equality.
@@ -1128,7 +1133,7 @@ g_variant_type_is_subtype_of (const GVariantType *type,
 /**
  * g_variant_type_element:
  * @type: an array or maybe #GVariantType
- * @returns: the element type of @type
+ * @returns: (transfer none): the element type of @type
  *
  * Determines the element type of an array or maybe type.
  *
@@ -1153,7 +1158,7 @@ g_variant_type_element (const GVariantType *type)
 /**
  * g_variant_type_first:
  * @type: a tuple or dictionary entry #GVariantType
- * @returns: the first item type of @type, or %NULL
+ * @returns: (transfer none): the first item type of @type, or %NULL
  *
  * Determines the first item type of a tuple or dictionary entry
  * type.
@@ -1191,7 +1196,7 @@ g_variant_type_first (const GVariantType *type)
 /**
  * g_variant_type_next:
  * @type: a #GVariantType from a previous call
- * @returns: the next #GVariantType after @type, or %NULL
+ * @returns: (transfer none): the next #GVariantType after @type, or %NULL
  *
  * Determines the next item type of a tuple or dictionary entry
  * type.
@@ -1258,7 +1263,7 @@ g_variant_type_n_items (const GVariantType *type)
 /**
  * g_variant_type_key:
  * @type: a dictionary entry #GVariantType
- * @returns: the key type of the dictionary entry
+ * @returns: (transfer none): the key type of the dictionary entry
  *
  * Determines the key type of a dictionary entry type.
  *
@@ -1284,7 +1289,7 @@ g_variant_type_key (const GVariantType *type)
 /**
  * g_variant_type_value:
  * @type: a dictionary entry #GVariantType
- * @returns: the value type of the dictionary entry
+ * @returns: (transfer none): the value type of the dictionary entry
  *
  * Determines the value type of a dictionary entry type.
  *
@@ -1307,9 +1312,9 @@ g_variant_type_value (const GVariantType *type)
 
 /**
  * g_variant_type_new_tuple:
- * @items: an array of #GVariantTypes, one for each item
+ * @items: (array length=length): an array of #GVariantTypes, one for each item
  * @length: the length of @items, or -1
- * @returns: a new tuple #GVariantType
+ * @returns: (transfer full): a new tuple #GVariantType
  *
  * Constructs a new tuple type, from @items.
  *
@@ -1390,7 +1395,7 @@ g_variant_type_new_tuple (const GVariantType * const *items,
 /**
  * g_variant_type_new_array:
  * @element: a #GVariantType
- * @returns: a new array #GVariantType
+ * @returns: (transfer full): a new array #GVariantType
  *
  * Constructs the type corresponding to an array of elements of the
  * type @type.
@@ -1419,7 +1424,7 @@ g_variant_type_new_array (const GVariantType *element)
 /**
  * g_variant_type_new_maybe:
  * @element: a #GVariantType
- * @returns: a new maybe #GVariantType
+ * @returns: (transfer full): a new maybe #GVariantType
  *
  * Constructs the type corresponding to a maybe instance containing
  * type @type or Nothing.
@@ -1449,7 +1454,7 @@ g_variant_type_new_maybe (const GVariantType *element)
  * g_variant_type_new_dict_entry:
  * @key: a basic #GVariantType
  * @value: a #GVariantType
- * @returns: a new dictionary entry #GVariantType
+ * @returns: (transfer full): a new dictionary entry #GVariantType
  *
  * Constructs the type corresponding to a dictionary entry with a key
  * of type @key and a value of type @value.

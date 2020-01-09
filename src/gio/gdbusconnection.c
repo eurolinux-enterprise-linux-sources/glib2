@@ -90,6 +90,15 @@
  *      kind of pitfalls it avoids
  *      - Export objects before claiming names
  *    - Talk about auto-starting services (cf. GBusNameWatcherFlags)
+ *
+ *  - use abstract sockets in test code
+ *   - right now it doesn't work, dbus-daemon(1) fails with
+ *
+ *        /gdbus/connection/filter: Failed to start message bus: Failed to bind
+ *        socket "/tmp/g-dbus-tests-pid-28531": Address already in use
+ *        ** WARNING **: Error reading address from dbus daemon, 0 bytes read
+ *
+ *     or similar.
  */
 
 #include "config.h"
@@ -941,7 +950,7 @@ g_dbus_connection_init (GDBusConnection *connection)
  *
  * Gets the underlying stream used for IO.
  *
- * Returns: the stream used for IO
+ * Returns: (transfer none): the stream used for IO
  *
  * Since: 2.26
  */
@@ -1017,18 +1026,15 @@ flush_in_thread_func (GSimpleAsyncResult *res,
   if (!g_dbus_connection_flush_sync (G_DBUS_CONNECTION (object),
                                      cancellable,
                                      &error))
-    {
-      g_simple_async_result_set_from_error (res, error);
-      g_error_free (error);
-    }
+    g_simple_async_result_take_error (res, error);
 }
 
 /**
  * g_dbus_connection_flush:
  * @connection: A #GDBusConnection.
  * @cancellable: A #GCancellable or %NULL.
- * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL if you don't
- * care about the result.
+ * @callback: (allow-none): A #GAsyncReadyCallback to call when the request is
+ *            satisfied or %NULL if you don't care about the result.
  * @user_data: The data to pass to @callback.
  *
  * Asynchronously flushes @connection, that is, writes all queued
@@ -1228,18 +1234,15 @@ close_in_thread_func (GSimpleAsyncResult *res,
   if (!g_dbus_connection_close_sync (G_DBUS_CONNECTION (object),
                                      cancellable,
                                      &error))
-    {
-      g_simple_async_result_set_from_error (res, error);
-      g_error_free (error);
-    }
+    g_simple_async_result_take_error (res, error);
 }
 
 /**
  * g_dbus_connection_close:
  * @connection: A #GDBusConnection.
  * @cancellable: A #GCancellable or %NULL.
- * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL if you don't
- * care about the result.
+ * @callback: (allow-none): A #GAsyncReadyCallback to call when the request is
+ *            satisfied or %NULL if you don't care about the result.
  * @user_data: The data to pass to @callback.
  *
  * Closes @connection. Note that this never causes the process to
@@ -1449,7 +1452,8 @@ g_dbus_connection_send_message_unlocked (GDBusConnection   *connection,
   if (out_serial != NULL)
     *out_serial = serial_to_use;
 
-  g_dbus_message_set_serial (message, serial_to_use);
+  if (!(flags & G_DBUS_SEND_MESSAGE_FLAGS_PRESERVE_SERIAL))
+    g_dbus_message_set_serial (message, serial_to_use);
 
   g_dbus_message_lock (message);
   _g_dbus_worker_send_message (connection->worker,
@@ -1471,7 +1475,8 @@ g_dbus_connection_send_message_unlocked (GDBusConnection   *connection,
  * @connection: A #GDBusConnection.
  * @message: A #GDBusMessage
  * @flags: Flags affecting how the message is sent.
- * @out_serial: Return location for serial number assigned to @message when sending it or %NULL.
+ * @out_serial: (out) (allow-none): Return location for serial number assigned
+ *              to @message when sending it or %NULL.
  * @error: Return location for error or %NULL.
  *
  * Asynchronously sends @message to the peer represented by @connection.
@@ -1739,7 +1744,7 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
   error = NULL;
   if (!g_dbus_connection_send_message_unlocked (connection, message, flags, out_serial, &error))
     {
-      g_simple_async_result_set_from_error (simple, error);
+      g_simple_async_result_take_error (simple, error);
       g_simple_async_result_complete_in_idle (simple);
       g_object_unref (simple);
       goto out;
@@ -1767,14 +1772,17 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
                               (GDestroyNotify) g_object_unref);
     }
 
-  data->timeout_source = g_timeout_source_new (timeout_msec);
-  g_source_set_priority (data->timeout_source, G_PRIORITY_DEFAULT);
-  g_source_set_callback (data->timeout_source,
-                         send_message_with_reply_timeout_cb,
-                         send_message_data_ref (data),
-                         (GDestroyNotify) send_message_data_unref);
-  g_source_attach (data->timeout_source, data->main_context);
-  g_source_unref (data->timeout_source);
+  if (timeout_msec != G_MAXINT)
+    {
+      data->timeout_source = g_timeout_source_new (timeout_msec);
+      g_source_set_priority (data->timeout_source, G_PRIORITY_DEFAULT);
+      g_source_set_callback (data->timeout_source,
+                             send_message_with_reply_timeout_cb,
+                             send_message_data_ref (data),
+                             (GDestroyNotify) send_message_data_unref);
+      g_source_attach (data->timeout_source, data->main_context);
+      g_source_unref (data->timeout_source);
+    }
 
   g_hash_table_insert (connection->map_method_serial_to_send_message_data,
                        GUINT_TO_POINTER (*out_serial),
@@ -1789,11 +1797,13 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
  * @connection: A #GDBusConnection.
  * @message: A #GDBusMessage.
  * @flags: Flags affecting how the message is sent.
- * @timeout_msec: The timeout in milliseconds or -1 to use the default timeout.
- * @out_serial: Return location for serial number assigned to @message when sending it or %NULL.
+ * @timeout_msec: The timeout in milliseconds, -1 to use the default
+ *                timeout or %G_MAXINT for no timeout.
+ * @out_serial: (out) (allow-none): Return location for serial number assigned
+ *              to @message when sending it or %NULL.
  * @cancellable: A #GCancellable or %NULL.
- * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL if you don't
- * care about the result.
+ * @callback: (allow-none): A #GAsyncReadyCallback to call when the request is
+ *            satisfied or %NULL if you don't care about the result.
  * @user_data: The data to pass to @callback.
  *
  * Asynchronously sends @message to the peer represented by @connection.
@@ -1869,7 +1879,7 @@ g_dbus_connection_send_message_with_reply (GDBusConnection     *connection,
  * linkend="gdbus-unix-fd-client"/> for an example of how to use this
  * low-level API to send and receive UNIX file descriptors.
  *
- * Returns: A locked #GDBusMessage or %NULL if @error is set.
+ * Returns: (transfer full): A locked #GDBusMessage or %NULL if @error is set.
  *
  * Since: 2.26
  */
@@ -1931,8 +1941,10 @@ send_message_with_reply_sync_cb (GDBusConnection *connection,
  * @connection: A #GDBusConnection.
  * @message: A #GDBusMessage.
  * @flags: Flags affecting how the message is sent.
- * @timeout_msec: The timeout in milliseconds or -1 to use the default timeout.
- * @out_serial: Return location for serial number assigned to @message when sending it or %NULL.
+ * @timeout_msec: The timeout in milliseconds, -1 to use the default
+ *                timeout or %G_MAXINT for no timeout.
+ * @out_serial: (out) (allow-none): Return location for serial number assigned
+ *              to @message when sending it or %NULL.
  * @cancellable: A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
  *
@@ -1965,7 +1977,7 @@ send_message_with_reply_sync_cb (GDBusConnection *connection,
  * Note that @message must be unlocked, unless @flags contain the
  * %G_DBUS_SEND_MESSAGE_FLAGS_PRESERVE_SERIAL flag.
  *
- * Returns: A locked #GDBusMessage that is the reply to @message or %NULL if @error is set.
+ * Returns: (transfer full): A locked #GDBusMessage that is the reply to @message or %NULL if @error is set.
  *
  * Since: 2.26
  */
@@ -1983,7 +1995,7 @@ g_dbus_connection_send_message_with_reply_sync (GDBusConnection   *connection,
 
   g_return_val_if_fail (G_IS_DBUS_CONNECTION (connection), NULL);
   g_return_val_if_fail (G_IS_DBUS_MESSAGE (message), NULL);
-  g_return_val_if_fail ((flags & G_DBUS_SEND_MESSAGE_FLAGS_PRESERVE_SERIAL) || !g_dbus_message_get_locked (message), FALSE);
+  g_return_val_if_fail ((flags & G_DBUS_SEND_MESSAGE_FLAGS_PRESERVE_SERIAL) || !g_dbus_message_get_locked (message), NULL);
   g_return_val_if_fail (timeout_msec >= 0 || timeout_msec == -1, NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
@@ -2259,15 +2271,20 @@ initable_init (GInitable     *initable,
 
   ret = FALSE;
 
+  /* First, handle the case where the connection already has an
+   * initialization error set.
+   */
+  if (connection->initialization_error != NULL)
+    goto out;
+
+  /* Also make this a no-op if we're already initialized fine */
   if (connection->is_initialized)
     {
-      if (connection->stream != NULL)
-        ret = TRUE;
-      else
-        g_assert (connection->initialization_error != NULL);
+      ret = TRUE;
       goto out;
     }
-  g_assert (connection->initialization_error == NULL);
+
+  g_assert (connection->initialization_error == NULL && !connection->is_initialized);
 
   /* The user can pass multiple (but mutally exclusive) construct
    * properties:
@@ -2444,9 +2461,9 @@ async_initable_iface_init (GAsyncInitableIface *async_initable_iface)
 /**
  * g_dbus_connection_new:
  * @stream: A #GIOStream.
- * @guid: The GUID to use if a authenticating as a server or %NULL.
+ * @guid: (allow-none): The GUID to use if a authenticating as a server or %NULL.
  * @flags: Flags describing how to make the connection.
- * @observer: A #GDBusAuthObserver or %NULL.
+ * @observer: (allow-none): A #GDBusAuthObserver or %NULL.
  * @cancellable: A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied.
  * @user_data: The data to pass to @callback.
@@ -2525,9 +2542,9 @@ g_dbus_connection_new_finish (GAsyncResult  *res,
 /**
  * g_dbus_connection_new_sync:
  * @stream: A #GIOStream.
- * @guid: The GUID to use if a authenticating as a server or %NULL.
+ * @guid: (allow-none): The GUID to use if a authenticating as a server or %NULL.
  * @flags: Flags describing how to make the connection.
- * @observer: A #GDBusAuthObserver or %NULL.
+ * @observer: (allow-none): A #GDBusAuthObserver or %NULL.
  * @cancellable: A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
  *
@@ -2570,7 +2587,7 @@ g_dbus_connection_new_sync (GIOStream             *stream,
  * g_dbus_connection_new_for_address:
  * @address: A D-Bus address.
  * @flags: Flags describing how to make the connection.
- * @observer: A #GDBusAuthObserver or %NULL.
+ * @observer: (allow-none): A #GDBusAuthObserver or %NULL.
  * @cancellable: A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied.
  * @user_data: The data to pass to @callback.
@@ -2655,7 +2672,7 @@ g_dbus_connection_new_for_address_finish (GAsyncResult  *res,
  * g_dbus_connection_new_for_address_sync:
  * @address: A D-Bus address.
  * @flags: Flags describing how to make the connection.
- * @observer: A #GDBusAuthObserver or %NULL.
+ * @observer: (allow-none): A #GDBusAuthObserver or %NULL.
  * @cancellable: A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
  *
@@ -2703,11 +2720,18 @@ g_dbus_connection_new_for_address_sync (const gchar           *address,
  * g_dbus_connection_set_exit_on_close:
  * @connection: A #GDBusConnection.
  * @exit_on_close: Whether the process should be terminated
- * when @connection is closed by the remote peer.
+ *     when @connection is closed by the remote peer.
  *
  * Sets whether the process should be terminated when @connection is
  * closed by the remote peer. See #GDBusConnection:exit-on-close for
  * more details.
+ *
+ * Note that this function should be used with care. Most modern UNIX
+ * desktops tie the notion of a user session the session bus, and expect
+ * all of a users applications to quit when their bus connection goes away.
+ * If you are setting @exit_on_close to %FALSE for the shared session
+ * bus connection, you should make sure that your application exits
+ * when the user session ends.
  *
  * Since: 2.26
  */
@@ -2793,7 +2817,7 @@ g_dbus_connection_get_unique_name (GDBusConnection *connection)
  * each application is a client. So this method will always return
  * %NULL for message bus clients.
  *
- * Returns: A #GCredentials or %NULL if not available. Do not free
+ * Returns: (transfer none): A #GCredentials or %NULL if not available. Do not free
  * this object, it is owned by @connection.
  *
  * Since: 2.26
@@ -2969,11 +2993,14 @@ args_to_rule (const gchar *sender,
               const gchar *interface_name,
               const gchar *member,
               const gchar *object_path,
-              const gchar *arg0)
+              const gchar *arg0,
+              gboolean     negate)
 {
   GString *rule;
 
   rule = g_string_new ("type='signal'");
+  if (negate)
+    g_string_prepend_c (rule, '-');
   if (sender != NULL)
     g_string_append_printf (rule, ",sender='%s'", sender);
   if (interface_name != NULL)
@@ -3002,6 +3029,9 @@ add_match_rule (GDBusConnection *connection,
   GError *error;
   GDBusMessage *message;
 
+  if (match_rule[0] == '-')
+    return;
+
   message = g_dbus_message_new_method_call ("org.freedesktop.DBus", /* name */
                                             "/org/freedesktop/DBus", /* path */
                                             "org.freedesktop.DBus", /* interface */
@@ -3029,6 +3059,9 @@ remove_match_rule (GDBusConnection *connection,
 {
   GError *error;
   GDBusMessage *message;
+
+  if (match_rule[0] == '-')
+    return;
 
   message = g_dbus_message_new_method_call ("org.freedesktop.DBus", /* name */
                                             "/org/freedesktop/DBus", /* path */
@@ -3066,11 +3099,14 @@ is_signal_data_for_name_lost_or_acquired (SignalData *signal_data)
 /**
  * g_dbus_connection_signal_subscribe:
  * @connection: A #GDBusConnection.
- * @sender: Sender name to match on (unique or well-known name) or %NULL to listen from all senders.
- * @interface_name: D-Bus interface name to match on or %NULL to match on all interfaces.
- * @member: D-Bus signal name to match on or %NULL to match on all signals.
- * @object_path: Object path to match on or %NULL to match on all object paths.
- * @arg0: Contents of first string argument to match on or %NULL to match on all kinds of arguments.
+ * @sender: (allow-none): Sender name to match on (unique or well-known name)
+ *                        or %NULL to listen from all senders.
+ * @interface_name: (allow-none): D-Bus interface name to match on or %NULL to
+ *                                match on all interfaces.
+ * @member: (allow-none): D-Bus signal name to match on or %NULL to match on all signals.
+ * @object_path: (allow-none): Object path to match on or %NULL to match on all object paths.
+ * @arg0: (allow-none): Contents of first string argument to match on or %NULL
+ *                      to match on all kinds of arguments.
  * @flags: Flags describing how to subscribe to the signal (currently unused).
  * @callback: Callback to invoke when there is a signal matching the requested data.
  * @user_data: User data to pass to @callback.
@@ -3133,7 +3169,16 @@ g_dbus_connection_signal_subscribe (GDBusConnection     *connection,
 
   CONNECTION_LOCK (connection);
 
-  rule = args_to_rule (sender, interface_name, member, object_path, arg0);
+  /* If G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE was specified, we will end up
+   * with a '-' character to prefix the rule (which will otherwise be
+   * normal).
+   *
+   * This allows us to hash the rule and do our lifecycle tracking in
+   * the usual way, but the '-' prevents the match rule from ever
+   * actually being send to the bus (either for add or remove).
+   */
+  rule = args_to_rule (sender, interface_name, member, object_path, arg0,
+                       (flags & G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE) != 0);
 
   if (sender != NULL && (g_dbus_is_unique_name (sender) || g_strcmp0 (sender, "org.freedesktop.DBus") == 0))
     sender_unique_name = sender;
@@ -4201,7 +4246,7 @@ static const gchar introspect_header[] =
 static const gchar introspect_tail[] =
   "</node>\n";
 
-static const gchar introspect_standard_interfaces[] =
+static const gchar introspect_properties_interface[] =
   "  <interface name=\"org.freedesktop.DBus.Properties\">\n"
   "    <method name=\"Get\">\n"
   "      <arg type=\"s\" name=\"interface_name\" direction=\"in\"/>\n"
@@ -4222,7 +4267,9 @@ static const gchar introspect_standard_interfaces[] =
   "      <arg type=\"a{sv}\" name=\"changed_properties\"/>\n"
   "      <arg type=\"as\" name=\"invalidated_properties\"/>\n"
   "    </signal>\n"
-  "  </interface>\n"
+  "  </interface>\n";
+
+static const gchar introspect_introspectable_interface[] =
   "  <interface name=\"org.freedesktop.DBus.Introspectable\">\n"
   "    <method name=\"Introspect\">\n"
   "      <arg type=\"s\" name=\"xml_data\" direction=\"out\"/>\n"
@@ -4239,12 +4286,6 @@ static void
 introspect_append_header (GString *s)
 {
   g_string_append (s, introspect_header);
-}
-
-static void
-introspect_append_standard_interfaces (GString *s)
-{
-  g_string_append (s, introspect_standard_interfaces);
 }
 
 static void
@@ -4338,10 +4379,17 @@ handle_introspect (GDBusConnection *connection,
 
   /* first the header with the standard interfaces */
   s = g_string_sized_new (sizeof (introspect_header) +
-                          sizeof (introspect_standard_interfaces) +
+                          sizeof (introspect_properties_interface) +
+                          sizeof (introspect_introspectable_interface) +
                           sizeof (introspect_tail));
   introspect_append_header (s);
-  introspect_append_standard_interfaces (s);
+  if (!g_hash_table_lookup (eo->map_if_name_to_ei,
+                            "org.freedesktop.DBus.Properties"))
+    g_string_append (s, introspect_properties_interface);
+
+  if (!g_hash_table_lookup (eo->map_if_name_to_ei,
+                            "org.freedesktop.DBus.Introspectable"))
+    g_string_append (s, introspect_introspectable_interface);
 
   /* then include the registered interfaces */
   g_hash_table_iter_init (&hash_iter, eo->map_if_name_to_ei);
@@ -4594,13 +4642,13 @@ obj_message_func (GDBusConnection *connection,
 
 /**
  * g_dbus_connection_register_object:
- * @connection: A #GDBusConnection.
- * @object_path: The object path to register at.
- * @interface_info: Introspection data for the interface.
- * @vtable: A #GDBusInterfaceVTable to call into or %NULL.
- * @user_data: Data to pass to functions in @vtable.
- * @user_data_free_func: Function to call when the object path is unregistered.
- * @error: Return location for error or %NULL.
+ * @connection: A #GDBusConnection
+ * @object_path: The object path to register at
+ * @interface_info: Introspection data for the interface
+ * @vtable: (allow-none): A #GDBusInterfaceVTable to call into, or %NULL
+ * @user_data: Data to pass to functions in @vtable
+ * @user_data_free_func: Function to call when the object path is unregistered
+ * @error: Return location for error or %NULL
  *
  * Registers callbacks for exported objects at @object_path with the
  * D-Bus interface that is described in @interface_info.
@@ -4639,7 +4687,12 @@ obj_message_func (GDBusConnection *connection,
  * reference count is -1, see g_dbus_interface_info_ref()) for as long
  * as the object is exported. Also note that @vtable will be copied.
  *
- * See <xref linkend="gdbus-server"/> for an example of how to use this method.
+ * A %NULL @vtable can be used for
+ * <ulink url="http://en.wikipedia.org/wiki/Marker_interface_pattern">marker
+ * interfaces</ulink>.
+ *
+ * See <xref linkend="gdbus-server"/> for an example of how to use this
+ * method.
  *
  * Returns: 0 if @error is set, otherwise a registration id (never 0)
  * that can be used with g_dbus_connection_unregister_object() .
@@ -4773,11 +4826,13 @@ g_dbus_connection_unregister_object (GDBusConnection *connection,
 /**
  * g_dbus_connection_emit_signal:
  * @connection: A #GDBusConnection.
- * @destination_bus_name: The unique bus name for the destination for the signal or %NULL to emit to all listeners.
+ * @destination_bus_name: (allow-none): The unique bus name for the destination
+ *                        for the signal or %NULL to emit to all listeners.
  * @object_path: Path of remote object.
  * @interface_name: D-Bus interface to emit a signal on.
  * @signal_name: The name of the signal to emit.
- * @parameters: A #GVariant tuple with parameters for the signal or %NULL if not passing parameters.
+ * @parameters: (allow-none): A #GVariant tuple with parameters for the signal
+ *              or %NULL if not passing parameters.
  * @error: Return location for error or %NULL.
  *
  * Emits a signal.
@@ -4960,10 +5015,7 @@ g_dbus_connection_call_done (GObject      *source,
     value = NULL;
 
   if (value == NULL)
-    {
-      g_simple_async_result_set_from_error (state->simple, error);
-      g_error_free (error);
-    }
+    g_simple_async_result_take_error (state->simple, error);
   else
     g_simple_async_result_set_op_res_gpointer (state->simple, value,
                                                (GDestroyNotify) g_variant_unref);
@@ -4979,17 +5031,21 @@ g_dbus_connection_call_done (GObject      *source,
 /**
  * g_dbus_connection_call:
  * @connection: A #GDBusConnection.
- * @bus_name: A unique or well-known bus name or %NULL if @connection is not a message bus connection.
+ * @bus_name: (allow-none): A unique or well-known bus name or %NULL if
+ *            @connection is not a message bus connection.
  * @object_path: Path of remote object.
  * @interface_name: D-Bus interface to invoke method on.
  * @method_name: The name of the method to invoke.
- * @parameters: A #GVariant tuple with parameters for the method or %NULL if not passing parameters.
- * @reply_type: The expected type of the reply, or %NULL.
+ * @parameters: (allow-none): A #GVariant tuple with parameters for the method
+ *              or %NULL if not passing parameters.
+ * @reply_type: (allow-none): The expected type of the reply, or %NULL.
  * @flags: Flags from the #GDBusCallFlags enumeration.
- * @timeout_msec: The timeout in milliseconds or -1 to use the default timeout.
+ * @timeout_msec: The timeout in milliseconds, -1 to use the default
+ *                timeout or %G_MAXINT for no timeout.
  * @cancellable: A #GCancellable or %NULL.
- * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL if you don't
- * care about the result of the method invocation.
+ * @callback: (allow-none): A #GAsyncReadyCallback to call when the request is
+ *            satisfied or %NULL if you don't * care about the result of the
+ *            method invocation.
  * @user_data: The data to pass to @callback.
  *
  * Asynchronously invokes the @method_name method on the
@@ -5149,10 +5205,12 @@ g_dbus_connection_call_finish (GDBusConnection  *connection,
  * @object_path: Path of remote object.
  * @interface_name: D-Bus interface to invoke method on.
  * @method_name: The name of the method to invoke.
- * @parameters: A #GVariant tuple with parameters for the method or %NULL if not passing parameters.
- * @reply_type: The expected type of the reply, or %NULL.
+ * @parameters: (allow-none): A #GVariant tuple with parameters for the method
+ *              or %NULL if not passing parameters.
+ * @reply_type: (allow-none): The expected type of the reply, or %NULL.
  * @flags: Flags from the #GDBusCallFlags enumeration.
- * @timeout_msec: The timeout in milliseconds or -1 to use the default timeout.
+ * @timeout_msec: The timeout in milliseconds, -1 to use the default
+ *                timeout or %G_MAXINT for no timeout.
  * @cancellable: A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
  *
@@ -5351,6 +5409,8 @@ handle_subtree_introspect (GDBusConnection *connection,
   GDBusInterfaceInfo **interfaces;
   guint n;
   gchar **subnode_paths;
+  gboolean has_properties_interface;
+  gboolean has_introspectable_interface;
 
   handled = FALSE;
 
@@ -5390,7 +5450,20 @@ handle_subtree_introspect (GDBusConnection *connection,
                                        es->user_data);
   if (interfaces != NULL)
     {
-      introspect_append_standard_interfaces (s);
+      has_properties_interface = FALSE;
+      has_introspectable_interface = FALSE;
+
+      for (n = 0; interfaces[n] != NULL; n++)
+        {
+          if (strcmp (interfaces[n]->name, "org.freedesktop.DBus.Properties") == 0)
+            has_properties_interface = TRUE;
+          else if (strcmp (interfaces[n]->name, "org.freedesktop.DBus.Introspectable") == 0)
+            has_introspectable_interface = TRUE;
+        }
+      if (!has_properties_interface)
+        g_string_append (s, introspect_properties_interface);
+      if (!has_introspectable_interface)
+        g_string_append (s, introspect_introspectable_interface);
 
       for (n = 0; interfaces[n] != NULL; n++)
         {
@@ -6227,7 +6300,7 @@ get_uninitialized_connection (GBusType       bus_type,
  * Note that the returned #GDBusConnection object will (usually) have
  * the #GDBusConnection:exit-on-close property set to %TRUE.
  *
- * Returns: A #GDBusConnection or %NULL if @error is set. Free with g_object_unref().
+ * Returns: (transfer full): A #GDBusConnection or %NULL if @error is set. Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -6268,8 +6341,7 @@ bus_get_async_initable_cb (GObject      *source_object,
                                      &error))
     {
       g_assert (error != NULL);
-      g_simple_async_result_set_from_error (simple, error);
-      g_error_free (error);
+      g_simple_async_result_take_error (simple, error);
       g_object_unref (source_object);
     }
   else
@@ -6319,8 +6391,7 @@ g_bus_get (GBusType             bus_type,
   if (connection == NULL)
     {
       g_assert (error != NULL);
-      g_simple_async_result_set_from_error (simple, error);
-      g_error_free (error);
+      g_simple_async_result_take_error (simple, error);
       g_simple_async_result_complete_in_idle (simple);
       g_object_unref (simple);
     }
@@ -6350,7 +6421,7 @@ g_bus_get (GBusType             bus_type,
  * Note that the returned #GDBusConnection object will (usually) have
  * the #GDBusConnection:exit-on-close property set to %TRUE.
  *
- * Returns: A #GDBusConnection or %NULL if @error is set. Free with g_object_unref().
+ * Returns: (transfer full): A #GDBusConnection or %NULL if @error is set. Free with g_object_unref().
  *
  * Since: 2.26
  */

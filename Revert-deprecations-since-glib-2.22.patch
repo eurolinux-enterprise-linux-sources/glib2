@@ -1,0 +1,341 @@
+From d6ee2d00307a81de12cdaf32526d810b1b96fc44 Mon Sep 17 00:00:00 2001
+From: Matthew Barnes <mbarnes@redhat.com>
+Date: Fri, 5 Sep 2014 14:56:15 -0400
+Subject: [PATCH] Revert deprecations since glib-2.22
+
+Although it's a no-no, some apps in RHEL 6 build with deprecated symbols
+disabled (e.g. devhelp - rhbz#1136304). Revert deprecations picked up in
+the rebases to avoid breaking other apps similarly.
+---
+ gio/gunixsocketaddress.h |    4 ----
+ glib/gcompletion.c       |   19 -------------------
+ glib/gcompletion.h       |    4 ----
+ glib/glib.symbols        |    2 --
+ glib/gmain.c             |    2 --
+ glib/gmain.h             |    2 --
+ glib/grel.c              |   28 ----------------------------
+ glib/grel.h              |    4 ----
+ 8 files changed, 0 insertions(+), 65 deletions(-)
+
+diff --git a/gio/gunixsocketaddress.h b/gio/gunixsocketaddress.h
+index 161d898..4fd1182 100644
+--- a/gio/gunixsocketaddress.h
++++ b/gio/gunixsocketaddress.h
+@@ -55,19 +55,15 @@ struct _GUnixSocketAddressClass
+ GType           g_unix_socket_address_get_type    (void) G_GNUC_CONST;
+ 
+ GSocketAddress *g_unix_socket_address_new             (const gchar        *path);
+-#ifndef G_DISABLE_DEPRECATED
+ GSocketAddress *g_unix_socket_address_new_abstract    (const gchar        *path,
+ 						       gint                path_len);
+-#endif
+ GSocketAddress *g_unix_socket_address_new_with_type   (const gchar            *path,
+ 						       gint                    path_len,
+ 						       GUnixSocketAddressType  type);
+ const char *    g_unix_socket_address_get_path        (GUnixSocketAddress *address);
+ gsize           g_unix_socket_address_get_path_len    (GUnixSocketAddress *address);
+ GUnixSocketAddressType g_unix_socket_address_get_address_type (GUnixSocketAddress *address);
+-#ifndef G_DISABLE_DEPRECATED
+ gboolean        g_unix_socket_address_get_is_abstract (GUnixSocketAddress *address);
+-#endif
+ 
+ gboolean        g_unix_socket_address_abstract_names_supported (void);
+ 
+diff --git a/glib/gcompletion.c b/glib/gcompletion.c
+index 13ebc43..3d6a9e3 100644
+--- a/glib/gcompletion.c
++++ b/glib/gcompletion.c
+@@ -36,8 +36,6 @@
+ #include "gmessages.h"
+ #include "gunicode.h"
+ 
+-#undef G_DISABLE_DEPRECATED
+-
+ #include "gcompletion.h"
+ 
+ /**
+@@ -63,9 +61,6 @@
+  * retrieves the item's string from the data structure. You can change
+  * the way in which strings are compared by setting a different
+  * #GCompletionStrncmpFunc in g_completion_set_compare().
+- *
+- * GCompletion has been marked as deprecated, since this API is rarely
+- * used and not very actively maintained.
+  **/
+ 
+ /**
+@@ -140,8 +135,6 @@ g_completion_new (GCompletionFunc func)
+  * @items: the list of items to add.
+  *
+  * Adds items to the #GCompletion.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void 
+ g_completion_add_items (GCompletion* cmp,
+@@ -178,8 +171,6 @@ g_completion_add_items (GCompletion* cmp,
+  * @items: the items to remove.
+  *
+  * Removes items from a #GCompletion.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void 
+ g_completion_remove_items (GCompletion* cmp,
+@@ -209,8 +200,6 @@ g_completion_remove_items (GCompletion* cmp,
+  * @cmp: the #GCompletion.
+  *
+  * Removes all items from the #GCompletion.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void 
+ g_completion_clear_items (GCompletion* cmp)
+@@ -290,8 +279,6 @@ completion_check_cache (GCompletion* cmp,
+  * not be changed.
+  *
+  * Since: 2.4
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ GList*
+ g_completion_complete_utf8 (GCompletion  *cmp,
+@@ -336,8 +323,6 @@ g_completion_complete_utf8 (GCompletion  *cmp,
+  *
+  * Attempts to complete the string @prefix using the #GCompletion
+  * target items.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ GList* 
+ g_completion_complete (GCompletion* cmp,
+@@ -406,8 +391,6 @@ g_completion_complete (GCompletion* cmp,
+  * @cmp: the #GCompletion.
+  *
+  * Frees all memory used by the #GCompletion.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void 
+ g_completion_free (GCompletion* cmp)
+@@ -425,8 +408,6 @@ g_completion_free (GCompletion* cmp)
+  *
+  * Sets the function to use for string comparisons. The default string
+  * comparison function is strncmp().
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void
+ g_completion_set_compare(GCompletion *cmp,
+diff --git a/glib/gcompletion.h b/glib/gcompletion.h
+index 04c024f..900883e 100644
+--- a/glib/gcompletion.h
++++ b/glib/gcompletion.h
+@@ -56,8 +56,6 @@ struct _GCompletion
+   GCompletionStrncmpFunc strncmp_func;
+ };
+ 
+-#ifndef G_DISABLE_DEPRECATED
+-
+ GCompletion* g_completion_new           (GCompletionFunc func);
+ void         g_completion_add_items     (GCompletion*    cmp,
+                                          GList*          items);
+@@ -74,8 +72,6 @@ void         g_completion_set_compare   (GCompletion *cmp,
+ 				         GCompletionStrncmpFunc strncmp_func);
+ void         g_completion_free          (GCompletion*    cmp);
+ 
+-#endif
+-
+ G_END_DECLS
+ 
+ #endif /* __G_COMPLETION_H__ */
+diff --git a/glib/glib.symbols b/glib/glib.symbols
+index 6971be6..79e1fee 100644
+--- a/glib/glib.symbols
++++ b/glib/glib.symbols
+@@ -729,9 +729,7 @@ g_source_destroy
+ g_source_get_can_recurse
+ g_source_get_context
+ g_source_get_time
+-#ifndef G_DISABLE_DEPRECATED
+ g_source_get_current_time
+-#endif
+ g_source_get_id
+ g_source_get_name
+ g_source_get_priority
+diff --git a/glib/gmain.c b/glib/gmain.c
+index 4fc606a..ee9751c 100644
+--- a/glib/gmain.c
++++ b/glib/gmain.c
+@@ -3608,8 +3608,6 @@ g_main_context_remove_poll_unlocked (GMainContext *context,
+  * calling g_get_current_time() directly is that when 
+  * checking multiple sources, GLib can cache a single value
+  * instead of having to repeatedly get the system time.
+- *
+- * Deprecated: 2.28: use g_source_get_time() instead
+  **/
+ void
+ g_source_get_current_time (GSource  *source,
+diff --git a/glib/gmain.h b/glib/gmain.h
+index bd94651..99f5293 100644
+--- a/glib/gmain.h
++++ b/glib/gmain.h
+@@ -370,10 +370,8 @@ void     g_source_add_child_source    (GSource        *source,
+ void     g_source_remove_child_source (GSource        *source,
+ 				       GSource        *child_source);
+ 
+-#ifndef G_DISABLE_DEPRECATED
+ void     g_source_get_current_time (GSource        *source,
+                                     GTimeVal       *timeval);
+-#endif
+ gint64   g_source_get_time         (GSource        *source);
+ 
+  /* void g_source_connect_closure (GSource        *source,
+diff --git a/glib/grel.c b/glib/grel.c
+index 9ad5861..2c01bac 100644
+--- a/glib/grel.c
++++ b/glib/grel.c
+@@ -37,8 +37,6 @@
+ #include "gtestutils.h"
+ #include "gstring.h"
+ 
+-#undef G_DISABLE_DEPRECATED
+-
+ #include "grel.h"
+ 
+ /**
+@@ -82,10 +80,6 @@
+  * To destroy the #GRelation, use g_relation_destroy().
+  *
+  * To help debug #GRelation objects, use g_relation_print().
+- *
+- * GRelation has been marked as deprecated, since this API has never
+- * been fully implemented, is not very actively maintained and rarely
+- * used.
+  **/
+ 
+ typedef struct _GRealTuples        GRealTuples;
+@@ -187,8 +181,6 @@ tuple_equal (gint fields)
+  *
+  * Creates a new #GRelation with the given number of fields. Note that
+  * currently the number of fields must be 2.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ GRelation*
+ g_relation_new (gint fields)
+@@ -225,8 +217,6 @@ g_relation_free_array (gpointer key, gpointer value, gpointer user_data)
+  * Destroys the #GRelation, freeing all memory allocated. However, it
+  * does not free memory allocated for the tuple data, so you should
+  * free that first if appropriate.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void
+ g_relation_destroy (GRelation *relation)
+@@ -261,8 +251,6 @@ g_relation_destroy (GRelation *relation)
+  *
+  * Creates an index on the given field. Note that this must be called
+  * before any records are added to the #GRelation.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void
+ g_relation_index (GRelation   *relation,
+@@ -285,8 +273,6 @@ g_relation_index (GRelation   *relation,
+  *           or #gconstpointer.
+  *
+  * Inserts a record into a #GRelation.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void
+ g_relation_insert (GRelation   *relation,
+@@ -377,8 +363,6 @@ g_relation_delete_tuple (gpointer tuple_key,
+  *
+  * Deletes any records from a #GRelation that have the given key value
+  * in the given field.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ gint
+ g_relation_delete  (GRelation     *relation,
+@@ -442,8 +426,6 @@ g_relation_select_tuple (gpointer tuple_key,
+  * Returns all of the tuples which have the given key in the given
+  * field. Use g_tuples_index() to access the returned records. The
+  * returned records should be freed with g_tuples_destroy().
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ GTuples*
+ g_relation_select (GRelation     *relation,
+@@ -488,8 +470,6 @@ g_relation_select (GRelation     *relation,
+  *
+  * Returns the number of tuples in a #GRelation that have the given
+  * value in the given field.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ gint
+ g_relation_count (GRelation     *relation,
+@@ -523,8 +503,6 @@ g_relation_count (GRelation     *relation,
+  * Returns %TRUE if a record with the given values exists in a
+  * #GRelation. Note that the values are compared directly, so that, for
+  * example, two copies of the same string will not match.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ gboolean
+ g_relation_exists (GRelation   *relation, ...)
+@@ -556,8 +534,6 @@ g_relation_exists (GRelation   *relation, ...)
+  * should always be called after g_relation_select() when you are
+  * finished with the records. The records are not removed from the
+  * #GRelation.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void
+ g_tuples_destroy (GTuples *tuples0)
+@@ -581,8 +557,6 @@ g_tuples_destroy (GTuples *tuples0)
+  * Gets a field from the records returned by g_relation_select(). It
+  * returns the given field of the record at the given index. The
+  * returned value should not be changed.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ gpointer
+ g_tuples_index (GTuples     *tuples0,
+@@ -646,8 +620,6 @@ g_relation_print_index (gpointer tuple_key,
+  *
+  * Outputs information about all records in a #GRelation, as well as
+  * the indexes. It is for debugging.
+- *
+- * Deprecated: 2.26: Rarely used API
+  **/
+ void
+ g_relation_print (GRelation *relation)
+diff --git a/glib/grel.h b/glib/grel.h
+index 5cb8d09..e7c9291 100644
+--- a/glib/grel.h
++++ b/glib/grel.h
+@@ -66,8 +66,6 @@ struct _GTuples
+  * g_relation_count() counts ...
+  */
+ 
+-#ifndef G_DISABLE_DEPRECATED
+-
+ GRelation* g_relation_new     (gint         fields);
+ void       g_relation_destroy (GRelation   *relation);
+ void       g_relation_index   (GRelation   *relation,
+@@ -94,8 +92,6 @@ gpointer   g_tuples_index     (GTuples     *tuples,
+                                gint         index_,
+                                gint         field);
+ 
+-#endif
+-
+ G_END_DECLS
+ 
+ #endif /* __G_REL_H__ */
+-- 
+1.7.1
+

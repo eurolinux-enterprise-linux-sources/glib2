@@ -29,6 +29,9 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_MKDEV_H
+#include <sys/mkdev.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -294,7 +297,7 @@ g_dbus_message_new_signal (const gchar  *path,
  *
  * Creates a new #GDBusMessage that is a reply to @method_call_message.
  *
- * Returns: A #GDBusMessage. Free with g_object_unref().
+ * Returns: (transfer full):  #GDBusMessage. Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -332,7 +335,7 @@ g_dbus_message_new_method_reply (GDBusMessage *method_call_message)
  *
  * Creates a new #GDBusMessage that is an error reply to @method_call_message.
  *
- * Returns: A #GDBusMessage. Free with g_object_unref().
+ * Returns: (transfer full): A #GDBusMessage. Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -364,7 +367,7 @@ g_dbus_message_new_method_error (GDBusMessage             *method_call_message,
  *
  * Creates a new #GDBusMessage that is an error reply to @method_call_message.
  *
- * Returns: A #GDBusMessage. Free with g_object_unref().
+ * Returns: (transfer full): A #GDBusMessage. Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -409,7 +412,7 @@ g_dbus_message_new_method_error_literal (GDBusMessage  *method_call_message,
  *
  * Like g_dbus_message_new_method_error() but intended for language bindings.
  *
- * Returns: A #GDBusMessage. Free with g_object_unref().
+ * Returns: (transfer full): A #GDBusMessage. Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -780,7 +783,7 @@ g_dbus_message_set_body (GDBusMessage  *message,
  *
  * This method is only available on UNIX.
  *
- * Returns: A #GUnixFDList or %NULL if no file descriptors are
+ * Returns: (transfer none):A #GUnixFDList or %NULL if no file descriptors are
  * associated. Do not free, this object is owned by @message.
  *
  * Since: 2.26
@@ -1183,10 +1186,10 @@ parse_value_from_blob (GMemoryInputStream    *mis,
         {
           guint64 v;
           gdouble *encoded;
+          G_STATIC_ASSERT (sizeof (gdouble) == sizeof (guint64));
           v = g_data_input_stream_read_uint64 (dis, NULL, &local_error);
           if (local_error != NULL)
             goto fail;
-          G_STATIC_ASSERT (sizeof (gdouble) == sizeof (guint64));
           encoded = (gdouble *) &v;
           ret = g_variant_new_double (*encoded);
         }
@@ -3195,8 +3198,8 @@ g_dbus_message_lock (GDBusMessage *message)
  * This operation can fail if e.g. @message contains file descriptors
  * and the per-process or system-wide open files limit is reached.
  *
- * Returns: A new #GDBusMessage or %NULL if @error is set. Free with
- * g_object_unref().
+ * Returns: (transfer full): A new #GDBusMessage or %NULL if @error is set.
+ *     Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -3210,7 +3213,7 @@ g_dbus_message_copy (GDBusMessage  *message,
   GVariant *header_value;
 
   g_return_val_if_fail (G_IS_DBUS_MESSAGE (message), NULL);
-  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   ret = g_dbus_message_new ();
   ret->type                   = message->type;
@@ -3253,4 +3256,3 @@ g_dbus_message_copy (GDBusMessage  *message,
  out:
   return ret;
 }
-

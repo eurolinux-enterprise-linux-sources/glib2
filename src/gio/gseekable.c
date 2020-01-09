@@ -89,7 +89,7 @@ g_seekable_can_seek (GSeekable *seekable)
  * @seekable: a #GSeekable.
  * @offset: a #goffset.
  * @type: a #GSeekType.
- * @cancellable: optional #GCancellable object, %NULL to ignore. 
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore. 
  * @error: a #GError location to store the error occuring, or %NULL to 
  * ignore.
  * 
@@ -143,7 +143,7 @@ g_seekable_can_truncate (GSeekable *seekable)
  * g_seekable_truncate:
  * @seekable: a #GSeekable.
  * @offset: a #goffset.
- * @cancellable: optional #GCancellable object, %NULL to ignore. 
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore. 
  * @error: a #GError location to store the error occuring, or %NULL to 
  * ignore.
  * 
@@ -154,7 +154,8 @@ g_seekable_can_truncate (GSeekable *seekable)
  * was cancelled, the error %G_IO_ERROR_CANCELLED will be returned. If an
  * operation was partially finished when the operation was cancelled the
  * partial result will be returned, without an error.
- * 
+ *
+ * Virtual: truncate_fn
  * Returns: %TRUE if successful. If an error
  *     has occurred, this function will return %FALSE and set @error
  *     appropriately if present. 

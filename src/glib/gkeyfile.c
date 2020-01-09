@@ -26,6 +26,7 @@
 #include "config.h"
 
 #include "gkeyfile.h"
+#include "gutils.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -138,6 +139,9 @@ static void                  g_key_file_remove_key_value_pair_node (GKeyFile    
                                                                     GKeyFileGroup *group,
                                                                     GList         *pair_node);
 
+static void                  g_key_file_add_key_value_pair     (GKeyFile               *key_file,
+                                                                GKeyFileGroup          *group,
+                                                                GKeyFileKeyValuePair   *pair);
 static void                  g_key_file_add_key                (GKeyFile               *key_file,
 								GKeyFileGroup          *group,
 								const gchar            *key,
@@ -314,13 +318,13 @@ find_file_in_data_dirs (const gchar   *file,
 
   data_dirs = dirs;
 
-  while (data_dirs && (data_dir = *data_dirs) && fd < 0)
+  while (data_dirs && (data_dir = *data_dirs) && fd == -1)
     {
       gchar *candidate_file, *sub_dir;
 
       candidate_file = (gchar *) file;
       sub_dir = g_strdup ("");
-      while (candidate_file != NULL && fd < 0)
+      while (candidate_file != NULL && fd == -1)
         {
           gchar *p;
 
@@ -329,7 +333,7 @@ find_file_in_data_dirs (const gchar   *file,
 
           fd = g_open (path, O_RDONLY, 0);
 
-          if (fd < 0)
+          if (fd == -1)
             {
               g_free (path);
               path = NULL;
@@ -355,7 +359,7 @@ find_file_in_data_dirs (const gchar   *file,
       data_dirs++;
     }
 
-  if (fd < 0)
+  if (fd == -1)
     {
       g_set_error_literal (error, G_KEY_FILE_ERROR,
                            G_KEY_FILE_ERROR_NOT_FOUND,
@@ -483,7 +487,7 @@ g_key_file_load_from_file (GKeyFile       *key_file,
 
   fd = g_open (file, O_RDONLY, 0);
 
-  if (fd < 0)
+  if (fd == -1)
     {
       g_set_error_literal (error, G_FILE_ERROR,
                            g_file_error_from_errno (errno),
@@ -608,7 +612,7 @@ g_key_file_load_from_dirs (GKeyFile       *key_file,
       fd = find_file_in_data_dirs (file, data_dirs, &output_path,
                                    &key_file_error);
 
-      if (fd < 0)
+      if (fd == -1)
         {
           if (key_file_error)
             g_propagate_error (error, key_file_error);
@@ -911,11 +915,22 @@ g_key_file_parse_key_value_pair (GKeyFile     *key_file,
   locale = key_get_locale (key);
 
   if (locale == NULL || g_key_file_locale_is_interesting (key_file, locale))
-    g_key_file_add_key (key_file, key_file->current_group, key, value);
+    {
+      GKeyFileKeyValuePair *pair;
+
+      pair = g_slice_new (GKeyFileKeyValuePair);
+      pair->key = key;
+      pair->value = value;
+
+      g_key_file_add_key_value_pair (key_file, key_file->current_group, pair);
+    }
+  else
+    {
+      g_free (key);
+      g_free (value);
+    }
 
   g_free (locale);
-  g_free (key);
-  g_free (value);
 }
 
 static gchar *
@@ -948,11 +963,14 @@ g_key_file_parse_data (GKeyFile     *key_file,
 
   parse_error = NULL;
 
-  for (i = 0; i < length; i++)
+  i = 0;
+  while (i < length)
     {
       if (data[i] == '\n')
         {
-	  if (i > 0 && data[i - 1] == '\r')
+	  if (key_file->parse_buffer->len > 0
+	      && (key_file->parse_buffer->str[key_file->parse_buffer->len - 1]
+		  == '\r'))
 	    g_string_erase (key_file->parse_buffer,
 			    key_file->parse_buffer->len - 1,
 			    1);
@@ -971,9 +989,25 @@ g_key_file_parse_data (GKeyFile     *key_file,
               g_propagate_error (error, parse_error);
               return;
             }
+          i++;
         }
       else
-        g_string_append_c (key_file->parse_buffer, data[i]);
+        {
+          const gchar *start_of_line;
+          const gchar *end_of_line;
+          gsize line_length;
+
+          start_of_line = data + i;
+          end_of_line = memchr (start_of_line, '\n', length - i);
+
+          if (end_of_line == NULL)
+            end_of_line = data + length;
+
+          line_length = end_of_line - start_of_line;
+
+          g_string_append_len (key_file->parse_buffer, start_of_line, line_length);
+          i += line_length;
+        }
     }
 
   key_file->approximate_size += length;
@@ -1630,8 +1664,6 @@ g_key_file_set_locale_string (GKeyFile     *key_file,
   g_free (value);
 }
 
-extern GSList *_g_compute_locale_variants (const gchar *locale);
-
 /**
  * g_key_file_get_locale_string:
  * @key_file: a #GKeyFile
@@ -1677,16 +1709,7 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
 
   if (locale)
     {
-      GSList *l, *list;
-
-      list = _g_compute_locale_variants (locale);
-
-      languages = g_new (gchar *, g_slist_length (list) + 1);
-      for (l = list, i = 0; l; l = l->next, i++)
-	languages[i] = l->data;
-      languages[i] = NULL;
-
-      g_slist_free (list);
+      languages = g_get_locale_variants (locale);
       free_languages = TRUE;
     }
   else
@@ -3338,6 +3361,17 @@ g_key_file_remove_group (GKeyFile     *key_file,
 }
 
 static void
+g_key_file_add_key_value_pair (GKeyFile             *key_file,
+                               GKeyFileGroup        *group,
+                               GKeyFileKeyValuePair *pair)
+{
+  g_hash_table_replace (group->lookup_map, pair->key, pair);
+  group->key_value_pairs = g_list_prepend (group->key_value_pairs, pair);
+  group->has_trailing_blank_line = FALSE;
+  key_file->approximate_size += strlen (pair->key) + strlen (pair->value) + 2;
+}
+
+static void
 g_key_file_add_key (GKeyFile      *key_file,
 		    GKeyFileGroup *group,
 		    const gchar   *key,
@@ -3349,10 +3383,7 @@ g_key_file_add_key (GKeyFile      *key_file,
   pair->key = g_strdup (key);
   pair->value = g_strdup (value);
 
-  g_hash_table_replace (group->lookup_map, pair->key, pair);
-  group->key_value_pairs = g_list_prepend (group->key_value_pairs, pair);
-  group->has_trailing_blank_line = FALSE;
-  key_file->approximate_size += strlen (key) + strlen (value) + 2;
+  g_key_file_add_key_value_pair (key_file, group, pair);
 }
 
 /**

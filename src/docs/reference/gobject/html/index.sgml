@@ -221,6 +221,7 @@
 <ANCHOR id="g-object-ref" href="gobject/gobject-The-Base-Object-Type.html#g-object-ref">
 <ANCHOR id="g-object-unref" href="gobject/gobject-The-Base-Object-Type.html#g-object-unref">
 <ANCHOR id="g-object-ref-sink" href="gobject/gobject-The-Base-Object-Type.html#g-object-ref-sink">
+<ANCHOR id="g-clear-object" href="gobject/gobject-The-Base-Object-Type.html#g-clear-object">
 <ANCHOR id="GInitiallyUnowned" href="gobject/gobject-The-Base-Object-Type.html#GInitiallyUnowned">
 <ANCHOR id="GInitiallyUnownedClass" href="gobject/gobject-The-Base-Object-Type.html#GInitiallyUnownedClass">
 <ANCHOR id="G-TYPE-INITIALLY-UNOWNED:CAPS" href="gobject/gobject-The-Base-Object-Type.html#G-TYPE-INITIALLY-UNOWNED:CAPS">
@@ -677,6 +678,7 @@
 <ANCHOR id="g-signal-parse-name" href="gobject/gobject-Signals.html#g-signal-parse-name">
 <ANCHOR id="g-signal-get-invocation-hint" href="gobject/gobject-Signals.html#g-signal-get-invocation-hint">
 <ANCHOR id="g-signal-type-cclosure-new" href="gobject/gobject-Signals.html#g-signal-type-cclosure-new">
+<ANCHOR id="g-signal-accumulator-first-wins" href="gobject/gobject-Signals.html#g-signal-accumulator-first-wins">
 <ANCHOR id="g-signal-accumulator-true-handled" href="gobject/gobject-Signals.html#g-signal-accumulator-true-handled">
 <ANCHOR id="gobject-Closures" href="gobject/gobject-Closures.html">
 <ANCHOR id="gobject-Closures.synopsis" href="gobject/gobject-Closures.html#gobject-Closures.synopsis">
@@ -711,6 +713,7 @@
 <ANCHOR id="g-closure-add-marshal-guards" href="gobject/gobject-Closures.html#g-closure-add-marshal-guards">
 <ANCHOR id="g-closure-set-meta-marshal" href="gobject/gobject-Closures.html#g-closure-set-meta-marshal">
 <ANCHOR id="g-source-set-closure" href="gobject/gobject-Closures.html#g-source-set-closure">
+<ANCHOR id="g-source-set-dummy-callback" href="gobject/gobject-Closures.html#g-source-set-dummy-callback">
 <ANCHOR id="G-TYPE-IO-CHANNEL:CAPS" href="gobject/gobject-Closures.html#G-TYPE-IO-CHANNEL:CAPS">
 <ANCHOR id="G-TYPE-IO-CONDITION:CAPS" href="gobject/gobject-Closures.html#G-TYPE-IO-CONDITION:CAPS">
 <ANCHOR id="g-cclosure-marshal-VOID--VOID" href="gobject/gobject-Closures.html#g-cclosure-marshal-VOID--VOID">
@@ -781,6 +784,15 @@
 <ANCHOR id="glib-mkenums" href="gobject/glib-mkenums.html">
 <ANCHOR id="glib-genmarshal" href="gobject/glib-genmarshal.html">
 <ANCHOR id="gobject-query" href="gobject/gobject-query.html">
-<ANCHOR id="annotation-glossterm-array" href="gobject/annotation-glossary.html#annotation-glossterm-array">
+<ANCHOR id="annotation-glossterm-out" href="gobject/annotation-glossary.html#annotation-glossterm-out">
 <ANCHOR id="annotation-glossterm-allow-none" href="gobject/annotation-glossary.html#annotation-glossterm-allow-none">
+<ANCHOR id="annotation-glossterm-inout" href="gobject/annotation-glossary.html#annotation-glossterm-inout">
+<ANCHOR id="annotation-glossterm-closure" href="gobject/annotation-glossary.html#annotation-glossterm-closure">
 <ANCHOR id="annotation-glossterm-transfer none" href="gobject/annotation-glossary.html#annotation-glossterm-transfer none">
+<ANCHOR id="annotation-glossterm-array" href="gobject/annotation-glossary.html#annotation-glossterm-array">
+<ANCHOR id="annotation-glossterm-element-type" href="gobject/annotation-glossary.html#annotation-glossterm-element-type">
+<ANCHOR id="annotation-glossterm-transfer container" href="gobject/annotation-glossary.html#annotation-glossterm-transfer container">
+<ANCHOR id="annotation-glossterm-transfer full" href="gobject/annotation-glossary.html#annotation-glossterm-transfer full">
+<ANCHOR id="annotation-glossterm-scope call" href="gobject/annotation-glossary.html#annotation-glossterm-scope call">
+<ANCHOR id="annotation-glossterm-type" href="gobject/annotation-glossary.html#annotation-glossterm-type">
+<ANCHOR id="annotation-glossterm-scope notified" href="gobject/annotation-glossary.html#annotation-glossterm-scope notified">

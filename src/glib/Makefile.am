@@ -82,6 +82,7 @@ MIRRORING_TAB_SOURCE = 				\
 EXTRA_DIST += 			\
 	makefile.msc.in		\
 	glib.rc.in		\
+	gen-iswide-table.py	\
 	gen-unicode-tables.pl	\
 	gen-script-table.pl	\
 	glibconfig.h.win32.in	\
@@ -177,7 +178,6 @@ libglib_2_0_la_SOURCES = 	\
 	gthreadprivate.h	\
 	gthreadpool.c   	\
 	gtimer.c		\
-	gtimezoneprivate.h 	\
 	gtimezone.c	 	\
 	gtree.c			\
 	guniprop.c		\
@@ -335,7 +335,7 @@ pcre_lib =
 pcre_inc =
 endif
 
-libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib)
+libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(GLIB_RT_LIBS)
 libglib_2_0_la_DEPENDENCIES = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ $(glib_win32_res) $(glib_def)
 
 libglib_2_0_la_LDFLAGS = $(GLIB_LINK_FLAGS) \
@@ -424,7 +424,7 @@ endif
 glib-2.0.lib: libglib-2.0.la glib.def
 	lib -machine:@LIB_EXE_MACHINE_FLAG@ -name:libglib-2.0-$(LT_CURRENT_MINUS_AGE).dll -def:glib.def -out:$@
 
-dist-hook: $(BUILT_EXTRA_DIST) ../build/win32/vs9/glib.vcproj
+dist-hook: $(BUILT_EXTRA_DIST) ../build/win32/vs9/glib.vcproj ../build/win32/vs10/glib.vcxproj ../build/win32/vs10/glib.vcxproj.filters
 	files='$(BUILT_EXTRA_DIST)'; \
 	for f in $$files; do \
 	  if test -f $$f; then d=.; else d=$(srcdir); fi; \
@@ -440,6 +440,31 @@ dist-hook: $(BUILT_EXTRA_DIST) ../build/win32/vs9/glib.vcproj
 		esac; \
 	done >libglib.sourcefiles
 	$(CPP) -P - <$(top_srcdir)/build/win32/vs9/glib.vcprojin >$@
+	rm libglib.sourcefiles
+
+../build/win32/vs10/glib.vcxproj: $(top_srcdir)/build/win32/vs10/glib.vcxprojin
+	for F in $(libglib_2_0_la_SOURCES); do \
+		case $$F in \
+		*-gcc.c) \
+			;; \
+		*.c) echo '    <ClCompile Include="..\..\..\glib\'$$F'" />' \
+		     ;; \
+		esac; \
+	done >libglib.vs10.sourcefiles
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/glib.vcxprojin >$@
+	rm libglib.vs10.sourcefiles
+	
+../build/win32/vs10/glib.vcxproj.filters: $(top_srcdir)/build/win32/vs10/glib.vcxproj.filtersin
+	for F in $(libglib_2_0_la_SOURCES); do \
+		case $$F in \
+		*-gcc.c) \
+			;; \
+		*.c) echo '    <ClCompile Include="..\..\..\glib\'$$F'"><Filter>Source Files</Filter></ClCompile>' \
+		     ;; \
+		esac; \
+	done >libglib.vs10.sourcefiles.filters
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/glib.vcxproj.filtersin >$@	
+	rm libglib.vs10.sourcefiles.filters
 
 distclean-local:
 	if test $(srcdir) = .; then :; else \

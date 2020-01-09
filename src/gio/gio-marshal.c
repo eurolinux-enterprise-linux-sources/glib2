@@ -855,7 +855,46 @@ _gio_marshal_VOID__STRING_BOOLEAN (GClosure     *closure,
             data2);
 }
 
-/* BOOL:OBJECT (./gio-marshal.list:24) */
+/* VOID:POINTER,INT,STRING (./gio-marshal.list:24) */
+void
+_gio_marshal_VOID__POINTER_INT_STRING (GClosure     *closure,
+                                       GValue       *return_value G_GNUC_UNUSED,
+                                       guint         n_param_values,
+                                       const GValue *param_values,
+                                       gpointer      invocation_hint G_GNUC_UNUSED,
+                                       gpointer      marshal_data)
+{
+  typedef void (*GMarshalFunc_VOID__POINTER_INT_STRING) (gpointer     data1,
+                                                         gpointer     arg_1,
+                                                         gint         arg_2,
+                                                         gpointer     arg_3,
+                                                         gpointer     data2);
+  register GMarshalFunc_VOID__POINTER_INT_STRING callback;
+  register GCClosure *cc = (GCClosure*) closure;
+  register gpointer data1, data2;
+
+  g_return_if_fail (n_param_values == 4);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_VOID__POINTER_INT_STRING) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            g_marshal_value_peek_pointer (param_values + 1),
+            g_marshal_value_peek_int (param_values + 2),
+            g_marshal_value_peek_string (param_values + 3),
+            data2);
+}
+
+/* BOOLEAN:OBJECT (./gio-marshal.list:25) */
 void
 _gio_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                               GValue       *return_value G_GNUC_UNUSED,
@@ -892,5 +931,231 @@ _gio_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                        data2);
 
   g_value_set_boolean (return_value, v_return);
+}
+
+/* INT:OBJECT (./gio-marshal.list:26) */
+void
+_gio_marshal_INT__OBJECT (GClosure     *closure,
+                          GValue       *return_value G_GNUC_UNUSED,
+                          guint         n_param_values,
+                          const GValue *param_values,
+                          gpointer      invocation_hint G_GNUC_UNUSED,
+                          gpointer      marshal_data)
+{
+  typedef gint (*GMarshalFunc_INT__OBJECT) (gpointer     data1,
+                                            gpointer     arg_1,
+                                            gpointer     data2);
+  register GMarshalFunc_INT__OBJECT callback;
+  register GCClosure *cc = (GCClosure*) closure;
+  register gpointer data1, data2;
+  gint v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values == 2);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_INT__OBJECT) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       g_marshal_value_peek_object (param_values + 1),
+                       data2);
+
+  g_value_set_int (return_value, v_return);
+}
+
+/* VOID:INT64 (./gio-marshal.list:27) */
+void
+_gio_marshal_VOID__INT64 (GClosure     *closure,
+                          GValue       *return_value G_GNUC_UNUSED,
+                          guint         n_param_values,
+                          const GValue *param_values,
+                          gpointer      invocation_hint G_GNUC_UNUSED,
+                          gpointer      marshal_data)
+{
+  typedef void (*GMarshalFunc_VOID__INT64) (gpointer     data1,
+                                            gint64       arg_1,
+                                            gpointer     data2);
+  register GMarshalFunc_VOID__INT64 callback;
+  register GCClosure *cc = (GCClosure*) closure;
+  register gpointer data1, data2;
+
+  g_return_if_fail (n_param_values == 2);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_VOID__INT64) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            g_marshal_value_peek_int64 (param_values + 1),
+            data2);
+}
+
+/* VOID:UINT64 (./gio-marshal.list:28) */
+void
+_gio_marshal_VOID__UINT64 (GClosure     *closure,
+                           GValue       *return_value G_GNUC_UNUSED,
+                           guint         n_param_values,
+                           const GValue *param_values,
+                           gpointer      invocation_hint G_GNUC_UNUSED,
+                           gpointer      marshal_data)
+{
+  typedef void (*GMarshalFunc_VOID__UINT64) (gpointer     data1,
+                                             guint64      arg_1,
+                                             gpointer     data2);
+  register GMarshalFunc_VOID__UINT64 callback;
+  register GCClosure *cc = (GCClosure*) closure;
+  register gpointer data1, data2;
+
+  g_return_if_fail (n_param_values == 2);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_VOID__UINT64) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            g_marshal_value_peek_uint64 (param_values + 1),
+            data2);
+}
+
+/* BOOLEAN:FLAGS (./gio-marshal.list:29) */
+void
+_gio_marshal_BOOLEAN__FLAGS (GClosure     *closure,
+                             GValue       *return_value G_GNUC_UNUSED,
+                             guint         n_param_values,
+                             const GValue *param_values,
+                             gpointer      invocation_hint G_GNUC_UNUSED,
+                             gpointer      marshal_data)
+{
+  typedef gboolean (*GMarshalFunc_BOOLEAN__FLAGS) (gpointer     data1,
+                                                   guint        arg_1,
+                                                   gpointer     data2);
+  register GMarshalFunc_BOOLEAN__FLAGS callback;
+  register GCClosure *cc = (GCClosure*) closure;
+  register gpointer data1, data2;
+  gboolean v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values == 2);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_BOOLEAN__FLAGS) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       g_marshal_value_peek_flags (param_values + 1),
+                       data2);
+
+  g_value_set_boolean (return_value, v_return);
+}
+
+/* BOOLEAN:OBJECT,FLAGS (./gio-marshal.list:30) */
+void
+_gio_marshal_BOOLEAN__OBJECT_FLAGS (GClosure     *closure,
+                                    GValue       *return_value G_GNUC_UNUSED,
+                                    guint         n_param_values,
+                                    const GValue *param_values,
+                                    gpointer      invocation_hint G_GNUC_UNUSED,
+                                    gpointer      marshal_data)
+{
+  typedef gboolean (*GMarshalFunc_BOOLEAN__OBJECT_FLAGS) (gpointer     data1,
+                                                          gpointer     arg_1,
+                                                          guint        arg_2,
+                                                          gpointer     data2);
+  register GMarshalFunc_BOOLEAN__OBJECT_FLAGS callback;
+  register GCClosure *cc = (GCClosure*) closure;
+  register gpointer data1, data2;
+  gboolean v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values == 3);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_BOOLEAN__OBJECT_FLAGS) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       g_marshal_value_peek_object (param_values + 1),
+                       g_marshal_value_peek_flags (param_values + 2),
+                       data2);
+
+  g_value_set_boolean (return_value, v_return);
+}
+
+/* OBJECT:VOID (./gio-marshal.list:31) */
+void
+_gio_marshal_OBJECT__VOID (GClosure     *closure,
+                           GValue       *return_value G_GNUC_UNUSED,
+                           guint         n_param_values,
+                           const GValue *param_values,
+                           gpointer      invocation_hint G_GNUC_UNUSED,
+                           gpointer      marshal_data)
+{
+  typedef GObject* (*GMarshalFunc_OBJECT__VOID) (gpointer     data1,
+                                                 gpointer     data2);
+  register GMarshalFunc_OBJECT__VOID callback;
+  register GCClosure *cc = (GCClosure*) closure;
+  register gpointer data1, data2;
+  GObject* v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values == 1);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_OBJECT__VOID) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       data2);
+
+  g_value_take_object (return_value, v_return);
 }
 

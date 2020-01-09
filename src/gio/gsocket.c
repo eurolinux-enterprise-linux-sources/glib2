@@ -50,6 +50,7 @@
 #include "gioerror.h"
 #include "gioenums.h"
 #include "gioerror.h"
+#include "gio-marshal.h"
 #include "gnetworkingprivate.h"
 #include "gsocketaddress.h"
 #include "gsocketcontrolmessage.h"
@@ -1224,7 +1225,7 @@ g_socket_get_fd (GSocket *socket)
  * useful if the socket has been bound to a local address,
  * either explicitly or implicitly when connecting.
  *
- * Returns: a #GSocketAddress or %NULL on error.
+ * Returns: (transfer full): a #GSocketAddress or %NULL on error.
  *     Free the returned object with g_object_unref().
  *
  * Since: 2.22
@@ -1257,7 +1258,7 @@ g_socket_get_local_address (GSocket  *socket,
  * Try to get the remove address of a connected socket. This is only
  * useful for connection oriented sockets that have been connected.
  *
- * Returns: a #GSocketAddress or %NULL on error.
+ * Returns: (transfer full): a #GSocketAddress or %NULL on error.
  *     Free the returned object with g_object_unref().
  *
  * Since: 2.22
@@ -1478,7 +1479,7 @@ g_socket_speaks_ipv4 (GSocket *socket)
 /**
  * g_socket_accept:
  * @socket: a #GSocket.
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * Accept incoming connections on a connection-based socket. This removes
@@ -1492,7 +1493,7 @@ g_socket_speaks_ipv4 (GSocket *socket)
  * or return %G_IO_ERROR_WOULD_BLOCK if non-blocking I/O is enabled.
  * To be notified of an incoming connection, wait for the %G_IO_IN condition.
  *
- * Returns: a new #GSocket, or %NULL on error.
+ * Returns: (transfer full): a new #GSocket, or %NULL on error.
  *     Free the returned object with g_object_unref().
  *
  * Since: 2.22
@@ -1590,7 +1591,7 @@ g_socket_accept (GSocket       *socket,
  * g_socket_connect:
  * @socket: a #GSocket.
  * @address: a #GSocketAddress specifying the remote address.
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * Connect the socket to the specified remote address.
@@ -1736,7 +1737,7 @@ g_socket_check_connect_result (GSocket  *socket,
  * @buffer: a buffer to read data into (which should be at least @size
  *     bytes long).
  * @size: the number of bytes you want to read from the socket
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * Receive data (up to @size bytes) from a socket. This is mainly used by
@@ -1785,7 +1786,7 @@ g_socket_receive (GSocket       *socket,
  *     bytes long).
  * @size: the number of bytes you want to read from the socket
  * @blocking: whether to do blocking or non-blocking I/O
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * This behaves exactly the same as g_socket_receive(), except that
@@ -1863,7 +1864,7 @@ g_socket_receive_with_blocking (GSocket       *socket,
  * @buffer: a buffer to read data into (which should be at least @size
  *     bytes long).
  * @size: the number of bytes you want to read from the socket
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * Receive data (up to @size bytes) from a socket.
@@ -1912,9 +1913,9 @@ g_socket_receive_from (GSocket         *socket,
 /**
  * g_socket_send:
  * @socket: a #GSocket
- * @buffer: the buffer containing the data to send.
+ * @buffer: (array length=size): the buffer containing the data to send.
  * @size: the number of bytes to send
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * Tries to send @size bytes from @buffer on the socket. This is
@@ -1952,10 +1953,10 @@ g_socket_send (GSocket       *socket,
 /**
  * g_socket_send_with_blocking:
  * @socket: a #GSocket
- * @buffer: the buffer containing the data to send.
+ * @buffer: (array length=size): the buffer containing the data to send.
  * @size: the number of bytes to send
  * @blocking: whether to do blocking or non-blocking I/O
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * This behaves exactly the same as g_socket_send(), except that
@@ -2031,9 +2032,9 @@ g_socket_send_with_blocking (GSocket       *socket,
  * g_socket_send_to:
  * @socket: a #GSocket
  * @address: a #GSocketAddress, or %NULL
- * @buffer: the buffer containing the data to send.
+ * @buffer: (array length=size): the buffer containing the data to send.
  * @size: the number of bytes to send
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * Tries to send @size bytes from @buffer to @address. If @address is
@@ -2104,7 +2105,7 @@ g_socket_shutdown (GSocket   *socket,
 
   g_return_val_if_fail (G_IS_SOCKET (socket), TRUE);
 
-  if (!check_socket (socket, NULL))
+  if (!check_socket (socket, error))
     return FALSE;
 
   /* Do nothing? */
@@ -2131,7 +2132,7 @@ g_socket_shutdown (GSocket   *socket,
     {
       int errsv = get_socket_errno ();
       g_set_error (error, G_IO_ERROR, socket_io_error_from_errno (errsv),
-		   _("Unable to create socket: %s"), socket_strerror (errsv));
+		   _("Unable to shutdown socket: %s"), socket_strerror (errsv));
       return FALSE;
     }
 
@@ -2191,7 +2192,7 @@ g_socket_close (GSocket  *socket,
   if (socket->priv->closed)
     return TRUE; /* Multiple close not an error */
 
-  if (!check_socket (socket, NULL))
+  if (!check_socket (socket, error))
     return FALSE;
 
   while (1)
@@ -2411,7 +2412,7 @@ typedef struct {
   GIOCondition  condition;
   GCancellable *cancellable;
   GPollFD       cancel_pollfd;
-  GTimeVal      timeout_time;
+  gint64        timeout_time;
 } GSocketSource;
 
 static gboolean
@@ -2423,19 +2424,20 @@ socket_source_prepare (GSource *source,
   if (g_cancellable_is_cancelled (socket_source->cancellable))
     return TRUE;
 
-  if (socket_source->timeout_time.tv_sec)
+  if (socket_source->timeout_time)
     {
-      GTimeVal now;
+      gint64 now;
 
-      g_source_get_current_time (source, &now);
-      *timeout = ((socket_source->timeout_time.tv_sec - now.tv_sec) * 1000 +
-		  (socket_source->timeout_time.tv_usec - now.tv_usec) / 1000);
+      now = g_source_get_time (source);
+      /* Round up to ensure that we don't try again too early */
+      *timeout = (socket_source->timeout_time - now + 999) / 1000;
       if (*timeout < 0)
-	{
-	  socket_source->socket->priv->timed_out = TRUE;
-	  socket_source->pollfd.revents = socket_source->condition & (G_IO_IN | G_IO_OUT);
-	  return TRUE;
-	}
+        {
+          socket_source->socket->priv->timed_out = TRUE;
+          socket_source->pollfd.revents = socket_source->condition & (G_IO_IN | G_IO_OUT);
+          *timeout = 0;
+          return TRUE;
+        }
     }
   else
     *timeout = -1;
@@ -2466,6 +2468,10 @@ socket_source_dispatch (GSource     *source,
   GSocketSourceFunc func = (GSocketSourceFunc)callback;
   GSocketSource *socket_source = (GSocketSource *)source;
 
+#ifdef G_OS_WIN32
+  socket_source->pollfd.revents = update_condition (socket_source->socket);
+#endif
+
   return (*func) (socket_source->socket,
 		  socket_source->pollfd.revents & socket_source->condition,
 		  user_data);
@@ -2492,12 +2498,42 @@ socket_source_finalize (GSource *source)
     }
 }
 
+static gboolean
+socket_source_closure_callback (GSocket      *socket,
+				GIOCondition  condition,
+				gpointer      data)
+{
+  GClosure *closure = data;
+
+  GValue params[2] = { { 0, }, { 0, } };
+  GValue result_value = { 0, };
+  gboolean result;
+
+  g_value_init (&result_value, G_TYPE_BOOLEAN);
+
+  g_value_init (&params[0], G_TYPE_SOCKET);
+  g_value_set_object (&params[0], socket);
+  g_value_init (&params[1], G_TYPE_IO_CONDITION);
+  g_value_set_flags (&params[1], condition);
+
+  g_closure_invoke (closure, &result_value, 2, params, NULL);
+
+  result = g_value_get_boolean (&result_value);
+  g_value_unset (&result_value);
+  g_value_unset (&params[0]);
+  g_value_unset (&params[1]);
+
+  return result;
+}
+
 static GSourceFuncs socket_source_funcs =
 {
   socket_source_prepare,
   socket_source_check,
   socket_source_dispatch,
-  socket_source_finalize
+  socket_source_finalize,
+  (GSourceFunc)socket_source_closure_callback,
+  (GSourceDummyMarshal)_gio_marshal_BOOLEAN__FLAGS,
 };
 
 static GSource *
@@ -2546,24 +2582,20 @@ socket_source_new (GSocket      *socket,
   g_source_add_poll (source, &socket_source->pollfd);
 
   if (socket->priv->timeout)
-    {
-      g_get_current_time (&socket_source->timeout_time);
-      socket_source->timeout_time.tv_sec += socket->priv->timeout;
-    }
+    socket_source->timeout_time = g_get_monotonic_time () +
+                                  socket->priv->timeout * 1000000;
+
   else
-    {
-      socket_source->timeout_time.tv_sec = 0;
-      socket_source->timeout_time.tv_usec = 0;
-    }
+    socket_source->timeout_time = 0;
 
   return source;
 }
 
 /**
- * g_socket_create_source:
+ * g_socket_create_source: (skip)
  * @socket: a #GSocket
  * @condition: a #GIOCondition mask to monitor
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  *
  * Creates a %GSource that can be attached to a %GMainContext to monitor
  * for the availibility of the specified @condition on the socket.
@@ -2585,7 +2617,7 @@ socket_source_new (GSocket      *socket,
  * marked as having had a timeout, and so the next #GSocket I/O method
  * you call will then fail with a %G_IO_ERROR_TIMED_OUT.
  *
- * Returns: a newly allocated %GSource, free with g_source_unref().
+ * Returns: (transfer full): a newly allocated %GSource, free with g_source_unref().
  *
  * Since: 2.22
  */
@@ -2664,7 +2696,7 @@ g_socket_condition_check (GSocket      *socket,
  * g_socket_condition_wait:
  * @socket: a #GSocket
  * @condition: a #GIOCondition mask to wait for
- * @cancellable: a #GCancellable, or %NULL
+ * @cancellable: (allow-none): a #GCancellable, or %NULL
  * @error: a #GError pointer, or %NULL
  *
  * Waits for @condition to become true on @socket. When the condition
@@ -2791,13 +2823,13 @@ g_socket_condition_wait (GSocket       *socket,
  * g_socket_send_message:
  * @socket: a #GSocket
  * @address: a #GSocketAddress, or %NULL
- * @vectors: an array of #GOutputVector structs
+ * @vectors: (array length=num_vectors): an array of #GOutputVector structs
  * @num_vectors: the number of elements in @vectors, or -1
- * @messages: a pointer to an array of #GSocketControlMessages, or
- *   %NULL.
+ * @messages: (array length=num_messages) (allow-none): a pointer to an
+ *   array of #GSocketControlMessages, or %NULL.
  * @num_messages: number of elements in @messages, or -1.
  * @flags: an int containing #GSocketMsgFlags flags
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
  * Send data to @address on @socket.  This is the most complicated and
@@ -3089,14 +3121,14 @@ g_socket_send_message (GSocket                *socket,
  * g_socket_receive_message:
  * @socket: a #GSocket
  * @address: a pointer to a #GSocketAddress pointer, or %NULL
- * @vectors: an array of #GInputVector structs
+ * @vectors: (array length=num_vectors): an array of #GInputVector structs
  * @num_vectors: the number of elements in @vectors, or -1
- * @messages: a pointer which may be filled with an array of
- *     #GSocketControlMessages, or %NULL
+ * @messages: (array length=num_messages) (allow-none): a pointer which
+ *    may be filled with an array of #GSocketControlMessages, or %NULL
  * @num_messages: a pointer which will be filled with the number of
  *    elements in @messages, or %NULL
  * @flags: a pointer to an int containing #GSocketMsgFlags flags
- * @cancellable: a %GCancellable or %NULL
+ * @cancellable: (allow-none): a %GCancellable or %NULL
  * @error: a #GError pointer, or %NULL
  *
  * Receive data from a socket.  This is the most complicated and
@@ -3466,7 +3498,7 @@ g_socket_receive_message (GSocket                 *socket,
  * g_unix_connection_send_credentials() /
  * g_unix_connection_receive_credentials() functions.
  *
- * Returns: %NULL if @error is set, otherwise a #GCredentials object
+ * Returns: (transfer full): %NULL if @error is set, otherwise a #GCredentials object
  * that must be freed with g_object_unref().
  *
  * Since: 2.26

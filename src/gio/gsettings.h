@@ -71,6 +71,7 @@ struct _GSettings
 GType                   g_settings_get_type                             (void);
 
 const gchar * const *   g_settings_list_schemas                         (void);
+const gchar * const *   g_settings_list_relocatable_schemas             (void);
 GSettings *             g_settings_new                                  (const gchar        *schema);
 GSettings *             g_settings_new_with_path                        (const gchar        *schema,
                                                                          const gchar        *path);
@@ -81,6 +82,11 @@ GSettings *             g_settings_new_with_backend_and_path            (const g
                                                                          const gchar        *path);
 gchar **                g_settings_list_children                        (GSettings          *settings);
 gchar **                g_settings_list_keys                            (GSettings          *settings);
+GVariant *              g_settings_get_range                            (GSettings          *settings,
+                                                                         const gchar        *key);
+gboolean                g_settings_range_check                          (GSettings          *settings,
+                                                                         const gchar        *key,
+                                                                         GVariant           *value);
 
 gboolean                g_settings_set_value                            (GSettings          *settings,
                                                                          const gchar        *key,
@@ -179,8 +185,9 @@ typedef gboolean      (*GSettingsBindGetMapping)                        (GValue 
 /**
  * GSettingsGetMapping:
  * @value: the #GVariant to map, or %NULL
- * @result: the result of the mapping
- * @user_data: the user data that was passed to g_settings_get_mapped()
+ * @result: (out): the result of the mapping
+ * @user_data: (closure): the user data that was passed to
+ * g_settings_get_mapped()
  * @returns: %TRUE if the conversion succeeded, %FALSE in case of an error
  *
  * The type of the function that is used to convert from a value stored

@@ -56,6 +56,8 @@ gboolean         g_desktop_app_info_get_is_hidden     (GDesktopAppInfo *info);
 void             g_desktop_app_info_set_desktop_env   (const char      *desktop_env);
 
 
+#ifndef G_DISABLE_DEPRECATED
+
 #define G_TYPE_DESKTOP_APP_INFO_LOOKUP           (g_desktop_app_info_lookup_get_type ())
 #define G_DESKTOP_APP_INFO_LOOKUP(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), G_TYPE_DESKTOP_APP_INFO_LOOKUP, GDesktopAppInfoLookup))
 #define G_IS_DESKTOP_APP_INFO_LOOKUP(obj)	 (G_TYPE_CHECK_INSTANCE_TYPE ((obj), G_TYPE_DESKTOP_APP_INFO_LOOKUP))
@@ -90,6 +92,32 @@ GType     g_desktop_app_info_lookup_get_type                   (void) G_GNUC_CON
 
 GAppInfo *g_desktop_app_info_lookup_get_default_for_uri_scheme (GDesktopAppInfoLookup *lookup,
                                                                 const char            *uri_scheme);
+
+/**
+ * GDesktopAppLaunchCallback:
+ * @appinfo: a #GDesktopAppInfo
+ * @pid: Process identifier
+ * @user_data: User data
+ *
+ * During invocation, g_desktop_app_info_launch_uris_as_manager() may
+ * create one or more child processes.  This callback is invoked once
+ * for each, providing the process ID.
+ */
+typedef void (*GDesktopAppLaunchCallback) (GDesktopAppInfo  *appinfo,
+					   GPid              pid,
+					   gpointer          user_data);
+
+gboolean    g_desktop_app_info_launch_uris_as_manager (GDesktopAppInfo            *appinfo,
+						       GList                      *uris,
+						       GAppLaunchContext          *launch_context,
+						       GSpawnFlags                 spawn_flags,
+						       GSpawnChildSetupFunc        user_setup,
+						       gpointer                    user_setup_data,
+						       GDesktopAppLaunchCallback   pid_callback,
+						       gpointer                    pid_callback_data,
+						       GError                    **error);
+
+#endif /* G_DISABLE_DEPRECATED */
 
 G_END_DECLS
 

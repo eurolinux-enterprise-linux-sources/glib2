@@ -360,7 +360,7 @@ g_buffered_input_stream_new_sized (GInputStream *base_stream,
  * g_buffered_input_stream_fill:
  * @stream: a #GBufferedInputStream
  * @count: the number of bytes that will be read from the stream
- * @cancellable: optional #GCancellable object, %NULL to ignore
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore
  * @error: location to store the error occuring, or %NULL to ignore
  *
  * Tries to read @count bytes from the stream into the buffer.
@@ -447,9 +447,9 @@ async_fill_callback_wrapper (GObject      *source_object,
  * @count: the number of bytes that will be read from the stream
  * @io_priority: the <link linkend="io-priority">I/O priority</link>
  *     of the request
- * @cancellable: optional #GCancellable object
- * @callback: a #GAsyncReadyCallback
- * @user_data: a #gpointer
+ * @cancellable: (allow-none): optional #GCancellable object
+ * @callback: (scope async): a #GAsyncReadyCallback
+ * @user_data: (closure): a #gpointer
  *
  * Reads data into @stream's buffer asynchronously, up to @count size.
  * @io_priority can be used to prioritize reads. For the synchronous
@@ -496,11 +496,10 @@ g_buffered_input_stream_fill_async (GBufferedInputStream *stream,
 
   if (!g_input_stream_set_pending (G_INPUT_STREAM (stream), &error))
     {
-      g_simple_async_report_gerror_in_idle (G_OBJECT (stream),
+      g_simple_async_report_take_gerror_in_idle (G_OBJECT (stream),
                                             callback,
                                             user_data,
                                             error);
-      g_error_free (error);
       return;
     }
 
@@ -603,13 +602,14 @@ g_buffered_input_stream_peek (GBufferedInputStream *stream,
 /**
  * g_buffered_input_stream_peek_buffer:
  * @stream: a #GBufferedInputStream
- * @count: a #gsize to get the number of bytes available in the buffer
+ * @count: (out): a #gsize to get the number of bytes available in the buffer
  *
  * Returns the buffer with the currently available bytes. The returned
  * buffer must not be modified and will become invalid when reading from
  * the stream or filling the buffer.
  *
- * Returns: read-only buffer
+ * Returns: (array length=count) (element-type guint8) (transfer none):
+ *          read-only buffer
  */
 const void*
 g_buffered_input_stream_peek_buffer (GBufferedInputStream *stream,
@@ -840,7 +840,7 @@ g_buffered_input_stream_read (GInputStream *stream,
 /**
  * g_buffered_input_stream_read_byte:
  * @stream: a #GBufferedInputStream
- * @cancellable: optional #GCancellable object, %NULL to ignore
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore
  * @error: location to store the error occuring, or %NULL to ignore
  *
  * Tries to read a single byte from the stream or the buffer. Will block
@@ -937,8 +937,7 @@ fill_async_callback (GObject      *source_object,
   g_simple_async_result_set_op_res_gssize (simple, res);
   if (res == -1)
     {
-      g_simple_async_result_set_from_error (simple, error);
-      g_error_free (error);
+      g_simple_async_result_take_error (simple, error);
     }
   else
     {
@@ -1049,13 +1048,12 @@ large_read_callback (GObject *source_object,
 
   /* Only report the error if we've not already read some data */
   if (nread < 0 && data->bytes_read == 0)
-    g_simple_async_result_set_from_error (simple, error);
+    g_simple_async_result_take_error (simple, error);
+  else if (error)
+    g_error_free (error);
 
   if (nread > 0)
     data->bytes_read += nread;
-
-  if (error)
-    g_error_free (error);
 
   /* Complete immediately, not in idle, since we're already
    * in a mainloop callout
@@ -1087,8 +1085,9 @@ read_fill_buffer_callback (GObject      *source_object,
                                                result, &error);
 
   if (nread < 0 && data->bytes_read == 0)
-    g_simple_async_result_set_from_error (simple, error);
-
+    g_simple_async_result_take_error (simple, error);
+  else if (error)
+    g_error_free (error);
 
   if (nread > 0)
     {
@@ -1099,9 +1098,6 @@ read_fill_buffer_callback (GObject      *source_object,
       data->bytes_read += data->count;
       priv->pos += data->count;
     }
-
-  if (error)
-    g_error_free (error);
 
   /* Complete immediately, not in idle, since we're already
    * in a mainloop callout
@@ -1234,13 +1230,12 @@ large_skip_callback (GObject      *source_object,
 
   /* Only report the error if we've not already read some data */
   if (nread < 0 && data->bytes_skipped == 0)
-    g_simple_async_result_set_from_error (simple, error);
+    g_simple_async_result_take_error (simple, error);
+  else if (error)
+    g_error_free (error);
 
   if (nread > 0)
     data->bytes_skipped += nread;
-
-  if (error)
-    g_error_free (error);
 
   /* Complete immediately, not in idle, since we're already
    * in a mainloop callout
@@ -1272,7 +1267,9 @@ skip_fill_buffer_callback (GObject      *source_object,
                                                result, &error);
 
   if (nread < 0 && data->bytes_skipped == 0)
-    g_simple_async_result_set_from_error (simple, error);
+    g_simple_async_result_take_error (simple, error);
+  else if (error)
+    g_error_free (error);
 
   if (nread > 0)
     {
@@ -1282,9 +1279,6 @@ skip_fill_buffer_callback (GObject      *source_object,
       data->bytes_skipped += data->count;
       priv->pos += data->count;
     }
-
-  if (error)
-    g_error_free (error);
 
   /* Complete immediately, not in idle, since we're already
    * in a mainloop callout

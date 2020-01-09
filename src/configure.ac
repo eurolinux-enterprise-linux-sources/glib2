@@ -21,9 +21,9 @@ m4_define(glib_configure_ac)
 # set glib_binary_age _and_ glib_interface_age to 0.
 #
 m4_define([glib_major_version], [2])
-m4_define([glib_minor_version], [26])
-m4_define([glib_micro_version], [1])
-m4_define([glib_interface_age], [1])
+m4_define([glib_minor_version], [28])
+m4_define([glib_micro_version], [8])
+m4_define([glib_interface_age], [8])
 m4_define([glib_binary_age],
           [m4_eval(100 * glib_minor_version + glib_micro_version)])
 m4_define([glib_version],
@@ -49,16 +49,17 @@ AC_INIT(glib, [glib_version],
 
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR([glib/glib.h])
+AC_CONFIG_MACRO_DIR([m4macros])
 
 # Save this value here, since automake will set cflags later
 cflags_set=${CFLAGS+set}
 
 AM_INIT_AUTOMAKE([1.10 no-define])
 
-# Support silent build rules, requires at least automake-1.11. Enable
-# by either passing --enable-silent-rules to configure or passing V=0
+# Support silent build rules, requires at least automake-1.11. Disable
+# by either passing --disable-silent-rules to configure or passing V=1
 # to make
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 GLIB_MAJOR_VERSION=glib_major_version
 GLIB_MINOR_VERSION=glib_minor_version
@@ -224,10 +225,6 @@ AC_ARG_ENABLE(rebuilds,
               [AC_HELP_STRING([--disable-rebuilds],
                               [disable all source autogeneration rules])],,
               [enable_rebuilds=yes])
-AC_ARG_ENABLE(visibility,
-              [AC_HELP_STRING([--disable-visibility],
-                              [don't use ELF visibility attributes])],,
-              [enable_visibility=yes])
 
 if test "x$enable_threads" != "xyes"; then
   enable_threads=no
@@ -294,10 +291,6 @@ else
   if test "x$enable_debug" = "xno"; then
     GLIB_DEBUG_FLAGS="$GLIB_DEBUG_FLAGS -DG_DISABLE_ASSERT -DG_DISABLE_CHECKS"
   fi
-fi
-
-if test "x$enable_visibility" = "xno"; then
-  GLIB_DEBUG_FLAGS="$GLIB_DEBUG_FLAGS -DDISABLE_VISIBILITY"
 fi
 
 # Ensure MSVC-compatible struct packing convention is used when
@@ -864,7 +857,8 @@ AC_CHECK_HEADERS([sys/time.h sys/times.h sys/wait.h unistd.h values.h])
 AC_CHECK_HEADERS([sys/select.h sys/types.h stdint.h inttypes.h sched.h malloc.h])
 AC_CHECK_HEADERS([sys/vfs.h sys/mount.h sys/vmount.h sys/statfs.h sys/statvfs.h])
 AC_CHECK_HEADERS([mntent.h sys/mnttab.h sys/vfstab.h sys/mntctl.h sys/sysctl.h fstab.h])
-AC_CHECK_HEADERS([sys/uio.h])
+AC_CHECK_HEADERS([sys/uio.h sys/mkdev.h])
+AC_CHECK_HEADERS([linux/magic.h])
 
 # check for structure fields
 AC_CHECK_MEMBERS([struct stat.st_mtimensec, struct stat.st_mtim.tv_nsec, struct stat.st_atimensec, struct stat.st_atim.tv_nsec, struct stat.st_ctimensec, struct stat.st_ctim.tv_nsec])
@@ -882,7 +876,7 @@ AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_blocks, struct statfs.f
 #endif])
 # struct statvfs.f_basetype is available on Solaris but not for Linux. 
 AC_CHECK_MEMBERS([struct statvfs.f_basetype],,, [#include <sys/statvfs.h>])
-AC_CHECK_MEMBERS([struct tm.tm_gmtoff])
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.__tm_gmtoff],,,[#include <time.h>])
 
 # Checks for libcharset
 AM_LANGINFO_CODESET
@@ -955,7 +949,6 @@ AC_CHECK_FUNCS(lstat strerror strsignal memmove vsnprintf stpcpy strcasecmp strn
 AC_CHECK_FUNCS(chown lchmod lchown fchmod fchown link statvfs statfs utimes getgrgid getpwuid)
 AC_CHECK_FUNCS(getmntent_r setmntent endmntent hasmntopt getmntinfo)
 # Check for high-resolution sleep functions
-AC_CHECK_FUNCS(nanosleep nsleep)
 AC_CHECK_FUNCS(splice)
 
 AC_CHECK_HEADERS(crt_externs.h)
@@ -2384,8 +2377,10 @@ AC_CHECK_FUNCS(clock_gettime, [], [
     AC_DEFINE(HAVE_CLOCK_GETTIME, 1)
     G_THREAD_LIBS="$G_THREAD_LIBS -lrt"
     G_THREAD_LIBS_FOR_GTHREAD="$G_THREAD_LIBS_FOR_GTHREAD -lrt"
+    GLIB_RT_LIBS="-lrt"
   ])
 ])
+AC_SUBST(GLIB_RT_LIBS)
 
 AC_CACHE_CHECK(for monotonic clocks,
     glib_cv_monotonic_clock,AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
@@ -2538,21 +2533,20 @@ dnl ************************
 AC_MSG_CHECKING([for futex(2) system call])
 AC_COMPILE_IFELSE([ 
 #include <linux/futex.h>
-#include <syscall.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 int
 main (void)
 {
-  /* it's not like this actually runs or anything... */
-  syscall (SYS_futex, NULL, FUTEX_WAKE, FUTEX_WAIT);
+  /* it is not like this actually runs or anything... */
+  syscall (__NR_futex, NULL, FUTEX_WAKE, FUTEX_WAIT);
   return 0;
 }
 ],
 [
   AC_MSG_RESULT(yes)
-  AC_DEFINE(HAVE_FUTEX, [test "$have_futex" = "yes"],
-            [we have the futex(2) system call])
+  AC_DEFINE(HAVE_FUTEX, 1, [we have the futex(2) system call])
 ],
 [
   AC_MSG_RESULT(no)
@@ -2617,7 +2611,7 @@ AC_MSG_RESULT($broken_poll)
 dnl *********************
 dnl *** GRegex checks ***
 dnl *********************
-PCRE_REQUIRED_VERSION=7.2
+PCRE_REQUIRED_VERSION=8.11
 
 # Check if we should compile GRegex
 AC_ARG_ENABLE(regex, AC_HELP_STRING([--disable-regex],
@@ -3713,6 +3707,7 @@ build/Makefile
 build/win32/Makefile
 build/win32/dirent/Makefile
 build/win32/vs9/Makefile
+build/win32/vs10/Makefile
 glib/Makefile
 glib/glib.stp
 glib/libcharset/Makefile

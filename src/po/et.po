@@ -2,26 +2,27 @@
 # Estonian translation of GLib.
 #
 # Copyright (C) 2002, 2005, 2006 Free Software Foundation, Inc.
-# Copyright (C) 2007-2010 The GNOME Project.
+# Copyright (C) 2007–2011 The GNOME Project.
 # This file is distributed under the same license as the GLib package.
 #
 # Allan Sims <allsi eau ee>, 2002.
-# Ivar Smolin <okul linux ee>, 2005-2010.
+# Ivar Smolin <okul linux ee>, 2005–2011.
 # Priit Laes <plaes plaes org>, 2005, 2007, 2009
 # Mattias Põldaru <mahfiaz gmail com>, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: glib 2.26\n"
+"Project-Id-Version: glib MASTER\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=glib&component=general\n"
-"POT-Creation-Date: 2010-09-20 13:28+0000\n"
-"PO-Revision-Date: 2010-09-19 14:51+0300\n"
-"Last-Translator: Mattias Põldaru <mahfiaz gmail com>\n"
+"POT-Creation-Date: 2010-12-17 16:41+0000\n"
+"PO-Revision-Date: 2011-01-12 10:15+0200\n"
+"Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <gnome-et@linux.ee>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: et\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #, c-format
@@ -216,7 +217,7 @@ msgstr "Apr"
 
 msgctxt "abbreviated month name"
 msgid "May"
-msgstr ""
+msgstr "Mai"
 
 msgctxt "abbreviated month name"
 msgid "Jun"
@@ -460,8 +461,8 @@ msgid ""
 "Failed to parse '%-.*s', which should have been a digit inside a character "
 "reference (&#234; for example) - perhaps the digit is too large"
 msgstr ""
-"Viga '%-.*s' parsimisel. See võiks olla märgiviites olev number (näiteks "
-"&#234;) - võibolla on number liiga suur"
+"Viga '%-.*s' analüüsimisel. See võiks olla märgiviites olev number (näiteks "
+"&#234;) - võib-olla on number liiga suur"
 
 msgid ""
 "Character reference did not end with a semicolon; most likely you used an "
@@ -503,8 +504,8 @@ msgstr ""
 
 #, c-format
 msgid ""
-"Odd character '%s', expected a '>' character to end the empty-element tag '%"
-"s'"
+"Odd character '%s', expected a '>' character to end the empty-element tag "
+"'%s'"
 msgstr ""
 "Veider märk '%s', elemendi '%s' lõpusildi lõpetamiseks oodatakse märki '>'"
 
@@ -830,7 +831,7 @@ msgstr "tundmatu paojada"
 
 #, c-format
 msgid "Error while parsing replacement text \"%s\" at char %lu: %s"
-msgstr "Viga asendusteksti \"%s\" parsimisel märgi %lu kohal: %s"
+msgstr "Viga asendusteksti \"%s\" analüüsimisel märgi %lu kohal: %s"
 
 msgid "Quoted text doesn't begin with a quotation mark"
 msgstr "Tsiteeritav tekst ei alga jutumärgiga"
@@ -977,7 +978,7 @@ msgstr "Arv '%s' %s jaoks on väljaspool lubatud piire"
 
 #, c-format
 msgid "Error parsing option %s"
-msgstr "Viga võtme parsimisel: %s"
+msgstr "Viga võtme analüüsimisel: %s"
 
 #, c-format
 msgid "Missing argument for %s"
@@ -1117,9 +1118,9 @@ msgstr "Sinu platvormile puudub GCredentialsi tugi"
 msgid "Unexpected early end-of-stream"
 msgstr "Ootamatult varajane voolõpp"
 
-#, fuzzy, c-format
+#, c-format
 msgid "Unsupported key `%s' in address entry `%s'"
-msgstr "Toetamata sokliaadress"
+msgstr "Toetamata võti \"%s\" aadressikirjes \"%s\""
 
 #, c-format
 msgid ""
@@ -1172,7 +1173,6 @@ msgstr ""
 msgid "Error in address `%s' - the noncefile attribute is missing or malformed"
 msgstr ""
 
-#| msgid "Error connecting: "
 msgid "Error auto-launching: "
 msgstr "Viga automaatsel käivitamisel: "
 
@@ -1181,7 +1181,6 @@ msgid "Unknown or unsupported transport `%s' for address `%s'"
 msgstr ""
 
 #, fuzzy, c-format
-#| msgid "Error opening file '%s': %s"
 msgid "Error opening nonce file `%s': %s"
 msgstr "Viga faili '%s' avamisel: %s"
 
@@ -1283,22 +1282,21 @@ msgstr ""
 msgid "Didn't find cookie with id %d in the keyring at `%s'"
 msgstr "Küpsist id-ga %d võtmerõngas kohas '%s' ei leitud"
 
-#, fuzzy, c-format
+#, c-format
 msgid "Error deleting stale lock file `%s': %s"
-msgstr "Viga failist '%s' lugemisel: %s"
+msgstr "Viga iganenud lukufaili '%s' kustutamisel: %s"
 
-#, fuzzy, c-format
-#| msgid "Error creating lock-file `%s': %s"
+#, c-format
 msgid "Error creating lock file `%s': %s"
-msgstr "Viga likufaili '%s' loomisel: %s"
+msgstr "Viga lukufaili '%s' loomisel: %s"
 
-#, fuzzy, c-format
+#, c-format
 msgid "Error closing (unlinked) lock file `%s': %s"
-msgstr "Viga faili '%s' avamisel: %s"
+msgstr "Viga (kustutatud) lukufaili '%s' sulgemisel: %s"
 
-#, fuzzy, c-format
+#, c-format
 msgid "Error unlinking lock file `%s': %s"
-msgstr "Viga faili '%s' avamisel: %s"
+msgstr "Viga lukufaili '%s' kustutamisel: %s"
 
 #, c-format
 msgid "Error opening keyring `%s' for writing: "
@@ -1415,11 +1413,11 @@ msgstr ""
 
 #, c-format
 msgid "Parsed value `%s' is not a valid D-Bus object path"
-msgstr ""
+msgstr "Analüüsitud väärtus \"%s\" pole korrektne D-Busi objekti rada"
 
-#, fuzzy, c-format
+#, c-format
 msgid "Parsed value `%s' is not a valid D-Bus signature"
-msgstr "'%s' pole korrektne nimi "
+msgstr "Analüüsitud väärtus \"%s\" pole korrektne D-Busi signatuur"
 
 #, c-format
 msgid ""
@@ -1478,8 +1476,8 @@ msgstr ""
 
 #, c-format
 msgid ""
-"Message body has type signature `%s' but signature in the header field is `%"
-"s'"
+"Message body has type signature `%s' but signature in the header field is `"
+"%s'"
 msgstr ""
 
 #, c-format
@@ -1559,9 +1557,9 @@ msgstr ""
 msgid "Error: %s\n"
 msgstr "Viga: %s\n"
 
-#, fuzzy, c-format
+#, c-format
 msgid "Error parsing introspection XML: %s\n"
-msgstr "Viga võtme parsimisel: %s"
+msgstr ""
 
 msgid "Connect to the system bus"
 msgstr ""
@@ -1569,13 +1567,11 @@ msgstr ""
 msgid "Connect to the session bus"
 msgstr ""
 
-#, fuzzy
 msgid "Connect to given D-Bus address"
-msgstr "Ühendumise edenemine"
+msgstr "Ühendumine määratud D-Bus aadressiga"
 
-#, fuzzy
 msgid "Connection Endpoint Options:"
-msgstr "Ühendumise edenemine"
+msgstr ""
 
 msgid "Options specifying the connection endpoint"
 msgstr ""
@@ -1617,31 +1613,31 @@ msgstr "Viga ühendumisel: %s\n"
 
 #, c-format
 msgid "Error: Destination is not specified\n"
-msgstr ""
+msgstr "Viga: sihtkoht on määramata\n"
 
 #, c-format
 msgid "Error: Object path is not specified\n"
-msgstr ""
+msgstr "Viga: objekti rada on määramata\n"
 
-#, fuzzy, c-format
+#, c-format
 msgid "Error: %s is not a valid object path\n"
-msgstr "'%s' pole korrektne nimi "
+msgstr "Viga: %s pole korrektne objekti rada\n"
 
 #, c-format
 msgid "Error: Method name is not specified\n"
-msgstr ""
+msgstr "Viga: meetodi nimi on määramata\n"
 
 #, c-format
 msgid "Error: Method name `%s' is invalid\n"
-msgstr ""
+msgstr "Viga: vigane meetodi nimi \"%s\"\n" 
 
-#, fuzzy, c-format
+#, c-format
 msgid "Error parsing parameter %d of type `%s': %s\n"
-msgstr "Viga kataloogi '%s' avamisel: %s"
+msgstr "Viga \"%2$s\" tüüpi parameetri %1$d analüüsimisel: %3$s\n"
 
-#, fuzzy, c-format
+#, c-format
 msgid "Error parsing parameter %d: %s\n"
-msgstr "Viga võtme parsimisel: %s"
+msgstr "Viga parameetri %d analüüsimisel: %s\n"
 
 msgid "Destination name to introspect"
 msgstr ""
@@ -1852,10 +1848,8 @@ msgstr "Sokliaadressi jaoks ei ole piisavalt vaba ruumi"
 msgid "Unsupported socket address"
 msgstr "Toetamata sokliaadress"
 
-#, fuzzy
-#| msgid "Abstract name space not supported"
 msgid "empty names are not permitted"
-msgstr "Abstraktne nimeruum pole toetatud"
+msgstr "tühjad nimed pole lubatud"
 
 #, c-format
 msgid "invalid name '%s': names must begin with a lowercase letter"
@@ -1907,7 +1901,6 @@ msgid "<%s id='%s'> not (yet) defined."
 msgstr ""
 
 #, fuzzy, c-format
-#| msgid "Invalid attribute type (string expected)"
 msgid "invalid GVariant type string '%s'"
 msgstr "Vigane rekvisiidi tüüp (oodatakse stringi)"
 
@@ -1977,12 +1970,39 @@ msgstr ""
 msgid "text may not appear inside <%s>"
 msgstr ""
 
+#. Translators: Do not translate "--strict".
 #, c-format
-msgid "No such schema `%s' specified in override file `%s'"
+msgid "--strict was specified; exiting.\n"
+msgstr ""
+
+#, c-format
+msgid "This entire file has been ignored.\n"
+msgstr ""
+
+#, c-format
+msgid "Ignoring this file.\n"
 msgstr ""
 
 #, c-format
 msgid "No such key `%s' in schema `%s' as specified in override file `%s'"
+msgstr ""
+
+#, c-format
+msgid "; ignoring override for this key.\n"
+msgstr ""
+
+#, c-format
+msgid " and --strict was specified; exiting.\n"
+msgstr ""
+
+#, c-format
+msgid ""
+"error parsing key `%s' in schema `%s' as specified in override file `%s': "
+"%s.  "
+msgstr ""
+
+#, c-format
+msgid "Ignoring override for this key.\n"
 msgstr ""
 
 #, c-format
@@ -2001,6 +2021,9 @@ msgid "where to store the gschemas.compiled file"
 msgstr ""
 
 msgid "DIRECTORY"
+msgstr ""
+
+msgid "Abort on any errors in schemas"
 msgstr ""
 
 msgid "Do not write the gschema.compiled file"
@@ -2349,67 +2372,148 @@ msgid "Error resolving '%s'"
 msgstr "Viga '%s' lahendamisel"
 
 #, c-format
+msgid "Schema '%s' is not relocatable (path must not be specified)\n"
+msgstr ""
+
+#, fuzzy, c-format
+msgid "No such schema '%s'\n"
+msgstr "Liidest '%s' pole"
+
+#, c-format
+msgid "Schema '%s' is relocatable (path must be specified)\n"
+msgstr ""
+
+#, c-format
+msgid "Empty path given.\n"
+msgstr ""
+
+#, c-format
+msgid "Path must begin with a slash (/)\n"
+msgstr ""
+
+#, c-format
+msgid "Path must end with a slash (/)\n"
+msgstr ""
+
+#, c-format
+msgid "Path must not contain two adjacent slashes (//)\n"
+msgstr ""
+
+#, fuzzy, c-format
+msgid "No such key '%s'\n"
+msgstr "Omadust '%s' pole"
+
+#, c-format
+msgid "The provided value is outside of the valid range\n"
+msgstr ""
+
+msgid "List the installed (non-relocatable) schemas"
+msgstr ""
+
+msgid "List the installed relocatable schemas"
+msgstr ""
+
+msgid "Lists the keys in SCHEMA"
+msgstr ""
+
+msgid "SCHEMA[:PATH]"
+msgstr ""
+
+msgid "Lists the children of SCHEMA"
+msgstr ""
+
+msgid "List keys and values, recursively"
+msgstr ""
+
+msgid "Gets the value of KEY"
+msgstr ""
+
+msgid "SCHEMA[:PATH] KEY"
+msgstr ""
+
+msgid "Queries the range of valid values for KEY"
+msgstr ""
+
+msgid "Sets the value of KEY to VALUE"
+msgstr ""
+
+msgid "SCHEMA[:PATH] KEY VALUE"
+msgstr ""
+
+msgid "Resets KEY to its default value"
+msgstr ""
+
+msgid "Checks if KEY is writable"
+msgstr ""
+
 msgid ""
-"Commands:\n"
-"  help        Show this information\n"
-"  get         Get the value of a key\n"
-"  set         Set the value of a key\n"
-"  reset       Reset the value of a key\n"
-"  monitor     Monitor a key for changes\n"
-"  writable    Check if a key is writable\n"
+"Monitors KEY for changes.\n"
+"If no KEY is specified, monitor all keys in SCHEMA.\n"
+"Use ^C to stop monitoring.\n"
+msgstr ""
+
+msgid "SCHEMA[:PATH] [KEY]"
+msgstr ""
+
+#, c-format
+msgid ""
+"Unknown command %s\n"
 "\n"
-"Use '%s COMMAND --help' to get help for individual commands.\n"
 msgstr ""
-
-msgid "Specify the path for the schema"
-msgstr ""
-
-msgid "PATH"
-msgstr ""
-
-msgid "SCHEMA KEY"
-msgstr ""
-
-msgid "Get the value of KEY"
-msgstr ""
+"Tundmatu käsk '%s'\n"
+"\n"
 
 msgid ""
-"Arguments:\n"
-"  SCHEMA      The id of the schema\n"
-"  KEY         The name of the key\n"
-msgstr ""
-
-msgid "SCHEMA KEY VALUE"
-msgstr ""
-
-msgid "Set the value of KEY"
-msgstr ""
-
-msgid ""
-"Arguments:\n"
-"  SCHEMA      The id of the schema\n"
-"  KEY         The name of the key\n"
-"  VALUE       The value to set key to, as a serialized GVariant\n"
+"Usage:\n"
+"  gsettings COMMAND [ARGS...]\n"
+"\n"
+"Commands:\n"
+"  help                      Show this information\n"
+"  list-schemas              List installed schemas\n"
+"  list-relocatable-schemas  List relocatable schemas\n"
+"  list-keys                 List keys in a schema\n"
+"  list-children             List children of a schema\n"
+"  list-recursively          List keys and values, recursively\n"
+"  range                     Queries the range of a key\n"
+"  get                       Get the value of a key\n"
+"  set                       Set the value of a key\n"
+"  reset                     Reset the value of a key\n"
+"  writable                  Check if a key is writable\n"
+"  monitor                   Watch for changes\n"
+"\n"
+"Use 'gsettings help COMMAND' to get detailed help.\n"
+"\n"
 msgstr ""
 
 #, c-format
-msgid "Key %s is not writable\n"
-msgstr "Võti %s pole kirjutatav\n"
-
-msgid "Sets KEY to its default value"
+msgid ""
+"Usage:\n"
+"  gsettings %s %s\n"
+"\n"
+"%s\n"
+"\n"
 msgstr ""
 
-msgid "Find out whether KEY is writable"
+msgid "Arguments:\n"
 msgstr ""
 
 msgid ""
-"Monitor KEY for changes and print the changed values.\n"
-"Monitoring will continue until the process is terminated."
+"  SCHEMA    The name of the schema\n"
+"  PATH      The path, for relocatable schemas\n"
+msgstr ""
+
+msgid "  KEY       The (optional) key within the schema\n"
+msgstr ""
+
+msgid "  KEY       The key within the schema\n"
+msgstr ""
+
+msgid "  VALUE     The value to set\n"
 msgstr ""
 
 #, c-format
-msgid "Unknown command '%s'\n"
-msgstr "Tundmatu käsk '%s'\n"
+msgid "Empty schema name given"
+msgstr ""
 
 msgid "Invalid socket, not initialized"
 msgstr "Vigane sokkel, käivitamata"
@@ -2501,10 +2605,9 @@ msgstr "Tundmatu viga ühendumisel"
 msgid "Trying to proxy over non-TCP connection is not supported."
 msgstr ""
 
-#, fuzzy, c-format
-#| msgid "Property `%s' is not readable"
+#, c-format
 msgid "Proxy protocol '%s' is not supported."
-msgstr "Omadus `%s' pole loetav"
+msgstr "Proksi protokoll `%s' pole toetatud."
 
 msgid "Listener is already closed"
 msgstr "Kuulaja on juba suletud"
@@ -2514,31 +2617,32 @@ msgstr "Lisatud sokkel on suletud"
 
 #, c-format
 msgid "SOCKSv4 does not support IPv6 address '%s'"
-msgstr ""
+msgstr "SOCKSv4 ei toeta IPv6-aadressi '%s'"
 
 #, c-format
 msgid "SOCKSv4 implementation limits username to %i characters"
-msgstr ""
+msgstr "SOCKSv4 implementatsioon piirab kasutajanime pikkuse %i märgiga"
 
 #, c-format
 msgid "SOCKSv4a implementation limits hostname to %i characters"
-msgstr ""
+msgstr "SOCKSv4 implementatsioon piirab hostinime pikkuse %i märgiga"
 
 msgid "The server is not a SOCKSv4 proxy server."
-msgstr ""
+msgstr "Server ei ole SOCKSv4 proksiserver."
 
 msgid "Connection through SOCKSv4 server was rejected"
-msgstr ""
+msgstr "Ühendus läbi SOCKSv4-serveri lükati tagasi"
 
 msgid "The server is not a SOCKSv5 proxy server."
-msgstr ""
+msgstr "Server ei ole SOCKSv5 proksiserver."
 
 msgid "The SOCKSv5 proxy requires authentication."
-msgstr ""
+msgstr "SOCKSv5 proksi nõuab autentimist."
 
 msgid ""
-"The SOCKSv5 require an authentication method that is not supported by GLib."
-msgstr ""
+"The SOCKSv5 proxy requires an authentication method that is not supported by "
+"GLib."
+msgstr "SOCKSv5 proksi nõuab GLibi poolt toetamata autentimismeetodit."
 
 #, c-format
 msgid "Username or password is too long for SOCKSv5 protocol (max. is %i)."
@@ -2575,12 +2679,21 @@ msgstr ""
 msgid "SOCKSv5 proxy does not support provided address type."
 msgstr ""
 
-msgid "Unkown SOCKSv5 proxy error."
-msgstr ""
+msgid "Unknown SOCKSv5 proxy error."
+msgstr "SOCKSv5 proksi tundmatu viga."
 
 #, c-format
 msgid "Can't handle version %d of GThemedIcon encoding"
 msgstr "GThemedIcon kodeeringu versiooni %d pole võimalik käsitseda"
+
+msgid "No PEM-encoded certificate found"
+msgstr "PEM-kodeeritud sertifikaati ei leitud"
+
+msgid "Could not parse PEM-encoded certificate"
+msgstr "PEM-kodeeritud sertifikaati pole võimalik analüüsida"
+
+msgid "Could not parse PEM-encoded private key"
+msgstr "PEM-kodeeritud privaatvõtit pole võimalik analüüsida"
 
 #, c-format
 msgid "Expecting 1 control message, got %d"
@@ -2596,9 +2709,8 @@ msgstr "Eeldati ühte fd-d, aga saadi %d\n"
 msgid "Received invalid fd"
 msgstr "Saadi vigane fd"
 
-#, fuzzy
 msgid "Error sending credentials: "
-msgstr "Viga andmete saatmisel: %s"
+msgstr "Viga tõendite saatmisel: "
 
 #, c-format
 msgid "Error checking if SO_PASSCRED is enabled for socket: %s"
@@ -2610,9 +2722,9 @@ msgid ""
 "socket. Expected %d bytes, got %d"
 msgstr ""
 
-#, fuzzy, c-format
+#, c-format
 msgid "Error enabling SO_PASSCRED: %s"
-msgstr "Viga faili nime muutmisel: %s"
+msgstr "Viga SO_PASSCRED lubamisel: %s"
 
 msgid ""
 "Expecting to read a single byte for receiving credentials but read zero bytes"
@@ -2620,7 +2732,7 @@ msgstr ""
 
 #, c-format
 msgid "Error while disabling SO_PASSCRED: %s"
-msgstr ""
+msgstr "Viga SO_PASSCRED keelamisel: %s"
 
 #, c-format
 msgid "Error reading from unix: %s"
@@ -2668,11 +2780,11 @@ msgstr "Seose loomine pole win32 keskkonnas toetatud"
 
 #, fuzzy, c-format
 msgid "Error reading from handle: %s"
-msgstr "Viga failist lugemisel: %s"
+msgstr "Viga pidemest lugemisel: %s"
 
 #, fuzzy, c-format
 msgid "Error closing handle: %s"
-msgstr "Viga faili sulgemisel: %s"
+msgstr "Viga pideme sulgemisel: %s"
 
 #, fuzzy, c-format
 msgid "Error writing to handle: %s"

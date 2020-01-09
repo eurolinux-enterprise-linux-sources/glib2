@@ -629,6 +629,7 @@ g_variant_unref (GVariant *value)
       else
         g_variant_release_children (value);
 
+      memset (value, 0, sizeof (GVariant));
       g_slice_free (GVariant, value);
     }
 }
@@ -829,7 +830,7 @@ g_variant_n_children (GVariant *value)
  * g_variant_get_child_value:
  * @value: a container #GVariant
  * @index_: the index of the child to fetch
- * @returns: the child at the specified index
+ * @returns: (transfer full): the child at the specified index
  *
  * Reads a child item out of a container #GVariant instance.  This
  * includes variants, maybes, arrays, tuples and dictionary
@@ -847,41 +848,52 @@ GVariant *
 g_variant_get_child_value (GVariant *value,
                            gsize     index_)
 {
-  GVariant *child = NULL;
+  g_return_val_if_fail (index_ < g_variant_n_children (value), NULL);
 
-  g_variant_lock (value);
-
-  if (value->state & STATE_SERIALISED)
+  if (~g_atomic_int_get (&value->state) & STATE_SERIALISED)
     {
-      GVariantSerialised serialised = {
-        value->type_info,
-        (gpointer) value->contents.serialised.data,
-        value->size
-      };
-      GVariantSerialised s_child;
+      g_variant_lock (value);
 
-      /* get the serialiser to extract the serialised data for the child
-       * from the serialised data for the container
-       */
-      s_child = g_variant_serialised_get_child (serialised, index_);
+      if (~value->state & STATE_SERIALISED)
+        {
+          GVariant *child;
 
-      /* create a new serialised instance out of it */
-      child = g_slice_new (GVariant);
-      child->type_info = s_child.type_info;
-      child->state = (value->state & STATE_TRUSTED) |
-                     STATE_SERIALISED;
-      child->size = s_child.size;
-      child->ref_count = 1;
-      child->contents.serialised.buffer =
-        g_buffer_ref (value->contents.serialised.buffer);
-      child->contents.serialised.data = s_child.data;
-     }
-  else
-    child = g_variant_ref (value->contents.tree.children[index_]);
+          child = g_variant_ref (value->contents.tree.children[index_]);
+          g_variant_unlock (value);
 
-  g_variant_unlock (value);
+          return child;
+        }
 
-  return child;
+      g_variant_unlock (value);
+    }
+
+  {
+    GVariantSerialised serialised = {
+      value->type_info,
+      (gpointer) value->contents.serialised.data,
+      value->size
+    };
+    GVariantSerialised s_child;
+    GVariant *child;
+
+    /* get the serialiser to extract the serialised data for the child
+     * from the serialised data for the container
+     */
+    s_child = g_variant_serialised_get_child (serialised, index_);
+
+    /* create a new serialised instance out of it */
+    child = g_slice_new (GVariant);
+    child->type_info = s_child.type_info;
+    child->state = (value->state & STATE_TRUSTED) |
+                   STATE_SERIALISED;
+    child->size = s_child.size;
+    child->ref_count = 1;
+    child->contents.serialised.buffer =
+      g_buffer_ref (value->contents.serialised.buffer);
+    child->contents.serialised.data = s_child.data;
+
+    return child;
+  }
 }
 
 /**
@@ -894,7 +906,7 @@ g_variant_get_child_value (GVariant *value,
  *
  * The stored data is in machine native byte order but may not be in
  * fully-normalised form if read from an untrusted source.  See
- * g_variant_normalise() for a solution.
+ * g_variant_get_normal_form() for a solution.
  *
  * This function is approximately O(n) in the size of @data.
  *
@@ -928,7 +940,7 @@ g_variant_store (GVariant *value,
  *
  * The main reason to do this is to detect if a given chunk of
  * serialised data is in normal form: load the data into a #GVariant
- * using g_variant_create_from_data() and then use this function to
+ * using g_variant_new_from_data() and then use this function to
  * check.
  *
  * If @value is found to be in normal form then it will be marked as

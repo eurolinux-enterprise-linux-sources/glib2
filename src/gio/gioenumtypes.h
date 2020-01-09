@@ -57,6 +57,8 @@ GType g_mount_operation_result_get_type (void) G_GNUC_CONST;
 #define G_TYPE_MOUNT_OPERATION_RESULT (g_mount_operation_result_get_type ())
 GType g_output_stream_splice_flags_get_type (void) G_GNUC_CONST;
 #define G_TYPE_OUTPUT_STREAM_SPLICE_FLAGS (g_output_stream_splice_flags_get_type ())
+GType g_io_stream_splice_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_IO_STREAM_SPLICE_FLAGS (g_io_stream_splice_flags_get_type ())
 GType g_emblem_origin_get_type (void) G_GNUC_CONST;
 #define G_TYPE_EMBLEM_ORIGIN (g_emblem_origin_get_type ())
 GType g_resolver_error_get_type (void) G_GNUC_CONST;
@@ -109,6 +111,16 @@ GType g_credentials_type_get_type (void) G_GNUC_CONST;
 #define G_TYPE_CREDENTIALS_TYPE (g_credentials_type_get_type ())
 GType g_dbus_message_byte_order_get_type (void) G_GNUC_CONST;
 #define G_TYPE_DBUS_MESSAGE_BYTE_ORDER (g_dbus_message_byte_order_get_type ())
+GType g_application_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_APPLICATION_FLAGS (g_application_flags_get_type ())
+GType g_tls_error_get_type (void) G_GNUC_CONST;
+#define G_TYPE_TLS_ERROR (g_tls_error_get_type ())
+GType g_tls_certificate_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_TLS_CERTIFICATE_FLAGS (g_tls_certificate_flags_get_type ())
+GType g_tls_authentication_mode_get_type (void) G_GNUC_CONST;
+#define G_TYPE_TLS_AUTHENTICATION_MODE (g_tls_authentication_mode_get_type ())
+GType g_tls_rehandshake_mode_get_type (void) G_GNUC_CONST;
+#define G_TYPE_TLS_REHANDSHAKE_MODE (g_tls_rehandshake_mode_get_type ())
 
 /* enumerations from "gsettings.h" */
 GType g_settings_bind_flags_get_type (void) G_GNUC_CONST;

@@ -67,16 +67,16 @@ gboolean                        g_variant_is_of_type                    (GVarian
                                                                          const GVariantType   *type);
 gboolean                        g_variant_is_container                  (GVariant             *value);
 GVariantClass                   g_variant_classify                      (GVariant             *value);
-GVariant *                      g_variant_new_boolean                   (gboolean              boolean);
-GVariant *                      g_variant_new_byte                      (guchar                byte);
-GVariant *                      g_variant_new_int16                     (gint16                int16);
-GVariant *                      g_variant_new_uint16                    (guint16               uint16);
-GVariant *                      g_variant_new_int32                     (gint32                int32);
-GVariant *                      g_variant_new_uint32                    (guint32               uint32);
-GVariant *                      g_variant_new_int64                     (gint64                int64);
-GVariant *                      g_variant_new_uint64                    (guint64               uint64);
-GVariant *                      g_variant_new_handle                    (gint32                handle);
-GVariant *                      g_variant_new_double                    (gdouble               floating);
+GVariant *                      g_variant_new_boolean                   (gboolean              value);
+GVariant *                      g_variant_new_byte                      (guchar                value);
+GVariant *                      g_variant_new_int16                     (gint16                value);
+GVariant *                      g_variant_new_uint16                    (guint16               value);
+GVariant *                      g_variant_new_int32                     (gint32                value);
+GVariant *                      g_variant_new_uint32                    (guint32               value);
+GVariant *                      g_variant_new_int64                     (gint64                value);
+GVariant *                      g_variant_new_uint64                    (guint64               value);
+GVariant *                      g_variant_new_handle                    (gint32                value);
+GVariant *                      g_variant_new_double                    (gdouble               value);
 GVariant *                      g_variant_new_string                    (const gchar          *string);
 GVariant *                      g_variant_new_object_path               (const gchar          *object_path);
 gboolean                        g_variant_is_object_path                (const gchar          *string);
@@ -134,6 +134,13 @@ void                            g_variant_get_child                     (GVarian
                                                                          ...);
 GVariant *                      g_variant_get_child_value               (GVariant             *value,
                                                                          gsize                 index_);
+gboolean                        g_variant_lookup                        (GVariant             *dictionary,
+                                                                         const gchar          *key,
+                                                                         const gchar          *format_string,
+                                                                         ...);
+GVariant *                      g_variant_lookup_value                  (GVariant             *dictionary,
+                                                                         const gchar          *key,
+                                                                         const GVariantType   *expected_type);
 gconstpointer                   g_variant_get_fixed_array               (GVariant             *value,
                                                                          gsize                *n_elements,
                                                                          gsize                 element_size);
@@ -192,7 +199,24 @@ struct _GVariantBuilder {
 
 typedef enum
 {
-  G_VARIANT_PARSE_ERROR_FAILED
+  G_VARIANT_PARSE_ERROR_FAILED,
+  G_VARIANT_PARSE_ERROR_BASIC_TYPE_EXPECTED,
+  G_VARIANT_PARSE_ERROR_CANNOT_INFER_TYPE,
+  G_VARIANT_PARSE_ERROR_DEFINITE_TYPE_EXPECTED,
+  G_VARIANT_PARSE_ERROR_INPUT_NOT_AT_END,
+  G_VARIANT_PARSE_ERROR_INVALID_CHARACTER,
+  G_VARIANT_PARSE_ERROR_INVALID_FORMAT_STRING,
+  G_VARIANT_PARSE_ERROR_INVALID_OBJECT_PATH,
+  G_VARIANT_PARSE_ERROR_INVALID_SIGNATURE,
+  G_VARIANT_PARSE_ERROR_INVALID_TYPE_STRING,
+  G_VARIANT_PARSE_ERROR_NO_COMMON_TYPE,
+  G_VARIANT_PARSE_ERROR_NUMBER_OUT_OF_RANGE,
+  G_VARIANT_PARSE_ERROR_NUMBER_TOO_BIG,
+  G_VARIANT_PARSE_ERROR_TYPE_ERROR,
+  G_VARIANT_PARSE_ERROR_UNEXPECTED_TOKEN,
+  G_VARIANT_PARSE_ERROR_UNKNOWN_KEYWORD,
+  G_VARIANT_PARSE_ERROR_UNTERMINATED_STRING_CONSTANT,
+  G_VARIANT_PARSE_ERROR_VALUE_EXPECTED
 } GVariantParseError;
 #define G_VARIANT_PARSE_ERROR (g_variant_parser_get_error_quark ())
 

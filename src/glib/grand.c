@@ -60,7 +60,7 @@
 #endif
 
 /**
- * SECTION: random_numbers
+ * SECTION:random_numbers
  * @title: Random Numbers
  * @short_description: pseudo-random number generator
  *
@@ -68,8 +68,8 @@
  * pseudo-random number generator (PRNG). It uses the Mersenne Twister
  * PRNG, which was originally developed by Makoto Matsumoto and Takuji
  * Nishimura. Further information can be found at
- * <ulink url="http://www.math.keio.ac.jp/~matumoto/emt.html">
- * www.math.keio.ac.jp/~matumoto/emt.html</ulink>.
+ * <ulink url="http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html">
+ * http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html</ulink>.
  *
  * If you just need a random number, you simply call the
  * <function>g_random_*</function> functions, which will create a
@@ -586,7 +586,11 @@ g_rand_double (GRand* rand)
 gdouble 
 g_rand_double_range (GRand* rand, gdouble begin, gdouble end)
 {
-  return g_rand_double (rand) * (end - begin) + begin;
+  gdouble r;
+
+  r = g_rand_double (rand);
+
+  return r * end - (r - 1) * begin;
 }
 
 /**

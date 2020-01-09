@@ -18,6 +18,8 @@ progs_ldadd     = 					\
 	$(top_builddir)/gio/libgio-2.0.la
 
 TEST_PROGS +=	 		\
+	io-stream		\
+	actions 		\
 	memory-input-stream 	\
 	memory-output-stream 	\
 	readwrite		\
@@ -42,6 +44,7 @@ TEST_PROGS +=	 		\
 	network-address		\
 	gdbus-message		\
 	socket			\
+	pollable		\
 	$(NULL)
 
 if OS_UNIX
@@ -84,17 +87,27 @@ SAMPLE_PROGS = 				\
 	gdbus-connection-flush-helper	\
 	appinfo-test			\
 	proxy				\
+	gapplication-example-open	\
+	gapplication-example-cmdline	\
+	gapplication-example-cmdline2	\
+	gapplication-example-cmdline3	\
+	gapplication-example-actions	\
 	$(NULL)
 
 
 if OS_UNIX
-TEST_PROGS += live-g-file desktop-app-info unix-fd unix-streams
+TEST_PROGS += live-g-file desktop-app-info unix-fd unix-streams gapplication
 SAMPLE_PROGS +=	gdbus-example-unix-fd-client
 endif
 
 if OS_WIN32
 TEST_PROGS += win32-streams
 endif
+
+io_stream_SOURCES = io-stream.c
+io_stream_LDADD   = $(progs_ldadd)
+
+actions_LDADD	  = $(progs_ldadd)
 
 memory_input_stream_SOURCES	  = memory-input-stream.c
 memory_input_stream_LDADD	  = $(progs_ldadd)
@@ -196,6 +209,9 @@ network_address_LDADD	  = $(progs_ldadd)
 
 socket_SOURCE		  = socket.c
 socket_LDADD		  = $(progs_ldadd)
+
+pollable_SOURCE		  = pollable.c
+pollable_LDADD		  = $(progs_ldadd)
 
 contexts_SOURCES	  = contexts.c
 contexts_LDADD		  = $(progs_ldadd) \
@@ -301,6 +317,24 @@ contenttype_LDADD   = $(progs_ldadd)
 file_SOURCES = file.c
 file_LDADD   = $(progs_ldadd)
 
+gapplication_SOURCES = gapplication.c gdbus-sessionbus.c
+gapplication_LDADD = $(progs_ldadd)
+
+gapplication_example_open_SOURCES = gapplication-example-open.c
+gapplication_example_open_LDADD   = $(progs_ldadd)
+
+gapplication_example_cmdline_SOURCES = gapplication-example-cmdline.c
+gapplication_example_cmdline_LDADD   = $(progs_ldadd)
+
+gapplication_example_cmdline2_SOURCES = gapplication-example-cmdline2.c
+gapplication_example_cmdline2_LDADD   = $(progs_ldadd)
+
+gapplication_example_cmdline3_SOURCES = gapplication-example-cmdline3.c
+gapplication_example_cmdline3_LDADD   = $(progs_ldadd)
+
+gapplication_example_actions_SOURCES = gapplication-example-actions.c
+gapplication_example_actions_LDADD   = $(progs_ldadd)
+
 schema_tests = \
 	schema-tests/array-default-not-in-choices.gschema.xml		\
 	schema-tests/bad-choice.gschema.xml				\
@@ -348,6 +382,7 @@ schema_tests = \
 	schema-tests/extending.gschema.xml				\
 	schema-tests/from-docs.gschema.xml				\
 	schema-tests/incomplete-list.gschema.xml			\
+	schema-tests/inherit-gettext-domain.gschema.xml			\
 	schema-tests/invalid-path.gschema.xml				\
 	schema-tests/key-in-list-indirect.gschema.xml			\
 	schema-tests/key-in-list.gschema.xml				\

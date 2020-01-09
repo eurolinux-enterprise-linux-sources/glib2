@@ -279,6 +279,9 @@
 /* Define to 1 if you have the `link' function. */
 #undef HAVE_LINK
 
+/* Define to 1 if you have the <linux/magic.h> header file. */
+#undef HAVE_LINUX_MAGIC_H
+
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
 
@@ -321,9 +324,6 @@
 /* Have a monotonic clock */
 #undef HAVE_MONOTONIC_CLOCK
 
-/* Define to 1 if you have the `nanosleep' function. */
-#undef HAVE_NANOSLEEP
-
 /* Define to 1 if you have the <netdb.h> header file. */
 #undef HAVE_NETDB_H
 
@@ -332,9 +332,6 @@
 
 /* Have non-POSIX function getpwuid_r */
 #undef HAVE_NONPOSIX_GETPWUID_R
-
-/* Define to 1 if you have the `nsleep' function. */
-#undef HAVE_NSLEEP
 
 /* Define to 1 if you have the `on_exit' function. */
 #undef HAVE_ON_EXIT
@@ -478,11 +475,17 @@
 /* Define to 1 if `tm_gmtoff' is a member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_GMTOFF
 
+/* Define to 1 if `__tm_gmtoff' is a member of `struct tm'. */
+#undef HAVE_STRUCT_TM___TM_GMTOFF
+
 /* Define to 1 if you have the `symlink' function. */
 #undef HAVE_SYMLINK
 
 /* Define to 1 if you have the <sys/inotify.h> header file. */
 #undef HAVE_SYS_INOTIFY_H
+
+/* Define to 1 if you have the <sys/mkdev.h> header file. */
+#undef HAVE_SYS_MKDEV_H
 
 /* Define to 1 if you have the <sys/mntctl.h> header file. */
 #undef HAVE_SYS_MNTCTL_H

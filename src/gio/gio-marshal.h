@@ -185,14 +185,69 @@ G_GNUC_INTERNAL void _gio_marshal_VOID__STRING_BOOLEAN (GClosure     *closure,
                                                         gpointer      invocation_hint,
                                                         gpointer      marshal_data);
 
-/* BOOL:OBJECT (./gio-marshal.list:24) */
+/* VOID:POINTER,INT,STRING (./gio-marshal.list:24) */
+G_GNUC_INTERNAL void _gio_marshal_VOID__POINTER_INT_STRING (GClosure     *closure,
+                                                            GValue       *return_value,
+                                                            guint         n_param_values,
+                                                            const GValue *param_values,
+                                                            gpointer      invocation_hint,
+                                                            gpointer      marshal_data);
+
+/* BOOLEAN:OBJECT (./gio-marshal.list:25) */
 G_GNUC_INTERNAL void _gio_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                                                    GValue       *return_value,
                                                    guint         n_param_values,
                                                    const GValue *param_values,
                                                    gpointer      invocation_hint,
                                                    gpointer      marshal_data);
-#define _gio_marshal_BOOL__OBJECT	_gio_marshal_BOOLEAN__OBJECT
+
+/* INT:OBJECT (./gio-marshal.list:26) */
+G_GNUC_INTERNAL void _gio_marshal_INT__OBJECT (GClosure     *closure,
+                                               GValue       *return_value,
+                                               guint         n_param_values,
+                                               const GValue *param_values,
+                                               gpointer      invocation_hint,
+                                               gpointer      marshal_data);
+
+/* VOID:INT64 (./gio-marshal.list:27) */
+G_GNUC_INTERNAL void _gio_marshal_VOID__INT64 (GClosure     *closure,
+                                               GValue       *return_value,
+                                               guint         n_param_values,
+                                               const GValue *param_values,
+                                               gpointer      invocation_hint,
+                                               gpointer      marshal_data);
+
+/* VOID:UINT64 (./gio-marshal.list:28) */
+G_GNUC_INTERNAL void _gio_marshal_VOID__UINT64 (GClosure     *closure,
+                                                GValue       *return_value,
+                                                guint         n_param_values,
+                                                const GValue *param_values,
+                                                gpointer      invocation_hint,
+                                                gpointer      marshal_data);
+
+/* BOOLEAN:FLAGS (./gio-marshal.list:29) */
+G_GNUC_INTERNAL void _gio_marshal_BOOLEAN__FLAGS (GClosure     *closure,
+                                                  GValue       *return_value,
+                                                  guint         n_param_values,
+                                                  const GValue *param_values,
+                                                  gpointer      invocation_hint,
+                                                  gpointer      marshal_data);
+
+/* BOOLEAN:OBJECT,FLAGS (./gio-marshal.list:30) */
+G_GNUC_INTERNAL void _gio_marshal_BOOLEAN__OBJECT_FLAGS (GClosure     *closure,
+                                                         GValue       *return_value,
+                                                         guint         n_param_values,
+                                                         const GValue *param_values,
+                                                         gpointer      invocation_hint,
+                                                         gpointer      marshal_data);
+
+/* OBJECT:VOID (./gio-marshal.list:31) */
+G_GNUC_INTERNAL void _gio_marshal_OBJECT__VOID (GClosure     *closure,
+                                                GValue       *return_value,
+                                                guint         n_param_values,
+                                                const GValue *param_values,
+                                                gpointer      invocation_hint,
+                                                gpointer      marshal_data);
 
 G_END_DECLS
 

@@ -116,9 +116,7 @@ settings_sources = \
 	gdelayedsettingsbackend.h	\
 	gdelayedsettingsbackend.c	\
 	gkeyfilesettingsbackend.c	\
-	gmemorysettingsbackend.h	\
 	gmemorysettingsbackend.c	\
-	gnullsettingsbackend.h		\
 	gnullsettingsbackend.c		\
 	gsettingsbackendinternal.h	\
 	gsettingsbackend.c		\
@@ -133,6 +131,24 @@ settings_sources += \
 	gregistrysettingsbackend.h	\
 	gregistrysettingsbackend.c
 endif
+
+application_headers = \
+	gactiongroup.h			\
+	gsimpleactiongroup.h		\
+	gaction.h			\
+	gsimpleaction.h			\
+	gapplicationcommandline.h	\
+	gapplication.h
+
+application_sources = \
+	gactiongroup.c				\
+	gsimpleactiongroup.c			\
+	gaction.c				\
+	gsimpleaction.c				\
+	gapplicationcommandline.c		\
+	gapplicationimpl.h			\
+	gapplicationimpl-dbus.c			\
+	gapplication.c
 
 local_sources = \
 	glocaldirectorymonitor.c 	\
@@ -183,7 +199,6 @@ SUBDIRS += win32
 platform_libadd += win32/libgiowin32.la
 platform_deps += win32/libgiowin32.la
 endif
-
 
 SUBDIRS += .
 
@@ -289,6 +304,8 @@ libgio_2_0_la_SOURCES =		\
 	gdummyfile.c 		\
 	gdummyproxyresolver.c	\
 	gdummyproxyresolver.h	\
+	gdummytlsbackend.c	\
+	gdummytlsbackend.h	\
 	gemblem.h 		\
 	gemblem.c 		\
 	gemblemedicon.h		\
@@ -330,6 +347,8 @@ libgio_2_0_la_SOURCES =		\
 	gnetworkservice.c	\
 	goutputstream.c 	\
 	gpermission.c 		\
+	gpollableinputstream.c 	\
+	gpollableoutputstream.c \
 	gpollfilemonitor.c 	\
 	gpollfilemonitor.h 	\
 	gproxyresolver.c	\
@@ -352,15 +371,19 @@ libgio_2_0_la_SOURCES =		\
 	gproxy.c		\
 	gproxyaddress.c         \
 	gproxyaddressenumerator.c \
-	gproxyconnection.c      \
-	gproxyconnection.h      \
 	gsocketservice.c	\
 	gsrvtarget.c		\
 	gtcpconnection.c	\
+	gtcpwrapperconnection.c \
 	gthreadedsocketservice.c\
 	gthemedicon.c 		\
 	gthreadedresolver.c	\
 	gthreadedresolver.h	\
+	gtlsbackend.c		\
+	gtlscertificate.c	\
+	gtlsclientconnection.c	\
+	gtlsconnection.c	\
+	gtlsserverconnection.c	\
 	gunionvolumemonitor.c 	\
 	gunionvolumemonitor.h 	\
 	gvfs.c 			\
@@ -374,6 +397,7 @@ libgio_2_0_la_SOURCES =		\
 	$(appinfo_sources) 	\
 	$(unix_sources) 	\
 	$(win32_sources) 	\
+	$(application_sources) 	\
 	$(settings_sources) 	\
 	$(gdbus_sources) 	\
 	$(local_sources) 	\
@@ -484,6 +508,8 @@ gio_headers =			\
 	gnetworkservice.h	\
 	goutputstream.h 	\
 	gpermission.h 		\
+	gpollableinputstream.h 	\
+	gpollableoutputstream.h \
 	gproxyaddress.h         \
 	gproxy.h		\
 	gproxyaddressenumerator.h \
@@ -503,13 +529,20 @@ gio_headers =			\
 	gsocketservice.h	\
 	gsrvtarget.h		\
 	gtcpconnection.h	\
+	gtcpwrapperconnection.h \
 	gthreadedsocketservice.h\
 	gthemedicon.h 		\
+	gtlsbackend.h		\
+	gtlscertificate.h	\
+	gtlsclientconnection.h	\
+	gtlsconnection.h	\
+	gtlsserverconnection.h	\
 	gvfs.h 			\
 	gvolume.h 		\
 	gvolumemonitor.h 	\
 	gzlibcompressor.h	\
 	gzlibdecompressor.h	\
+	$(application_headers)	\
 	$(settings_headers)	\
 	$(gdbus_headers)	\
 	$(NULL)
@@ -601,7 +634,7 @@ EXTRA_DIST += $(completion_SCRIPTS)
 
 # ------------------------------------------------------------------------
 
-dist-hook: $(BUILT_EXTRA_DIST) ../build/win32/vs9/gio.vcproj
+dist-hook: $(BUILT_EXTRA_DIST) ../build/win32/vs9/gio.vcproj ../build/win32/vs10/gio.vcxproj ../build/win32/vs10/gio.vcxproj.filters
 	files='$(BUILT_EXTRA_DIST)'; \
 	for f in $$files; do \
 	  if test -f $$f; then d=.; else d=$(srcdir); fi; \
@@ -617,6 +650,28 @@ dist-hook: $(BUILT_EXTRA_DIST) ../build/win32/vs9/gio.vcproj
 	done | sort -u >libgio.sourcefiles
 	$(CPP) -P - <$(top_srcdir)/build/win32/vs9/gio.vcprojin >$@
 	rm libgio.sourcefiles
+	
+../build/win32/vs10/gio.vcxproj: $(top_srcdir)/build/win32/vs10/gio.vcxprojin
+	for F in `echo $(libgio_2_0_la_SOURCES) $(win32_actual_sources) $(win32_actual_more_sources_for_vcproj) | tr '/' '\\'`; do \
+		case $$F in \
+		gunix*.c|gdesktopappinfo.c) ;; \
+		*.c) echo '    <ClCompile Include="..\..\..\gio\'$$F'" />' \
+		     ;; \
+		esac; \
+	done | sort -u >libgio.vs10.sourcefiles
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/gio.vcxprojin >$@
+	rm libgio.vs10.sourcefiles
+
+../build/win32/vs10/gio.vcxproj.filters: $(top_srcdir)/build/win32/vs10/gio.vcxproj.filtersin
+	for F in `echo $(libgio_2_0_la_SOURCES) $(win32_actual_sources) $(win32_actual_more_sources_for_vcproj) | tr '/' '\\'`; do \
+		case $$F in \
+		gunix*.c|gdesktopappinfo.c) ;; \
+		*.c) echo '    <ClCompile Include="..\..\..\gio\'$$F'"><Filter>Source Files</Filter></ClCompile>' \
+		     ;; \
+		esac; \
+	done | sort -u >libgio.vs10.sourcefiles.filters
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/gio.vcxproj.filtersin >$@
+	rm libgio.vs10.sourcefiles.filters
 
 if HAVE_GLIB_RUNTIME_LIBDIR
 install-data-hook:

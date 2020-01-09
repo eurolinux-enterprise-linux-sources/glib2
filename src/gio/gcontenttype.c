@@ -42,9 +42,10 @@
  * @include: gio/gio.h
  *
  * A content type is a platform specific string that defines the type
- * of a file. On unix it is a mime type, on win32 it is an extension string
- * like ".doc", ".txt" or a percieved string like "audio". Such strings
- * can be looked up in the registry at HKEY_CLASSES_ROOT.
+ * of a file. On UNIX it is a <ulink url="http://www.wikipedia.org/wiki/Internet_media_type">mime type</ulink> like "text/plain" or "image/png".
+ * On Win32 it is an extension string like ".doc", ".txt" or a perceived
+ * string like "audio". Such strings can be looked up in the registry at
+ * HKEY_CLASSES_ROOT.
  **/
 
 #ifdef G_OS_WIN32
@@ -743,7 +744,7 @@ g_content_type_get_mime_type (const char *type)
  *
  * Gets the icon for a content type.
  *
- * Returns: #GIcon corresponding to the content type. Free the returned
+ * Returns: (transfer full): #GIcon corresponding to the content type. Free the returned
  *     object with g_object_unref()
  */
 GIcon *
@@ -1066,7 +1067,7 @@ enumerate_mimetypes_dir (const char *dir,
  * g_list_free (list);
  * </programlisting>
  *
- * Returns: #GList of the registered content types
+ * Returns: (element-type utf8) (transfer full): #GList of the registered content types
  */
 GList *
 g_content_types_get_registered (void)
@@ -1651,8 +1652,8 @@ match_match (TreeMatch    *match,
  * This function is useful in the implementation of
  * g_mount_guess_content_type().
  *
- * Returns: an %NULL-terminated array of zero or more content types,
- *     or %NULL. Free with g_strfreev()
+ * Returns: (transfer full) (array zero-terminated=1): an %NULL-terminated
+ *     array of zero or more content types, or %NULL. Free with g_strfreev()
  *
  * Since: 2.18
  */

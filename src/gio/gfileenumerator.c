@@ -173,7 +173,7 @@ g_file_enumerator_init (GFileEnumerator *enumerator)
 /**
  * g_file_enumerator_next_file:
  * @enumerator: a #GFileEnumerator.
- * @cancellable: optional #GCancellable object, %NULL to ignore.
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore.
  * @error: location to store the error occuring, or %NULL to ignore
  *
  * Returns information for the next file in the enumerated object.
@@ -185,7 +185,7 @@ g_file_enumerator_init (GFileEnumerator *enumerator)
  * enumerator is at the end, %NULL will be returned and @error will
  * be unset.
  *
- * Return value: A #GFileInfo or %NULL on error or end of enumerator.
+ * Return value: (transfer full): A #GFileInfo or %NULL on error or end of enumerator.
  *    Free the returned object with g_object_unref() when no longer needed.
  **/
 GFileInfo *
@@ -238,7 +238,7 @@ g_file_enumerator_next_file (GFileEnumerator *enumerator,
 /**
  * g_file_enumerator_close:
  * @enumerator: a #GFileEnumerator.
- * @cancellable: optional #GCancellable object, %NULL to ignore. 
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore. 
  * @error: location to store the error occuring, or %NULL to ignore
  *
  * Releases all resources used by this enumerator, making the
@@ -305,9 +305,9 @@ next_async_callback_wrapper (GObject      *source_object,
  * @num_files: the number of file info objects to request
  * @io_priority: the <link linkend="gioscheduler">io priority</link> 
  *     of the request. 
- * @cancellable: optional #GCancellable object, %NULL to ignore.
- * @callback: a #GAsyncReadyCallback to call when the request is satisfied
- * @user_data: the data to pass to callback function
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore.
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the request is satisfied
+ * @user_data: (closure): the data to pass to callback function
  *
  * Request information for a number of files from the enumerator asynchronously.
  * When all i/o for the operation is finished the @callback will be called with
@@ -390,7 +390,7 @@ g_file_enumerator_next_files_async (GFileEnumerator     *enumerator,
  * 
  * Finishes the asynchronous operation started with g_file_enumerator_next_files_async().
  * 
- * Returns: (transfer full) (element-type FileInfo): a #GList of #GFileInfo<!---->s. You must free the list with 
+ * Returns: (transfer full) (element-type Gio.FileInfo): a #GList of #GFileInfo<!---->s. You must free the list with 
  *     g_list_free() and unref the infos with g_object_unref() when you're 
  *     done with them.
  **/
@@ -439,9 +439,9 @@ close_async_callback_wrapper (GObject      *source_object,
  * @enumerator: a #GFileEnumerator.
  * @io_priority: the <link linkend="io-priority">I/O priority</link> 
  *     of the request.
- * @cancellable: optional #GCancellable object, %NULL to ignore. 
- * @callback: a #GAsyncReadyCallback to call when the request is satisfied
- * @user_data: the data to pass to callback function
+ * @cancellable: (allow-none): optional #GCancellable object, %NULL to ignore. 
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the request is satisfied
+ * @user_data: (closure): the data to pass to callback function
  *
  * Asynchronously closes the file enumerator. 
  *
@@ -586,7 +586,7 @@ g_file_enumerator_set_pending (GFileEnumerator *enumerator,
  *
  * Get the #GFile container which is being enumerated.
  *
- * Returns: the #GFile which is being enumerated.
+ * Returns: (transfer none): the #GFile which is being enumerated.
  *
  * Since: 2.18
  */
@@ -718,10 +718,7 @@ close_async_thread (GSimpleAsyncResult *res,
   class = G_FILE_ENUMERATOR_GET_CLASS (object);
   result = class->close_fn (G_FILE_ENUMERATOR (object), cancellable, &error);
   if (!result)
-    {
-      g_simple_async_result_set_from_error (res, error);
-      g_error_free (error);
-    }
+    g_simple_async_result_take_error (res, error);
 }
 
 

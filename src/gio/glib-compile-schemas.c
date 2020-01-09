@@ -24,12 +24,15 @@
 #include "config.h"
 
 #include <gstdio.h>
-#include <locale.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-
 #include <gi18n.h>
+
+#include <string.h>
+#include <stdio.h>
+#include <locale.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "gvdb/gvdb-builder.h"
 #include "strinfo.c"
@@ -107,6 +110,12 @@ enum_state_add_value (EnumState    *state,
       return;
     }
 
+  /* Silently drop the null case if it is mentioned.
+   * It is properly denoted with an empty array.
+   */
+  if (state->is_flags && value == 0)
+    return;
+
   if (state->is_flags && (value & (value - 1)))
     {
       g_set_error (error, G_MARKUP_ERROR,
@@ -120,7 +129,6 @@ enum_state_add_value (EnumState    *state,
    *
    * If we loosen the one-bit-set restriction we need an overlap check.
    */
-
 
   strinfo_builder_append_item (state->strinfo, nick, value);
 }
@@ -1223,7 +1231,9 @@ start_element (GMarkupParseContext  *context,
                        OPTIONAL | STRING, "gettext-domain", &gettext_domain,
                        OPTIONAL | STRING, "extends", &extends,
                        OPTIONAL | STRING, "list-of", &list_of))
-            parse_state_start_schema (state, id, path, gettext_domain,
+            parse_state_start_schema (state, id, path,
+                                      gettext_domain ? gettext_domain
+                                                     : state->schemalist_domain,
                                       extends, list_of, error);
           return;
         }
@@ -1958,13 +1968,13 @@ main (int argc, char **argv)
 
       if (files->len == 0)
         {
-          fprintf (stderr, _("No schema files found: "));
+          fprintf (stdout, _("No schema files found: "));
 
           if (g_unlink (target))
-            fprintf (stderr, _("doing nothing.\n"));
+            fprintf (stdout, _("doing nothing.\n"));
 
           else
-            fprintf (stderr, _("removed existing output file.\n"));
+            fprintf (stdout, _("removed existing output file.\n"));
 
           return 0;
         }
