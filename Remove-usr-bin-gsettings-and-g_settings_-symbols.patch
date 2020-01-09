@@ -1,0 +1,395 @@
+From e2ab0359e58b9bc41fdcb425381313957ec645b1 Mon Sep 17 00:00:00 2001
+From: Colin Walters <walters@verbum.org>
+Date: Tue, 3 Dec 2013 14:39:00 -0500
+Subject: [PATCH] Remove /usr/bin/gsettings and g_settings_* API
+
+---
+ docs/reference/gio/Makefile.am      |    1 -
+ docs/reference/gio/gio-docs.xml     |    5 --
+ docs/reference/gio/gio-sections.txt |   96 -----------------------------------
+ docs/reference/gio/gio.types        |    2 -
+ gio/Makefile.am                     |   42 +--------------
+ gio/gio.h                           |    1 -
+ gio/gio.symbols                     |   67 ------------------------
+ gio/giomodule.c                     |    2 -
+ gio/tests/Makefile.am               |    4 --
+ 9 files changed, 2 insertions(+), 218 deletions(-)
+
+diff --git a/docs/reference/gio/Makefile.am b/docs/reference/gio/Makefile.am
+index 1ba48c1..fcd3382 100644
+--- a/docs/reference/gio/Makefile.am
++++ b/docs/reference/gio/Makefile.am
+@@ -168,7 +168,6 @@ EXTRA_DIST +=			\
+ man_MANS =			\
+ 	gio-querymodules.1	\
+ 	glib-compile-schemas.1	\
+-	gsettings.1	\
+ 	gdbus.1
+ 
+ if ENABLE_MAN
+diff --git a/docs/reference/gio/gio-docs.xml b/docs/reference/gio/gio-docs.xml
+index d5b9e65..0900a10 100644
+--- a/docs/reference/gio/gio-docs.xml
++++ b/docs/reference/gio/gio-docs.xml
+@@ -153,11 +153,6 @@
+         <title>Utilities</title>
+         <xi:include href="xml/gfilenamecompleter.xml"/>
+     </chapter>
+-    <chapter id="settings">
+-        <title>Settings</title>
+-        <xi:include href="xml/gsettings.xml"/>
+-        <xi:include href="xml/gsettingsbackend.xml"/>
+-    </chapter>
+     <chapter id='permissions'>
+         <title>Permissions</title>
+         <xi:include href="xml/gpermission.xml"/>
+diff --git a/docs/reference/gio/gio-sections.txt b/docs/reference/gio/gio-sections.txt
+index 469c232..10a5349 100644
+--- a/docs/reference/gio/gio-sections.txt
++++ b/docs/reference/gio/gio-sections.txt
+@@ -2127,102 +2127,6 @@ G_TYPE_FILE_DESCRIPTOR_BASED
+ </SECTION>
+ 
+ <SECTION>
+-<FILE>gsettingsbackend</FILE>
+-<TITLE>GSettingsBackend</TITLE>
+-GSettingsBackend
+-GSettingsBackendClass
+-G_SETTINGS_BACKEND_EXTENSION_POINT_NAME
+-g_settings_backend_changed
+-g_settings_backend_path_changed
+-g_settings_backend_keys_changed
+-g_settings_backend_path_writable_changed
+-g_settings_backend_writable_changed
+-g_settings_backend_changed_tree
+-g_settings_backend_flatten_tree
+-g_keyfile_settings_backend_new
+-
+-<SUBSECTION Standard>
+-G_IS_SETTINGS_BACKEND
+-G_IS_SETTINGS_BACKEND_CLASS
+-G_SETTINGS_BACKEND
+-G_SETTINGS_BACKEND_CLASS
+-G_SETTINGS_BACKEND_GET_CLASS
+-G_TYPE_SETTINGS_BACKEND
+-
+-<SUBSECTION Private>
+-g_settings_backend_get_type
+-GSettingsBackendPrivate
+-</SECTION>
+-
+-<SECTION>
+-<FILE>gsettings</FILE>
+-<TITLE>GSettings</TITLE>
+-GSettings
+-g_settings_new
+-g_settings_new_with_path
+-g_settings_new_with_backend
+-g_settings_new_with_backend_and_path
+-g_settings_sync
+-g_settings_get_value
+-g_settings_set_value
+-g_settings_is_writable
+-g_settings_delay
+-g_settings_apply
+-g_settings_revert
+-g_settings_get_has_unapplied
+-g_settings_get_child
+-g_settings_reset
+-
+-<SUBSECTION Introspection>
+-g_settings_list_schemas
+-g_settings_list_items
+-
+-<SUBSECTION Convenience>
+-g_settings_get
+-g_settings_set
+-g_settings_get_boolean
+-g_settings_set_boolean
+-g_settings_get_int
+-g_settings_set_int
+-g_settings_get_double
+-g_settings_set_double
+-g_settings_get_string
+-g_settings_set_string
+-g_settings_get_strv
+-g_settings_set_strv
+-g_settings_get_enum
+-g_settings_set_enum
+-g_settings_get_flags
+-g_settings_set_flags
+-
+-<SUBSECTION MappedGet>
+-GSettingsGetMapping
+-g_settings_get_mapped
+-
+-<SUBSECTION Binding>
+-GSettingsBindFlags
+-g_settings_bind
+-g_settings_bind_with_mapping
+-g_settings_bind_writable
+-g_settings_unbind
+-GSettingsBindSetMapping
+-GSettingsBindGetMapping
+-
+-<SUBSECTION Standard>
+-GSettingsClass
+-G_IS_SETTINGS
+-G_IS_SETTINGS_CLASS
+-G_SETTINGS
+-G_SETTINGS_CLASS
+-G_SETTINGS_GET_CLASS
+-G_TYPE_SETTINGS
+-
+-<SUBSECTION Private>
+-GSettingsPrivate
+-g_settings_get_type
+-</SECTION>
+-
+-<SECTION>
+ <FILE>gunixcredentialsmessage</FILE>
+ <TITLE>GUnixCredentialsMessage</TITLE>
+ GUnixCredentialsMessage
+diff --git a/docs/reference/gio/gio.types b/docs/reference/gio/gio.types
+index 53b9c7f..7aa64d4 100644
+--- a/docs/reference/gio/gio.types
++++ b/docs/reference/gio/gio.types
+@@ -78,8 +78,6 @@ g_proxy_resolver_get_type
+ g_resolver_error_get_type
+ g_resolver_get_type
+ g_seekable_get_type
+-g_settings_get_type
+-g_settings_backend_get_type
+ g_simple_async_result_get_type
+ g_simple_permission_get_type
+ g_socket_address_enumerator_get_type
+diff --git a/gio/Makefile.am b/gio/Makefile.am
+index ccd1fac..88f3675 100644
+--- a/gio/Makefile.am
++++ b/gio/Makefile.am
+@@ -105,35 +105,6 @@ gdbus_sources = 							\
+ 	gdbusserver.h			gdbusserver.c			\
+ 	$(NULL)
+ 
+-settings_headers = \
+-	gsettingsbackend.h		\
+-	gsettings.h
+-
+-settings_sources = \
+-	gvdb/gvdb-format.h		\
+-	gvdb/gvdb-reader.h		\
+-	gvdb/gvdb-reader.c		\
+-	gdelayedsettingsbackend.h	\
+-	gdelayedsettingsbackend.c	\
+-	gkeyfilesettingsbackend.c	\
+-	gmemorysettingsbackend.h	\
+-	gmemorysettingsbackend.c	\
+-	gnullsettingsbackend.h		\
+-	gnullsettingsbackend.c		\
+-	gsettingsbackendinternal.h	\
+-	gsettingsbackend.c		\
+-	gsettingsschema.h		\
+-	gsettingsschema.c		\
+-	gsettings-mapping.h		\
+-	gsettings-mapping.c		\
+-	gsettings.c
+-
+-if OS_WIN32
+-settings_sources += \
+-	gregistrysettingsbackend.h	\
+-	gregistrysettingsbackend.c
+-endif
+-
+ local_sources = \
+ 	glocaldirectorymonitor.c 	\
+ 	glocaldirectorymonitor.h 	\
+@@ -374,7 +345,6 @@ libgio_2_0_la_SOURCES =		\
+ 	$(appinfo_sources) 	\
+ 	$(unix_sources) 	\
+ 	$(win32_sources) 	\
+-	$(settings_sources) 	\
+ 	$(gdbus_sources) 	\
+ 	$(local_sources) 	\
+ 	$(marshal_sources) 	\
+@@ -510,7 +480,6 @@ gio_headers =			\
+ 	gvolumemonitor.h 	\
+ 	gzlibcompressor.h	\
+ 	gzlibdecompressor.h	\
+-	$(settings_headers)	\
+ 	$(gdbus_headers)	\
+ 	$(NULL)
+ 
+@@ -558,7 +527,7 @@ gioenumtypes.c: $(gio_headers) gioenumtypes.c.template
+ gio-2.0.lib: libgio-2.0.la gio.def
+ 	lib -machine:@LIB_EXE_MACHINE_FLAG@ -name:libgio-2.0-$(LT_CURRENT_MINUS_AGE).dll -def:gio.def -out:$@
+ 
+-bin_PROGRAMS = gio-querymodules glib-compile-schemas gsettings
++bin_PROGRAMS = gio-querymodules glib-compile-schemas
+ 
+ gio_querymodules_SOURCES = gio-querymodules.c
+ gio_querymodules_LDADD	 = \
+@@ -575,12 +544,6 @@ glib_compile_schemas_SOURCES = \
+ 	gvdb/gvdb-builder.c		\
+ 	glib-compile-schemas.c
+ 
+-gsettings_LDADD = \
+-	$(top_builddir)/glib/libglib-2.0.la		\
+-	$(top_builddir)/gobject/libgobject-2.0.la	\
+-	libgio-2.0.la
+-gsettings_SOURCES = gsettings-tool.c
+-
+ schemadir = $(datadir)/glib-2.0/schemas
+ dist_schema_DATA = gschema.dtd
+ 
+@@ -595,8 +558,7 @@ gdbus_LDADD = libgio-2.0.la \
+ 
+ completiondir = $(sysconfdir)/bash_completion.d
+ completion_SCRIPTS = \
+-	gdbus-bash-completion.sh		\
+-	gsettings-bash-completion.sh
++	gdbus-bash-completion.sh
+ EXTRA_DIST += $(completion_SCRIPTS)
+ 
+ # ------------------------------------------------------------------------
+diff --git a/gio/gio.h b/gio/gio.h
+index a7bf993..78d7425 100644
+--- a/gio/gio.h
++++ b/gio/gio.h
+@@ -94,7 +94,6 @@
+ #include <gio/gproxyresolver.h>
+ #include <gio/gresolver.h>
+ #include <gio/gseekable.h>
+-#include <gio/gsettings.h>
+ #include <gio/gsimpleasyncresult.h>
+ #include <gio/gsimplepermission.h>
+ #include <gio/gsocketaddressenumerator.h>
+diff --git a/gio/gio.symbols b/gio/gio.symbols
+index 4c49501..ce2b8b2 100644
+--- a/gio/gio.symbols
++++ b/gio/gio.symbols
+@@ -1002,7 +1002,6 @@ g_socket_msg_flags_get_type G_GNUC_CONST
+ g_unix_socket_address_type_get_type G_GNUC_CONST
+ g_resolver_error_get_type G_GNUC_CONST
+ g_zlib_compressor_format_get_type
+-g_settings_bind_flags_get_type
+ g_dbus_error_get_type G_GNUC_CONST
+ g_bus_type_get_type G_GNUC_CONST
+ g_bus_name_owner_flags_get_type G_GNUC_CONST
+@@ -1476,72 +1475,6 @@ g_file_descriptor_based_get_fd
+ #endif
+ #endif
+ 
+-#if IN_HEADER(__G_SETTINGS_BACKEND_H__)
+-#if IN_FILE(__G_SETTINGS_BACKEND_C__)
+-g_settings_backend_get_type
+-g_settings_backend_changed
+-g_settings_backend_flatten_tree
+-g_settings_backend_keys_changed
+-g_settings_backend_path_changed
+-g_settings_backend_path_writable_changed
+-g_settings_backend_writable_changed
+-g_settings_backend_changed_tree
+-#endif
+-#endif
+-
+-#if IN_HEADER(__G_SETTINGS_BACKEND_H__)
+-#if IN_FILE(__G_KEYFILE_SETTINGS_BACKEND_C__)
+-g_keyfile_settings_backend_new
+-#endif
+-#endif
+-
+-#if IN_HEADER(__G_SETTINGS_H__)
+-#if IN_FILE(__G_SETTINGS_SCHEMA_C__)
+-g_settings_list_schemas
+-#endif
+-
+-#if IN_FILE(__G_SETTINGS_C__)
+-g_settings_apply
+-g_settings_bind
+-g_settings_bind_writable
+-g_settings_bind_with_mapping
+-g_settings_delay
+-g_settings_get
+-g_settings_get_child
+-g_settings_get_has_unapplied
+-g_settings_get_type
+-g_settings_get_value
+-g_settings_is_writable
+-g_settings_new
+-g_settings_new_with_backend
+-g_settings_new_with_backend_and_path
+-g_settings_new_with_path
+-g_settings_revert
+-g_settings_reset
+-g_settings_set
+-g_settings_set_value
+-g_settings_unbind
+-g_settings_get_int
+-g_settings_set_int
+-g_settings_get_string
+-g_settings_set_string
+-g_settings_get_strv
+-g_settings_set_strv
+-g_settings_get_double
+-g_settings_set_double
+-g_settings_get_boolean
+-g_settings_set_boolean
+-g_settings_get_enum
+-g_settings_set_enum
+-g_settings_get_flags
+-g_settings_set_flags
+-g_settings_sync
+-g_settings_list_keys
+-g_settings_list_children
+-g_settings_get_mapped
+-#endif
+-#endif
+-
+ #if IN_HEADER(__G_CREDENTIALS_H__)
+ #if IN_FILE(__G_CREDENTIALS_C__)
+ g_credentials_get_type G_GNUC_CONST
+diff --git a/gio/giomodule.c b/gio/giomodule.c
+index 83f4cc7..82a73f2 100644
+--- a/gio/giomodule.c
++++ b/gio/giomodule.c
+@@ -26,7 +26,6 @@
+ 
+ #include "giomodule.h"
+ #include "giomodule-priv.h"
+-#include "gmemorysettingsbackend.h"
+ #include "glocalfilemonitor.h"
+ #include "glocaldirectorymonitor.h"
+ #include "gnativevolumemonitor.h"
+@@ -587,7 +586,6 @@ _g_io_modules_ensure_loaded (void)
+ 	}
+ 
+       /* Initialize types from built-in "modules" */
+-      g_memory_settings_backend_get_type ();
+ #if defined(HAVE_SYS_INOTIFY_H) || defined(HAVE_LINUX_INOTIFY_H)
+       _g_inotify_directory_monitor_get_type ();
+       _g_inotify_file_monitor_get_type ();
+diff --git a/gio/tests/Makefile.am b/gio/tests/Makefile.am
+index 40901f3..0205895 100644
+--- a/gio/tests/Makefile.am
++++ b/gio/tests/Makefile.am
+@@ -35,7 +35,6 @@ TEST_PROGS +=	 		\
+ 	simple-async-result	\
+ 	srvtarget		\
+ 	contexts		\
+-	gsettings		\
+ 	gschema-compile		\
+ 	async-close-output-stream \
+ 	gdbus-addresses		\
+@@ -201,9 +200,6 @@ contexts_SOURCES	  = contexts.c
+ contexts_LDADD		  = $(progs_ldadd) \
+ 	$(top_builddir)/gthread/libgthread-2.0.la
+ 
+-gsettings_SOURCES	  = gsettings.c
+-gsettings_LDADD		  = $(progs_ldadd)
+-
+ gschema_compile_SOURCES	  = gschema-compile.c
+ gschema_compile_LDADD	  = $(progs_ldadd)
+ 
+-- 
+1.7.1
+
