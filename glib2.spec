@@ -3,7 +3,7 @@
 Summary: A library of handy utility functions
 Name: glib2
 Version: 2.28.8
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 URL: http://www.gtk.org
@@ -39,6 +39,8 @@ Patch4: Revert-deprecations-since-glib-2.22.patch
 # https://bugzilla.gnome.org/656173
 # https://bugzilla.gnome.org/656039
 Patch5: GDBusProxy-thread-safety.patch
+
+Patch6: glib2-force-fam-for-remote-fs.patch
 
 %description
 GLib is the low-level core library that forms the basis for projects
@@ -190,6 +192,10 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_libdir}/lib*.a
 
 %changelog
+* Wed Jan 20 2016 Colin Walters <walters@redhat.com> - 2.28.8-5
+- Force use of FAM on NFS
+  Resolves: #725178
+
 * Tue Sep 09 2014 Matthew Barnes <mbarnes@redhat.com> - 2.28.8-4
 - Improve thread-safety of GDBusProxy.
   Resolves: rhbz#1128848
