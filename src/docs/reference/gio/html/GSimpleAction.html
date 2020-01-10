@@ -8,7 +8,7 @@
 <link rel="up" href="application.html" title="Application support">
 <link rel="prev" href="GAction.html" title="GAction">
 <link rel="next" href="GPropertyAction.html" title="GPropertyAction">
-<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -211,7 +211,7 @@ g_simple_action_new (<em class="parameter"><code>const <a href="../glib-Basic-Ty
 </tr>
 <tr>
 <td class="parameter_name"><p>parameter_type</p></td>
-<td class="parameter_description"><p> the type of parameter to the activate function. </p></td>
+<td class="parameter_description"><p>the type of parameter to the activate function. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -252,7 +252,7 @@ must have the same <a href="../glib-GVariantType.html#GVariantType"><span class=
 </tr>
 <tr>
 <td class="parameter_name"><p>parameter_type</p></td>
-<td class="parameter_description"><p> the type of the parameter to the activate function. </p></td>
+<td class="parameter_description"><p>the type of the parameter to the activate function. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -367,7 +367,7 @@ action state hints.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>state_hint</p></td>
-<td class="parameter_description"><p> a <a href="../glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> representing the state hint. </p></td>
+<td class="parameter_description"><p>a <a href="../glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> representing the state hint. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -472,7 +472,7 @@ of <a class="link" href="GSimpleAction.html" title="GSimpleAction"><span class="
 </tr>
 <tr>
 <td class="parameter_name"><p>parameter</p></td>
-<td class="parameter_description"><p> the parameter to the activation. </p></td>
+<td class="parameter_description"><p>the parameter to the activation. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -521,19 +521,19 @@ call <a class="link" href="GSimpleAction.html#g-simple-action-set-state" title="
 11
 12
 13</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">static void</span>
-<span class="function">change_volume_state</span> <span class="gtkdoc opt">(</span>GSimpleAction <span class="gtkdoc opt">*</span>action<span class="gtkdoc opt">,</span>
-                     GVariant      <span class="gtkdoc opt">*</span>value<span class="gtkdoc opt">,</span>
-                     gpointer       user_data<span class="gtkdoc opt">)</span>
-<span class="gtkdoc opt">{</span>
-  gint requested<span class="gtkdoc opt">;</span>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span>
+<span class="function">change_volume_state</span><span class="normal"> </span><span class="symbol">(</span><span class="usertype">GSimpleAction</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">action</span><span class="symbol">,</span>
+<span class="normal">                     </span><span class="usertype">GVariant</span><span class="normal">      </span><span class="symbol">*</span><span class="normal">value</span><span class="symbol">,</span>
+<span class="normal">                     </span><span class="usertype">gpointer</span><span class="normal">       user_data</span><span class="symbol">)</span>
+<span class="cbracket">{</span>
+<span class="normal">  </span><span class="usertype">gint</span><span class="normal"> requested</span><span class="symbol">;</span>
 
-  requested <span class="gtkdoc opt">=</span> <span class="function"><a href="../glib-GVariant.html#g-variant-get-int32">g_variant_get_int32</a></span> <span class="gtkdoc opt">(</span>value<span class="gtkdoc opt">);</span>
+<span class="normal">  requested </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="../glib-GVariant.html#g-variant-get-int32">g_variant_get_int32</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">value</span><span class="symbol">);</span>
 
-  <span class="gtkdoc slc">// Volume only goes from 0 to 10</span>
-  <span class="keyword">if</span> <span class="gtkdoc opt">(</span><span class="number">0</span> <span class="gtkdoc opt">&lt;=</span> requested <span class="gtkdoc opt">&amp;&amp;</span> requested <span class="gtkdoc opt">&lt;=</span> <span class="number">10</span><span class="gtkdoc opt">)</span>
-    <span class="function"><a href="GSimpleAction.html#g-simple-action-set-state">g_simple_action_set_state</a></span> <span class="gtkdoc opt">(</span>action<span class="gtkdoc opt">,</span> value<span class="gtkdoc opt">);</span>
-<span class="gtkdoc opt">}</span></pre></td>
+<span class="normal">  </span><span class="comment">// Volume only goes from 0 to 10</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="number">0</span><span class="normal"> </span><span class="symbol">&lt;=</span><span class="normal"> requested </span><span class="symbol">&amp;&amp;</span><span class="normal"> requested </span><span class="symbol">&lt;=</span><span class="normal"> </span><span class="number">10</span><span class="symbol">)</span>
+<span class="normal">    </span><span class="function"><a href="GSimpleAction.html#g-simple-action-set-state">g_simple_action_set_state</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">action</span><span class="symbol">,</span><span class="normal"> value</span><span class="symbol">);</span>
+<span class="cbracket">}</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -558,7 +558,7 @@ It could set it to any value at all, or take some other action.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>value</p></td>
-<td class="parameter_description"><p> the requested value for the state. </p></td>
+<td class="parameter_description"><p>the requested value for the state. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -575,6 +575,6 @@ It could set it to any value at all, or take some other action.</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25.1</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

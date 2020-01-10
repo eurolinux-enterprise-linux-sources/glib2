@@ -8,7 +8,7 @@
 <link rel="up" href="highlevel-socket.html" title="High-level network functionallity">
 <link rel="prev" href="GThreadedSocketService.html" title="GThreadedSocketService">
 <link rel="next" href="tls.html" title="TLS (SSL) support">
-<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -173,7 +173,7 @@
 </div>
 <div class="refsect1">
 <a name="GNetworkMonitor.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">    <a href="/home/mclasen/gnome/share/gtk-doc/html/gobject/GTypeModule.html">GInterface</a>
+<pre class="screen">    GInterface
     <span class="lineart">╰──</span> GNetworkMonitor
 </pre>
 </div>
@@ -205,7 +205,7 @@ g_network_monitor_get_default (<em class="parameter"><code><span class="type">vo
 <p>Gets the default <a class="link" href="GNetworkMonitor.html" title="GNetworkMonitor"><span class="type">GNetworkMonitor</span></a> for the system.</p>
 <div class="refsect3">
 <a name="g-network-monitor-get-default.returns"></a><h4>Returns</h4>
-<p> a <a class="link" href="GNetworkMonitor.html" title="GNetworkMonitor"><span class="type">GNetworkMonitor</span></a>. </p>
+<p>a <a class="link" href="GNetworkMonitor.html" title="GNetworkMonitor"><span class="type">GNetworkMonitor</span></a>. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-32.html#api-index-2.32">2.32</a></p>
@@ -319,7 +319,7 @@ want to block, you should use <a class="link" href="GNetworkMonitor.html#g-netwo
 </tr>
 <tr>
 <td class="parameter_name"><p>cancellable</p></td>
-<td class="parameter_description"><p> a <a class="link" href="GCancellable.html" title="GCancellable"><span class="type">GCancellable</span></a>, or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_description"><p>a <a class="link" href="GCancellable.html" title="GCancellable"><span class="type">GCancellable</span></a>, or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -376,18 +376,18 @@ to get the result of the operation.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>cancellable</p></td>
-<td class="parameter_description"><p> a <a class="link" href="GCancellable.html" title="GCancellable"><span class="type">GCancellable</span></a>, or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_description"><p>a <a class="link" href="GCancellable.html" title="GCancellable"><span class="type">GCancellable</span></a>, or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>callback</p></td>
-<td class="parameter_description"><p> a <a class="link" href="GAsyncResult.html#GAsyncReadyCallback" title="GAsyncReadyCallback ()"><span class="type">GAsyncReadyCallback</span></a> to call when the
+<td class="parameter_description"><p>a <a class="link" href="GAsyncResult.html#GAsyncReadyCallback" title="GAsyncReadyCallback ()"><span class="type">GAsyncReadyCallback</span></a> to call when the
 request is satisfied. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until first called."><span class="acronym">scope async</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>user_data</p></td>
-<td class="parameter_description"><p> the data to pass to callback function. </p></td>
+<td class="parameter_description"><p>the data to pass to callback function. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="This parameter is a 'user_data', for callbacks; many bindings can pass NULL here."><span class="acronym">closure</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -494,7 +494,7 @@ indicates when a possibly-user-visible change has occurred.</p>
   GTypeInterface g_iface;
 
   void     (*network_changed)  (GNetworkMonitor      *monitor,
-				gboolean              available);
+				gboolean              network_available);
 
   gboolean (*can_reach)        (GNetworkMonitor      *monitor,
 				GSocketConnectable   *connectable,
@@ -674,15 +674,9 @@ marked as metered.</p>
 <a name="GNetworkMonitor-network-changed"></a><h3>The <code class="literal">“network-changed”</code> signal</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 user_function (<a class="link" href="GNetworkMonitor.html" title="GNetworkMonitor"><span class="type">GNetworkMonitor</span></a> *monitor,
-               <a href="../glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>         available,
+               <a href="../glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a>         network_available,
                <a href="../glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>         user_data)</pre>
-<p>Emitted when the network configuration changes. If <em class="parameter"><code>available</code></em>
- is
-<a href="../glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, then some hosts may be reachable that were not reachable
-before, while others that were reachable before may no longer be
-reachable. If <em class="parameter"><code>available</code></em>
- is <a href="../glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>, then no remote hosts are
-reachable.</p>
+<p>Emitted when the network configuration changes.</p>
 <div class="refsect3">
 <a name="GNetworkMonitor-network-changed.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -698,7 +692,7 @@ reachable.</p>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
-<td class="parameter_name"><p>available</p></td>
+<td class="parameter_name"><p>network_available</p></td>
 <td class="parameter_description"><p>the current value of <a class="link" href="GNetworkMonitor.html#GNetworkMonitor--network-available" title="The “network-available” property"><span class="type">“network-available”</span></a></p></td>
 <td class="parameter_annotations"> </td>
 </tr>
@@ -716,6 +710,6 @@ reachable.</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25.1</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

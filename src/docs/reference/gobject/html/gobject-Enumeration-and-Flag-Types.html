@@ -8,7 +8,7 @@
 <link rel="up" href="rn01.html" title="API Reference">
 <link rel="prev" href="gobject-The-Base-Object-Type.html" title="GObject">
 <link rel="next" href="gobject-Boxed-Types.html" title="Boxed Types">
-<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -259,15 +259,15 @@ definitions.</p>
 7
 8
 9</pre></td>
-        <td class="listing_code"><pre class="programlisting">GEnumClass <span class="gtkdoc opt">*</span>enum_class<span class="gtkdoc opt">;</span>
-GEnumValue <span class="gtkdoc opt">*</span>enum_value<span class="gtkdoc opt">;</span>
+        <td class="listing_code"><pre class="programlisting"><span class="usertype">GEnumClass</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">enum_class</span><span class="symbol">;</span>
+<span class="usertype">GEnumValue</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">enum_value</span><span class="symbol">;</span>
 
-enum_class <span class="gtkdoc opt">=</span> <span class="function"><a href="gobject-Type-Information.html#g-type-class-ref">g_type_class_ref</a></span> <span class="gtkdoc opt">(</span>MAMAN_TYPE_MY_ENUM<span class="gtkdoc opt">);</span>
-enum_value <span class="gtkdoc opt">=</span> <span class="function"><a href="gobject-Enumeration-and-Flag-Types.html#g-enum-get-value">g_enum_get_value</a></span> <span class="gtkdoc opt">(</span>enum_class<span class="gtkdoc opt">,</span> MAMAN_MY_ENUM_FOO<span class="gtkdoc opt">);</span>
+<span class="normal">enum_class </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="gobject-Type-Information.html#g-type-class-ref">g_type_class_ref</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">MAMAN_TYPE_MY_ENUM</span><span class="symbol">);</span>
+<span class="normal">enum_value </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="gobject-Enumeration-and-Flag-Types.html#g-enum-get-value">g_enum_get_value</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">enum_class</span><span class="symbol">,</span><span class="normal"> MAMAN_MY_ENUM_FOO</span><span class="symbol">);</span>
 
-<span class="function"><a href="../glib-Warnings-and-Assertions.html#g-print">g_print</a></span> <span class="gtkdoc opt">(</span><span class="string">&quot;Name: %s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span> enum_value<span class="gtkdoc opt">-&gt;</span>value_name<span class="gtkdoc opt">);</span>
+<span class="function"><a href="../glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="normal"> </span><span class="symbol">(</span><span class="string">"Name: %s</span><span class="specialchar">\n</span><span class="string">"</span><span class="symbol">,</span><span class="normal"> enum_value</span><span class="symbol">-&gt;</span><span class="normal">value_name</span><span class="symbol">);</span>
 
-<span class="function"><a href="gobject-Type-Information.html#g-type-class-unref">g_type_class_unref</a></span> <span class="gtkdoc opt">(</span>enum_class<span class="gtkdoc opt">);</span></pre></td>
+<span class="function"><a href="gobject-Type-Information.html#g-type-class-unref">g_type_class_unref</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">enum_class</span><span class="symbol">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -559,7 +559,7 @@ g_enum_get_value (<em class="parameter"><code><a class="link" href="gobject-Enum
 </div>
 <div class="refsect3">
 <a name="g-enum-get-value.returns"></a><h4>Returns</h4>
-<p> the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GEnumValue" title="struct GEnumValue"><span class="type">GEnumValue</span></a> for <em class="parameter"><code>value</code></em>
+<p>the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GEnumValue" title="struct GEnumValue"><span class="type">GEnumValue</span></a> for <em class="parameter"><code>value</code></em>
 , or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 if <em class="parameter"><code>value</code></em>
 is not a member of the enumeration. </p>
@@ -597,7 +597,7 @@ g_enum_get_value_by_name (<em class="parameter"><code><a class="link" href="gobj
 </div>
 <div class="refsect3">
 <a name="g-enum-get-value-by-name.returns"></a><h4>Returns</h4>
-<p> the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GEnumValue" title="struct GEnumValue"><span class="type">GEnumValue</span></a> with name <em class="parameter"><code>name</code></em>
+<p>the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GEnumValue" title="struct GEnumValue"><span class="type">GEnumValue</span></a> with name <em class="parameter"><code>name</code></em>
 ,
 or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the enumeration doesn't have a member
 with that name. </p>
@@ -635,7 +635,7 @@ g_enum_get_value_by_nick (<em class="parameter"><code><a class="link" href="gobj
 </div>
 <div class="refsect3">
 <a name="g-enum-get-value-by-nick.returns"></a><h4>Returns</h4>
-<p> the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GEnumValue" title="struct GEnumValue"><span class="type">GEnumValue</span></a> with nickname <em class="parameter"><code>nick</code></em>
+<p>the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GEnumValue" title="struct GEnumValue"><span class="type">GEnumValue</span></a> with nickname <em class="parameter"><code>nick</code></em>
 ,
 or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the enumeration doesn't have a member
 with that nickname. </p>
@@ -676,7 +676,7 @@ may change in the future.</p>
 </div>
 <div class="refsect3">
 <a name="g-enum-to-string.returns"></a><h4>Returns</h4>
-<p> a newly-allocated text string. </p>
+<p>a newly-allocated text string. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: 2.54</p>
@@ -713,7 +713,7 @@ g_flags_get_first_value (<em class="parameter"><code><a class="link" href="gobje
 </div>
 <div class="refsect3">
 <a name="g-flags-get-first-value.returns"></a><h4>Returns</h4>
-<p> the first <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue" title="struct GFlagsValue"><span class="type">GFlagsValue</span></a> which is set in
+<p>the first <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue" title="struct GFlagsValue"><span class="type">GFlagsValue</span></a> which is set in
 <em class="parameter"><code>value</code></em>
 , or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if none is set. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
@@ -750,7 +750,7 @@ g_flags_get_value_by_name (<em class="parameter"><code><a class="link" href="gob
 </div>
 <div class="refsect3">
 <a name="g-flags-get-value-by-name.returns"></a><h4>Returns</h4>
-<p> the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue" title="struct GFlagsValue"><span class="type">GFlagsValue</span></a> with name <em class="parameter"><code>name</code></em>
+<p>the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue" title="struct GFlagsValue"><span class="type">GFlagsValue</span></a> with name <em class="parameter"><code>name</code></em>
 ,
 or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if there is no flag with that name. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
@@ -787,7 +787,7 @@ g_flags_get_value_by_nick (<em class="parameter"><code><a class="link" href="gob
 </div>
 <div class="refsect3">
 <a name="g-flags-get-value-by-nick.returns"></a><h4>Returns</h4>
-<p> the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue" title="struct GFlagsValue"><span class="type">GFlagsValue</span></a> with nickname <em class="parameter"><code>nick</code></em>
+<p>the <a class="link" href="gobject-Enumeration-and-Flag-Types.html#GFlagsValue" title="struct GFlagsValue"><span class="type">GFlagsValue</span></a> with nickname <em class="parameter"><code>nick</code></em>
 ,
 or <a href="../glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if there is no flag with that nickname. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
@@ -828,7 +828,7 @@ may change in the future.</p>
 </div>
 <div class="refsect3">
 <a name="g-flags-to-string.returns"></a><h4>Returns</h4>
-<p> a newly-allocated text string. </p>
+<p>a newly-allocated text string. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: 2.54</p>
@@ -942,20 +942,20 @@ example:</p>
 12
 13
 14</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="gtkdoc kwb">static void</span>
-<span class="function">my_enum_complete_type_info</span> <span class="gtkdoc opt">(</span>GTypePlugin     <span class="gtkdoc opt">*</span>plugin<span class="gtkdoc opt">,</span>
-                            GType            g_type<span class="gtkdoc opt">,</span>
-                            GTypeInfo       <span class="gtkdoc opt">*</span>info<span class="gtkdoc opt">,</span>
-                            GTypeValueTable <span class="gtkdoc opt">*</span>value_table<span class="gtkdoc opt">)</span>
-<span class="gtkdoc opt">{</span>
-  <span class="gtkdoc kwb">static const</span> GEnumValue values<span class="gtkdoc opt">[] = {</span>
-    <span class="gtkdoc opt">{</span> MY_ENUM_FOO<span class="gtkdoc opt">,</span> <span class="string">&quot;MY_ENUM_FOO&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;foo&quot;</span> <span class="gtkdoc opt">},</span>
-    <span class="gtkdoc opt">{</span> MY_ENUM_BAR<span class="gtkdoc opt">,</span> <span class="string">&quot;MY_ENUM_BAR&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;bar&quot;</span> <span class="gtkdoc opt">},</span>
-    <span class="gtkdoc opt">{</span> <span class="number">0</span><span class="gtkdoc opt">,</span> NULL<span class="gtkdoc opt">,</span> NULL <span class="gtkdoc opt">}</span>
-  <span class="gtkdoc opt">};</span>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span>
+<span class="function">my_enum_complete_type_info</span><span class="normal"> </span><span class="symbol">(</span><span class="usertype">GTypePlugin</span><span class="normal">     </span><span class="symbol">*</span><span class="normal">plugin</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="usertype">GType</span><span class="normal">            g_type</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="usertype">GTypeInfo</span><span class="normal">       </span><span class="symbol">*</span><span class="normal">info</span><span class="symbol">,</span>
+<span class="normal">                            </span><span class="usertype">GTypeValueTable</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">value_table</span><span class="symbol">)</span>
+<span class="cbracket">{</span>
+<span class="normal">  </span><span class="keyword">static</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="usertype">GEnumValue</span><span class="normal"> values</span><span class="symbol">[]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">    </span><span class="cbracket">{</span><span class="normal"> MY_ENUM_FOO</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"MY_ENUM_FOO"</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"foo"</span><span class="normal"> </span><span class="cbracket">}</span><span class="symbol">,</span>
+<span class="normal">    </span><span class="cbracket">{</span><span class="normal"> MY_ENUM_BAR</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"MY_ENUM_BAR"</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"bar"</span><span class="normal"> </span><span class="cbracket">}</span><span class="symbol">,</span>
+<span class="normal">    </span><span class="cbracket">{</span><span class="normal"> </span><span class="number">0</span><span class="symbol">,</span><span class="normal"> <a href="../glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="symbol">,</span><span class="normal"> <a href="../glib-Standard-Macros.html#NULL:CAPS">NULL</a> </span><span class="cbracket">}</span>
+<span class="normal">  </span><span class="cbracket">}</span><span class="symbol">;</span>
 
-  <span class="function"><a href="gobject-Enumeration-and-Flag-Types.html#g-enum-complete-type-info">g_enum_complete_type_info</a></span> <span class="gtkdoc opt">(</span>type<span class="gtkdoc opt">,</span> info<span class="gtkdoc opt">,</span> values<span class="gtkdoc opt">);</span>
-<span class="gtkdoc opt">}</span></pre></td>
+<span class="normal">  </span><span class="function"><a href="gobject-Enumeration-and-Flag-Types.html#g-enum-complete-type-info">g_enum_complete_type_info</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">type</span><span class="symbol">,</span><span class="normal"> info</span><span class="symbol">,</span><span class="normal"> values</span><span class="symbol">);</span>
+<span class="cbracket">}</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -978,7 +978,7 @@ example:</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>info</p></td>
-<td class="parameter_description"><p> the <a class="link" href="gobject-Type-Information.html#GTypeInfo" title="struct GTypeInfo"><span class="type">GTypeInfo</span></a> struct to be filled in. </p></td>
+<td class="parameter_description"><p>the <a class="link" href="gobject-Type-Information.html#GTypeInfo" title="struct GTypeInfo"><span class="type">GTypeInfo</span></a> struct to be filled in. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Out parameter, where caller must allocate storage."><span class="acronym">out callee-allocates</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -1018,7 +1018,7 @@ function of a <a class="link" href="GTypePlugin.html" title="GTypePlugin"><span 
 </tr>
 <tr>
 <td class="parameter_name"><p>info</p></td>
-<td class="parameter_description"><p> the <a class="link" href="gobject-Type-Information.html#GTypeInfo" title="struct GTypeInfo"><span class="type">GTypeInfo</span></a> struct to be filled in. </p></td>
+<td class="parameter_description"><p>the <a class="link" href="gobject-Type-Information.html#GTypeInfo" title="struct GTypeInfo"><span class="type">GTypeInfo</span></a> struct to be filled in. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Out parameter, where caller must allocate storage."><span class="acronym">out callee-allocates</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -1220,6 +1220,6 @@ nickname.</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25.1</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

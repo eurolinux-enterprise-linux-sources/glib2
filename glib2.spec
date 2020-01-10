@@ -1,44 +1,37 @@
 %global _changelog_trimtime %(date +%s -d "1 year ago")
 
 Name: glib2
-Version: 2.54.2
+Version: 2.56.1
 Release: 2%{?dist}
 Summary: A library of handy utility functions
 
 License: LGPLv2+
 URL: http://www.gtk.org
-Source0: http://download.gnome.org/sources/glib/2.54/glib-%{version}.tar.xz
+Source0: http://download.gnome.org/sources/glib/2.56/glib-%{version}.tar.xz
 
-BuildRequires: git
-BuildRequires: pkgconfig
+BuildRequires: chrpath
 BuildRequires: gettext
-BuildRequires: libattr-devel
-BuildRequires: libmount-devel
-BuildRequires: libselinux-devel
-BuildRequires: pkgconfig(libpcre)
 # for sys/inotify.h
 BuildRequires: glibc-devel
-BuildRequires: zlib-devel
+BuildRequires: libattr-devel
+BuildRequires: libselinux-devel
 # for sys/sdt.h
 BuildRequires: systemtap-sdt-devel
+BuildRequires: pkgconfig(libelf)
+BuildRequires: pkgconfig(libffi)
+BuildRequires: pkgconfig(libpcre)
+BuildRequires: pkgconfig(mount)
+BuildRequires: pkgconfig(zlib)
 # Bootstrap build requirements
 BuildRequires: automake autoconf libtool
 BuildRequires: gtk-doc
 BuildRequires: python-devel
-BuildRequires: libffi-devel
-BuildRequires: elfutils-libelf-devel
-BuildRequires: chrpath
 
 # Patches we're carrying specifically for RHEL7:
 # Avoid deprecating things introduced since the first version of glib
 # built in RHEL7, as some projects use `-Werror` and such.
 Patch0: revert-g-source-remove-critical.patch
 Patch1: add-back-g-memmove.patch
-
-Patch2: 0001-gdbus-codegen-Don-t-assume-bindir-and-datadir-share-.patch
-Patch3: 0001-gdbus-codegen-Call-abspath-earlier.patch
-Patch4: 0001-Build-with-old-libmount-too.patch
-Patch5: 0001-gio-fix-race-condition-in-GDBusObjectManagerClient.patch
 
 # for GIO content-type support
 Requires: shared-mime-info
@@ -89,27 +82,30 @@ The glib2-tests package contains tests that can be used to verify
 the functionality of the installed glib2 package.
 
 %prep
-%autosetup -Sgit -n glib-%{version}
+%autosetup -n glib-%{version} -p1
 
 autoreconf -i -f
 
 %build
+# Bug 1324770: Also explicitly remove PCRE sources since we use --with-pcre=system
+rm glib/pcre/*.[ch]
 # Support builds of both git snapshots and tarballs packed with autogoo
 (if ! test -x configure; then NOCONFIGURE=1 ./autogen.sh; CONFIGFLAGS=--enable-gtk-doc; fi;
  %configure $CONFIGFLAGS \
+           --disable-silent-rules \
            --with-pcre=system \
            --enable-systemtap \
            --enable-static \
            --enable-installed-tests
 )
 
-make %{?_smp_mflags}
+%make_build
 
 %install
 # Use -p to preserve timestamps on .py files to ensure
 # they're not recompiled with different timestamps
 # to help multilib: https://bugzilla.redhat.com/show_bug.cgi?id=718404
-make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p -c"
+%make_install INSTALL="install -p"
 # Also since this is a generated .py file, set it to a known timestamp,
 # otherwise it will vary by build time, and thus break multilib -devel
 # installs.
@@ -120,13 +116,6 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 rm -f $RPM_BUILD_ROOT%{_libdir}/gio/modules/*.{a,la}
 rm -f $RPM_BUILD_ROOT%{_datadir}/glib-2.0/gdb/*.{pyc,pyo}
 rm -f $RPM_BUILD_ROOT%{_datadir}/glib-2.0/codegen/*.{pyc,pyo}
-
-# Multilib fixes for systemtap tapsets; see
-# https://bugzilla.redhat.com/718404
-for f in $RPM_BUILD_ROOT%{_datadir}/systemtap/tapset/*.stp; do
-    (dn=$(dirname ${f}); bn=$(basename ${f});
-     mv ${f} ${dn}/%{__isa_bits}-${bn})
-done
 
 mv  $RPM_BUILD_ROOT%{_bindir}/gio-querymodules $RPM_BUILD_ROOT%{_bindir}/gio-querymodules-%{__isa_bits}
 
@@ -189,6 +178,7 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_datadir}/glib-2.0/gdb
 %{_datadir}/glib-2.0/gettext
 %{_datadir}/glib-2.0/schemas/gschema.dtd
+%{_datadir}/glib-2.0/valgrind/glib.supp
 %{_datadir}/bash-completion/completions/gresource
 %{_bindir}/glib-genmarshal
 %{_bindir}/glib-gettextize
@@ -199,7 +189,6 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_bindir}/glib-compile-resources
 %{_bindir}/gresource
 %{_datadir}/glib-2.0/codegen
-%{_datadir}/glib-2.0/valgrind/glib.supp
 %attr (0755, root, root) %{_bindir}/gtester-report
 %{_mandir}/man1/glib-genmarshal.1*
 %{_mandir}/man1/glib-gettextize.1*
@@ -232,6 +221,13 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_datadir}/installed-tests
 
 %changelog
+* Mon Aug 27 2018 Colin Walters <walters@verbum.org> - 2.56.1-2
+- Add --disable-silent-rules
+
+* Sun Apr 08 2018 Kalev Lember <klember@redhat.com> - 2.56.1-1
+- Update to 2.56.1
+- Resolves #1567375
+
 * Fri Nov 10 2017 Kalev Lember <klember@redhat.com> - 2.54.2-2
 - Backport patch to fix race condition in GDBusObjectManagerClient
 - Resolves: #1494065
