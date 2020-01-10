@@ -4,7 +4,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the licence, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -532,7 +532,7 @@ cmd_help (gboolean     requested,
     {
       g_string_append (string,
       _("Usage:\n"
-        "  gresource [--section SECTION] COMMAND [ARGS...]\n"
+        "  gresource [--section SECTION] COMMAND [ARGS…]\n"
         "\n"
         "Commands:\n"
         "  help                      Show this information\n"
@@ -541,7 +541,7 @@ cmd_help (gboolean     requested,
         "  details                   List resources with details\n"
         "  extract                   Extract a resource\n"
         "\n"
-        "Use 'gresource help COMMAND' to get detailed help.\n\n"));
+        "Use “gresource help COMMAND” to get detailed help.\n\n"));
     }
   else
     {

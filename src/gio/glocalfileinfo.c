@@ -7,7 +7,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -401,13 +401,15 @@ get_one_xattr (const char *path,
   char value[64];
   char *value_p;
   ssize_t len;
+  int errsv;
 
   len = g_getxattr (path, xattr, value, sizeof (value)-1, follow_symlinks);
+  errsv = errno;
 
   value_p = NULL;
   if (len >= 0)
     value_p = value;
-  else if (len == -1 && errno == ERANGE)
+  else if (len == -1 && errsv == ERANGE)
     {
       len = g_getxattr (path, xattr, NULL, 0, follow_symlinks);
 
@@ -460,6 +462,8 @@ get_xattrs (const char            *path,
 
   if (all)
     {
+      int errsv;
+
       list_res_size = g_listxattr (path, NULL, 0, follow_symlinks);
 
       if (list_res_size == -1 ||
@@ -472,8 +476,9 @@ get_xattrs (const char            *path,
     retry:
       
       list_res_size = g_listxattr (path, list, list_size, follow_symlinks);
+      errsv = errno;
       
-      if (list_res_size == -1 && errno == ERANGE)
+      if (list_res_size == -1 && errsv == ERANGE)
 	{
 	  list_size = list_size * 2;
 	  list = g_realloc (list, list_size);
@@ -558,13 +563,15 @@ get_one_xattr_from_fd (int         fd,
   char value[64];
   char *value_p;
   ssize_t len;
+  int errsv;
 
   len = g_fgetxattr (fd, xattr, value, sizeof (value) - 1);
+  errsv = errno;
 
   value_p = NULL;
   if (len >= 0)
     value_p = value;
-  else if (len == -1 && errno == ERANGE)
+  else if (len == -1 && errsv == ERANGE)
     {
       len = g_fgetxattr (fd, xattr, NULL, 0);
 
@@ -615,6 +622,8 @@ get_xattrs_from_fd (int                    fd,
 
   if (all)
     {
+      int errsv;
+
       list_res_size = g_flistxattr (fd, NULL, 0);
 
       if (list_res_size == -1 ||
@@ -627,8 +636,9 @@ get_xattrs_from_fd (int                    fd,
     retry:
       
       list_res_size = g_flistxattr (fd, list, list_size);
+      errsv = errno;
       
-      if (list_res_size == -1 && errno == ERANGE)
+      if (list_res_size == -1 && errsv == ERANGE)
 	{
 	  list_size = list_size * 2;
 	  list = g_realloc (list, list_size);
@@ -772,7 +782,7 @@ set_xattr (char                       *filename,
     {
       g_set_error (error, G_IO_ERROR,
 		   g_io_error_from_errno (errsv),
-		   _("Error setting extended attribute '%s': %s"),
+		   _("Error setting extended attribute “%s”: %s"),
 		   escaped_attribute, g_strerror (errsv));
       return FALSE;
     }
@@ -1259,12 +1269,12 @@ get_content_type (const char          *basename,
 
       content_type = g_content_type_guess (basename, NULL, 0, &result_uncertain);
       
-#ifndef G_OS_WIN32
+#if !defined(G_OS_WIN32) && !defined(HAVE_COCOA)
       if (!fast && result_uncertain && path != NULL)
 	{
 	  guchar sniff_buffer[4096];
 	  gsize sniff_length;
-	  int fd;
+	  int fd, errsv;
 
 	  sniff_length = _g_unix_content_type_get_sniff_len ();
 	  if (sniff_length > 4096)
@@ -1272,7 +1282,8 @@ get_content_type (const char          *basename,
 
 #ifdef O_NOATIME	  
           fd = g_open (path, O_RDONLY | O_NOATIME, 0);
-          if (fd < 0 && errno == EPERM)
+          errsv = errno;
+          if (fd < 0 && errsv == EPERM)
 #endif
 	    fd = g_open (path, O_RDONLY, 0);
 
@@ -1763,7 +1774,7 @@ _g_local_file_info_get (const char             *basename,
           g_object_unref (info);
           g_set_error (error, G_IO_ERROR,
 		       g_io_error_from_errno (errsv),
-		       _("Error when getting information for file '%s': %s"),
+		       _("Error when getting information for file “%s”: %s"),
 		       display_name, g_strerror (errsv));
           g_free (display_name);
           return NULL;

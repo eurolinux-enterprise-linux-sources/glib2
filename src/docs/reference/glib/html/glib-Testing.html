@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Testing: GLib Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="GLib Reference Manual">
 <link rel="up" href="glib-utilities.html" title="GLib Utilities">
 <link rel="prev" href="glib-Bookmark-file-parser.html" title="Bookmark file parser">
@@ -725,8 +725,8 @@ nicely formatted test reports.</p>
 <span class="function">my_object_fixture_tear_down</span> <span class="gtkdoc opt">(</span>MyObjectFixture <span class="gtkdoc opt">*</span>fixture<span class="gtkdoc opt">,</span>
                              gconstpointer user_data<span class="gtkdoc opt">)</span>
 <span class="gtkdoc opt">{</span>
-  <span class="function"><a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#g-clear-object">g_clear_object</a></span> <span class="gtkdoc opt">(&amp;</span>fixture<span class="gtkdoc opt">-&gt;</span>helper<span class="gtkdoc opt">);</span>
-  <span class="function"><a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#g-clear-object">g_clear_object</a></span> <span class="gtkdoc opt">(&amp;</span>fixture<span class="gtkdoc opt">-&gt;</span>obj<span class="gtkdoc opt">);</span>
+  <span class="function"><a href="../gobject/gobject-The-Base-Object-Type.html#g-clear-object">g_clear_object</a></span> <span class="gtkdoc opt">(&amp;</span>fixture<span class="gtkdoc opt">-&gt;</span>helper<span class="gtkdoc opt">);</span>
+  <span class="function"><a href="../gobject/gobject-The-Base-Object-Type.html#g-clear-object">g_clear_object</a></span> <span class="gtkdoc opt">(&amp;</span>fixture<span class="gtkdoc opt">-&gt;</span>obj<span class="gtkdoc opt">);</span>
 <span class="gtkdoc opt">}</span>
 
 <span class="gtkdoc kwb">static void</span>
@@ -1466,7 +1466,7 @@ the test.</p>
 <tbody><tr>
 <td class="parameter_name"><p>msg</p></td>
 <td class="parameter_description"><p> explanation. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -1496,7 +1496,7 @@ the test.</p>
 <tbody><tr>
 <td class="parameter_name"><p>msg</p></td>
 <td class="parameter_description"><p> explanation. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -1775,7 +1775,7 @@ g_test_queue_destroy (<em class="parameter"><code><a class="link" href="glib-Dat
 <p>This function enqueus a callback <em class="parameter"><code>destroy_func</code></em>
  to be executed
 during the next test case teardown phase. This is most useful
-to auto destruct allocted test resources at the end of a test run.
+to auto destruct allocated test resources at the end of a test run.
 Resources are released in reverse queue order, that means enqueueing
 callback A before callback B will cause <code class="function">B()</code> to be called before
 <code class="function">A()</code> during teardown.</p>
@@ -1807,9 +1807,9 @@ callback A before callback B will cause <code class="function">B()</code> to be 
 <div class="refsect2">
 <a name="g-test-queue-unref"></a><h3>g_test_queue_unref()</h3>
 <pre class="programlisting">#define             g_test_queue_unref(gobject)</pre>
-<p>Enqueue an object to be released with <a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-unref"><code class="function">g_object_unref()</code></a> during
+<p>Enqueue an object to be released with <a href="../gobject/gobject-The-Base-Object-Type.html#g-object-unref"><code class="function">g_object_unref()</code></a> during
 the next teardown phase. This is equivalent to calling
-<a class="link" href="glib-Testing.html#g-test-queue-destroy" title="g_test_queue_destroy ()"><code class="function">g_test_queue_destroy()</code></a> with a destroy callback of <a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-unref"><code class="function">g_object_unref()</code></a>.</p>
+<a class="link" href="glib-Testing.html#g-test-queue-destroy" title="g_test_queue_destroy ()"><code class="function">g_test_queue_destroy()</code></a> with a destroy callback of <a href="../gobject/gobject-The-Base-Object-Type.html#g-object-unref"><code class="function">g_object_unref()</code></a>.</p>
 <div class="refsect3">
 <a name="g-test-queue-unref.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1891,7 +1891,7 @@ expected via <a class="link" href="glib-Testing.html#g-test-expect-message" titl
 <tr>
 <td class="parameter_name"><p>log_domain</p></td>
 <td class="parameter_description"><p> the log domain of the message. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>log_level</p></td>
@@ -2030,7 +2030,7 @@ message.</p>
 <tr>
 <td class="parameter_name"><p>test_path</p></td>
 <td class="parameter_description"><p> Test to run in a subprocess. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>usec_timeout</p></td>
@@ -2403,7 +2403,9 @@ see <a class="link" href="glib-Testing.html#g-test-rand-int" title="g_test_rand_
 fails. If the assertion fails (i.e. the expression is not true),
 an error message is logged and the application is terminated.</p>
 <p>The macro can be turned off in final releases of code by defining
-<code class="literal">G_DISABLE_ASSERT</code> when compiling the application.</p>
+<code class="literal">G_DISABLE_ASSERT</code> when compiling the application, so code must
+not depend on any side effects from <em class="parameter"><code>expr</code></em>
+.</p>
 <div class="refsect3">
 <a name="g-assert.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">

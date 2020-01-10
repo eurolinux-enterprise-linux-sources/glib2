@@ -4,7 +4,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the licence, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,13 +48,13 @@ check_relocatable_schema (GSettingsSchema *schema,
 {
   if (schema == NULL)
     {
-      g_printerr (_("No such schema '%s'\n"), schema_id);
+      g_printerr (_("No such schema “%s”\n"), schema_id);
       return FALSE;
     }
 
   if (!is_relocatable_schema (schema))
     {
-      g_printerr (_("Schema '%s' is not relocatable "
+      g_printerr (_("Schema “%s” is not relocatable "
                     "(path must not be specified)\n"),
                   schema_id);
       return FALSE;
@@ -69,13 +69,13 @@ check_schema (GSettingsSchema *schema,
 {
   if (schema == NULL)
     {
-      g_printerr (_("No such schema '%s'\n"), schema_id);
+      g_printerr (_("No such schema “%s”\n"), schema_id);
       return FALSE;
     }
 
   if (is_relocatable_schema (schema))
     {
-      g_printerr (_("Schema '%s' is relocatable "
+      g_printerr (_("Schema “%s” is relocatable "
                     "(path must be specified)\n"),
                   schema_id);
       return FALSE;
@@ -275,6 +275,8 @@ gsettings_description (void)
 {
   const gchar *description;
   description = g_settings_schema_key_get_description (global_schema_key);
+  if (description == NULL)
+    description = g_settings_schema_key_get_summary (global_schema_key);
   g_print ("%s\n", description);
 }
 
@@ -619,7 +621,7 @@ gsettings_help (gboolean     requested,
       g_string_append (string,
       _("Usage:\n"
         "  gsettings --version\n"
-        "  gsettings [--schemadir SCHEMADIR] COMMAND [ARGS...]\n"
+        "  gsettings [--schemadir SCHEMADIR] COMMAND [ARGS…]\n"
         "\n"
         "Commands:\n"
         "  help                      Show this information\n"
@@ -637,7 +639,7 @@ gsettings_help (gboolean     requested,
         "  writable                  Check if a key is writable\n"
         "  monitor                   Watch for changes\n"
         "\n"
-        "Use 'gsettings help COMMAND' to get detailed help.\n\n"));
+        "Use “gsettings help COMMAND” to get detailed help.\n\n"));
     }
   else
     {
@@ -848,7 +850,7 @@ main (int argc, char **argv)
             {
               if (global_schema == NULL)
                 {
-                  g_printerr (_("No such schema '%s'\n"), parts[0]);
+                  g_printerr (_("No such schema “%s”\n"), parts[0]);
                   return 1;
                 }
             }
@@ -861,7 +863,7 @@ main (int argc, char **argv)
     {
       if (!g_settings_schema_has_key (global_schema, argv[3]))
         {
-          g_printerr (_("No such key '%s'\n"), argv[3]);
+          g_printerr (_("No such key “%s”\n"), argv[3]);
           return 1;
         }
 

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2010 Codethink Limited
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation; either version 2 of the licence or (at
- * your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,7 +28,6 @@
 #include "gapplicationimpl.h"
 #include "gactiongroup.h"
 #include "gactionmap.h"
-#include "gmenumodel.h"
 #include "gsettings.h"
 #include "gnotification-private.h"
 #include "gnotificationbackend.h"
@@ -88,7 +87,7 @@
  *
  * If used, the expected form of an application identifier is very close
  * to that of of a
- * [DBus bus name](http://dbus.freedesktop.org/doc/dbus-specification.html#message-protocol-names-interface).
+ * [D-Bus bus name](http://dbus.freedesktop.org/doc/dbus-specification.html#message-protocol-names-interface).
  * Examples include: "com.example.MyApp", "org.example.internal-apps.Calculator".
  * For details on valid application identifiers, see g_application_id_is_valid().
  *
@@ -225,8 +224,6 @@ struct _GApplicationPrivate
   gchar             *resource_path;
 
   GActionGroup      *actions;
-  GMenuModel        *app_menu;
-  GMenuModel        *menubar;
 
   guint              inactivity_timeout_id;
   guint              inactivity_timeout;
@@ -547,7 +544,7 @@ g_application_parse_command_line (GApplication   *application,
     {
       GOptionEntry entries[] = {
         { "gapplication-app-id", '\0', 0, G_OPTION_ARG_STRING, &app_id,
-          N_("Override the application's ID") },
+          N_("Override the application’s ID") },
         { NULL }
       };
 
@@ -1145,7 +1142,7 @@ g_application_set_property (GObject      *object,
 /**
  * g_application_set_action_group:
  * @application: a #GApplication
- * @action_group: (allow-none): a #GActionGroup, or %NULL
+ * @action_group: (nullable): a #GActionGroup, or %NULL
  *
  * This used to be how actions were associated with a #GApplication.
  * Now there is #GActionMap for that.
@@ -1246,6 +1243,28 @@ g_application_constructed (GObject *object)
 }
 
 static void
+g_application_dispose (GObject *object)
+{
+  GApplication *application = G_APPLICATION (object);
+
+  if (application->priv->impl != NULL &&
+      G_APPLICATION_GET_CLASS (application)->dbus_unregister != g_application_real_dbus_unregister)
+    {
+      static gboolean warned;
+
+      if (!warned)
+        {
+          g_warning ("Your application did not unregister from D-Bus before destruction. "
+                     "Consider using g_application_run().");
+        }
+
+      warned = TRUE;
+    }
+
+  G_OBJECT_CLASS (g_application_parent_class)->dispose (object);
+}
+
+static void
 g_application_finalize (GObject *object)
 {
   GApplication *application = G_APPLICATION (object);
@@ -1317,6 +1336,7 @@ g_application_class_init (GApplicationClass *class)
   GObjectClass *object_class = G_OBJECT_CLASS (class);
 
   object_class->constructed = g_application_constructed;
+  object_class->dispose = g_application_dispose;
   object_class->finalize = g_application_finalize;
   object_class->get_property = g_application_get_property;
   object_class->set_property = g_application_set_property;
@@ -1547,7 +1567,7 @@ g_application_class_init (GApplicationClass *class)
  *   "[A-Z][a-z][0-9]_-." and must not begin with a digit.
  *
  * - Application identifiers must contain at least one '.' (period)
- *   character (and thus at least three elements).
+ *   character (and thus at least two elements).
  *
  * - Application identifiers must not begin or end with a '.' (period)
  *   character.
@@ -1606,7 +1626,7 @@ g_application_id_is_valid (const gchar *application_id)
 /* Public Constructor {{{1 */
 /**
  * g_application_new:
- * @application_id: (allow-none): the application id
+ * @application_id: (nullable): the application id
  * @flags: the application flags
  *
  * Creates a new #GApplication instance.
@@ -1653,7 +1673,7 @@ g_application_get_application_id (GApplication *application)
 /**
  * g_application_set_application_id:
  * @application: a #GApplication
- * @application_id: (allow-none): the identifier for @application
+ * @application_id: (nullable): the identifier for @application
  *
  * Sets the unique identifier for @application.
  *
@@ -1979,7 +1999,7 @@ g_application_get_dbus_object_path (GApplication *application)
 /**
  * g_application_register:
  * @application: a #GApplication
- * @cancellable: (allow-none): a #GCancellable, or %NULL
+ * @cancellable: (nullable): a #GCancellable, or %NULL
  * @error: a pointer to a NULL #GError, or %NULL
  *
  * Attempts registration of the application.
@@ -2198,7 +2218,7 @@ g_application_open (GApplication  *application,
  * g_application_run:
  * @application: a #GApplication
  * @argc: the argc from main() (or 0 if @argv is %NULL)
- * @argv: (array length=argc) (allow-none): the argv from main(), or %NULL
+ * @argv: (array length=argc) (nullable): the argv from main(), or %NULL
  *
  * Runs the application.
  *
@@ -2577,7 +2597,7 @@ g_application_get_default (void)
 
 /**
  * g_application_set_default:
- * @application: (allow-none): the application to set as default, or %NULL
+ * @application: (nullable): the application to set as default, or %NULL
  *
  * Sets or unsets the default application for the process, as returned
  * by g_application_get_default().
@@ -2705,7 +2725,7 @@ g_application_get_is_busy (GApplication *application)
 /**
  * g_application_send_notification:
  * @application: a #GApplication
- * @id: (allow-none): id of the notification, or %NULL
+ * @id: (nullable): id of the notification, or %NULL
  * @notification: the #GNotification to send
  *
  * Sends a notification on behalf of @application to the desktop shell.

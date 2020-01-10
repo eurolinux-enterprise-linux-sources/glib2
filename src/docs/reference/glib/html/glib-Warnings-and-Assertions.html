@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Warnings and Assertions: GLib Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="GLib Reference Manual">
 <link rel="up" href="glib-core.html" title="GLib Core Application Support">
 <link rel="prev" href="glib-Error-Reporting.html" title="Error Reporting">
@@ -529,8 +529,8 @@ a stack trace. The prompt is then shown again.</p>
 <td class="parameter_description"><p>the program name, needed by gdb for the "[S]tack trace"
 option. If <em class="parameter"><code>prg_name</code></em>
 is <a class="link" href="glib-Standard-Macros.html#NULL:CAPS" title="NULL"><code class="literal">NULL</code></a>, <a class="link" href="glib-Miscellaneous-Utility-Functions.html#g-get-prgname" title="g_get_prgname ()"><code class="function">g_get_prgname()</code></a> is called to get
-the program name (which will work correctly if <a href="http://developer.gnome.org/gdk3/gdk4-General.html#gdk-init"><code class="function">gdk_init()</code></a> or
-<a href="http://developer.gnome.org/gtk4/gtk4-General.html#gtk-init"><code class="function">gtk_init()</code></a> has been called)</p></td>
+the program name (which will work correctly if <code class="function">gdk_init()</code> or
+<a href="../gtk4/gtk4-General.html#gtk-init"><code class="function">gtk_init()</code></a> has been called)</p></td>
 <td class="parameter_annotations"> </td>
 </tr></tbody>
 </table></div>
@@ -544,8 +544,8 @@ g_on_error_stack_trace (<em class="parameter"><code>const <a class="link" href="
 <p>Invokes gdb, which attaches to the current process and shows a
 stack trace. Called by <a class="link" href="glib-Warnings-and-Assertions.html#g-on-error-query" title="g_on_error_query ()"><code class="function">g_on_error_query()</code></a> when the "[S]tack trace"
 option is selected. You can get the current process's program name
-with <a class="link" href="glib-Miscellaneous-Utility-Functions.html#g-get-prgname" title="g_get_prgname ()"><code class="function">g_get_prgname()</code></a>, assuming that you have called <a href="http://developer.gnome.org/gtk4/gtk4-General.html#gtk-init"><code class="function">gtk_init()</code></a> or
-<a href="http://developer.gnome.org/gdk3/gdk4-General.html#gdk-init"><code class="function">gdk_init()</code></a>.</p>
+with <a class="link" href="glib-Miscellaneous-Utility-Functions.html#g-get-prgname" title="g_get_prgname ()"><code class="function">g_get_prgname()</code></a>, assuming that you have called <a href="../gtk4/gtk4-General.html#gtk-init"><code class="function">gtk_init()</code></a> or
+<code class="function">gdk_init()</code>.</p>
 <p>This function may cause different actions on non-UNIX platforms.</p>
 <div class="refsect3">
 <a name="g-on-error-stack-trace.parameters"></a><h4>Parameters</h4>

@@ -1,0 +1,50 @@
+From aeecd81dd13e4d8ef609149f82770ad06a8fccdb Mon Sep 17 00:00:00 2001
+From: Beniamino Galvani <bgalvani@redhat.com>
+Date: Sat, 30 Sep 2017 11:26:29 +0200
+Subject: [PATCH] gio: fix race condition in GDBusObjectManagerClient
+
+priv->map_object_path_to_object_proxy must be protected to avoid
+concurrent access by multiple threads. Move the hash table insertion
+into the critical section.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=788368
+---
+ gio/gdbusobjectmanagerclient.c | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/gio/gdbusobjectmanagerclient.c b/gio/gdbusobjectmanagerclient.c
+index 1c00797cd165..08c94d5068ef 100644
+--- a/gio/gdbusobjectmanagerclient.c
++++ b/gio/gdbusobjectmanagerclient.c
+@@ -1542,6 +1542,13 @@ add_interfaces (GDBusObjectManagerClient *manager,
+       g_variant_unref (properties);
+     }
+ 
++  if (added)
++    {
++      g_hash_table_insert (manager->priv->map_object_path_to_object_proxy,
++                           g_strdup (object_path),
++                           op);
++    }
++
+   g_mutex_unlock (&manager->priv->lock);
+ 
+   /* now that we don't hold the lock any more, emit signals */
+@@ -1555,12 +1562,8 @@ add_interfaces (GDBusObjectManagerClient *manager,
+   g_list_free (interface_added_signals);
+ 
+   if (added)
+-    {
+-      g_hash_table_insert (manager->priv->map_object_path_to_object_proxy,
+-                           g_strdup (object_path),
+-                           op);
+-      g_signal_emit_by_name (manager, "object-added", op);
+-    }
++    g_signal_emit_by_name (manager, "object-added", op);
++
+   g_object_unref (manager);
+   g_object_unref (op);
+ }
+-- 
+2.14.2
+

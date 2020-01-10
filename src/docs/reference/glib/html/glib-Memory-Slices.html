@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Memory Slices: GLib Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="GLib Reference Manual">
 <link rel="up" href="glib-core.html" title="GLib Core Application Support">
 <link rel="prev" href="glib-Memory-Allocation.html" title="Memory Allocation">
@@ -221,8 +221,8 @@ array <span class="gtkdoc opt">=</span> <span class="function"><a href="glib-Mem
 array<span class="gtkdoc opt">-&gt;</span>data            <span class="gtkdoc opt">=</span> NULL<span class="gtkdoc opt">;</span>
 array<span class="gtkdoc opt">-&gt;</span>len             <span class="gtkdoc opt">=</span> <span class="number">0</span><span class="gtkdoc opt">;</span>
 array<span class="gtkdoc opt">-&gt;</span>alloc           <span class="gtkdoc opt">=</span> <span class="number">0</span><span class="gtkdoc opt">;</span>
-array<span class="gtkdoc opt">-&gt;</span>zero_terminated <span class="gtkdoc opt">= (</span>zero_terminated ? <span class="number">1</span> <span class="gtkdoc opt">:</span> <span class="number">0</span><span class="gtkdoc opt">);</span>
-array<span class="gtkdoc opt">-&gt;</span>clear           <span class="gtkdoc opt">= (</span>clear ? <span class="number">1</span> <span class="gtkdoc opt">:</span> <span class="number">0</span><span class="gtkdoc opt">);</span>
+array<span class="gtkdoc opt">-&gt;</span>zero_terminated <span class="gtkdoc opt">= (</span>zero_terminated <span class="gtkdoc opt">?</span> <span class="number">1</span> <span class="gtkdoc opt">:</span> <span class="number">0</span><span class="gtkdoc opt">);</span>
+array<span class="gtkdoc opt">-&gt;</span>clear           <span class="gtkdoc opt">= (</span>clear <span class="gtkdoc opt">?</span> <span class="number">1</span> <span class="gtkdoc opt">:</span> <span class="number">0</span><span class="gtkdoc opt">);</span>
 array<span class="gtkdoc opt">-&gt;</span>elt_size        <span class="gtkdoc opt">=</span> elt_size<span class="gtkdoc opt">;</span>
 
 <span class="gtkdoc slc">// We can free the block, so it can be reused.</span>

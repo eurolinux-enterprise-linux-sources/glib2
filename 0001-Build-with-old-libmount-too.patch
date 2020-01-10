@@ -1,0 +1,57 @@
+From a78c36d7f4e0e3038005305efd84f66a7d157f20 Mon Sep 17 00:00:00 2001
+From: Colin Walters <walters@verbum.org>
+Date: Wed, 1 Nov 2017 10:21:34 -0400
+Subject: [PATCH] Build with old libmount too
+
+Downstream: https://bugzilla.redhat.com/show_bug.cgi?id=1508056
+
+This is an easy change, and lets us build with RHEL7's libmount.
+
+See also https://github.com/ostreedev/ostree/commit/cee57a0268334d51cd312c6cdcf367bedfd3e30d
+---
+ configure.ac      | 6 ++++--
+ gio/gunixmounts.c | 4 ++--
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index fcbb62e7d..0beb3898c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1760,8 +1760,10 @@ AS_IF([ test $have_libmount = maybe ], [
+   glib_save_LIBS=$LIBS
+   AC_CHECK_HEADER([libmount/libmount.h], [:], [have_libmount=no])
+ 
+-  # Check for a recent enough libmount
+-  AC_CHECK_LIB([mount], [mnt_unref_table], [:], [have_libmount=no])
++  # We used to check for mnt_unref_table(), but now for compat with
++  # e.g. RHEL7 just use mnt_free_table().  Let's keep this check
++  # anyways.
++  AC_CHECK_LIB([mount], [mnt_free_table], [:], [have_libmount=no])
+   LIBS=$glib_save_LIBS
+ 
+   if test $have_libmount != no; then
+diff --git a/gio/gunixmounts.c b/gio/gunixmounts.c
+index ef7899dff..a3c40f5c1 100644
+--- a/gio/gunixmounts.c
++++ b/gio/gunixmounts.c
+@@ -505,7 +505,7 @@ _g_get_unix_mounts (void)
+   mnt_free_iter (iter);
+ 
+  out:
+-  mnt_unref_table (table);
++  mnt_free_table (table);
+ 
+   return g_list_reverse (return_list);
+ }
+@@ -1029,7 +1029,7 @@ _g_get_unix_mount_points (void)
+   mnt_free_iter (iter);
+ 
+  out:
+-  mnt_unref_table (table);
++  mnt_free_table (table);
+ 
+   return g_list_reverse (return_list);
+ }
+-- 
+2.13.6
+

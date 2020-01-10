@@ -1,13 +1,13 @@
 %global _changelog_trimtime %(date +%s -d "1 year ago")
 
 Name: glib2
-Version: 2.50.3
-Release: 3%{?dist}
+Version: 2.54.2
+Release: 2%{?dist}
 Summary: A library of handy utility functions
 
 License: LGPLv2+
 URL: http://www.gtk.org
-Source0: http://download.gnome.org/sources/glib/2.50/glib-%{version}.tar.xz
+Source0: http://download.gnome.org/sources/glib/2.54/glib-%{version}.tar.xz
 
 BuildRequires: git
 BuildRequires: pkgconfig
@@ -35,9 +35,10 @@ BuildRequires: chrpath
 Patch0: revert-g-source-remove-critical.patch
 Patch1: add-back-g-memmove.patch
 
-# Patches on top of 2.50+
-Patch2: 0001-gio-fam-Remove-leftover-debug-print.patch
-Patch3: 0001-gdbus-fix-use-after-free.patch
+Patch2: 0001-gdbus-codegen-Don-t-assume-bindir-and-datadir-share-.patch
+Patch3: 0001-gdbus-codegen-Call-abspath-earlier.patch
+Patch4: 0001-Build-with-old-libmount-too.patch
+Patch5: 0001-gio-fix-race-condition-in-GDBusObjectManagerClient.patch
 
 # for GIO content-type support
 Requires: shared-mime-info
@@ -198,6 +199,7 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_bindir}/glib-compile-resources
 %{_bindir}/gresource
 %{_datadir}/glib-2.0/codegen
+%{_datadir}/glib-2.0/valgrind/glib.supp
 %attr (0755, root, root) %{_bindir}/gtester-report
 %{_mandir}/man1/glib-genmarshal.1*
 %{_mandir}/man1/glib-gettextize.1*
@@ -230,6 +232,23 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_datadir}/installed-tests
 
 %changelog
+* Fri Nov 10 2017 Kalev Lember <klember@redhat.com> - 2.54.2-2
+- Backport patch to fix race condition in GDBusObjectManagerClient
+- Resolves: #1494065
+
+* Wed Nov 01 2017 Kalev Lember <klember@redhat.com> - 2.54.2-1
+- Update to 2.54.2
+- Related: #1481386
+
+* Tue Oct 31 2017 Colin Walters <walters@verbum.org> - 2.54.1-3
+- Backport patch to fix invocations of /bin/gdbus-codegen
+- Related: #1481386
+  See also bug 1507661
+
+* Wed Oct 18 2017 Florian Müllner <fmuellner@redhat.com> - 2.54.1-1
+- Update to 2.54.1
+- Related: #1481386
+
 * Tue Jun 06 2017 Colin Walters <walters@verbum.org> - 2.50.3-3
 - Add patch to fix use-after-free in GDBus
 - Resolves: #1437669
