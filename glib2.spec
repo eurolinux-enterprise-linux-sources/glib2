@@ -2,7 +2,7 @@
 
 Name: glib2
 Version: 2.56.1
-Release: 2%{?dist}
+Release: 4%{?dist}
 Summary: A library of handy utility functions
 
 License: LGPLv2+
@@ -32,6 +32,9 @@ BuildRequires: python-devel
 # built in RHEL7, as some projects use `-Werror` and such.
 Patch0: revert-g-source-remove-critical.patch
 Patch1: add-back-g-memmove.patch
+
+Patch10001: 0001-codegen-Change-pointer-casting-to-remove-type-punnin.patch
+Patch10002: 0002-gdbus-codegen-honor-Property.EmitsChangedSignal-anno.patch
 
 # for GIO content-type support
 Requires: shared-mime-info
@@ -83,6 +86,9 @@ the functionality of the installed glib2 package.
 
 %prep
 %autosetup -n glib-%{version} -p1
+
+# restore timestamps after patching to appease multilib for .pyc files
+tar vtf %{SOURCE0} | while read mode user size date time name; do touch -d "$date $time" ../$name; done
 
 autoreconf -i -f
 
@@ -221,6 +227,11 @@ gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 %{_datadir}/installed-tests
 
 %changelog
+* Fri May 10 2019 Ray Strode <rstrode@redhat.com> - 2.56.1-4
+- Backport glib2 change needed for accountsservice dbus
+  codegen fix
+  Related: #1709190
+
 * Mon Aug 27 2018 Colin Walters <walters@verbum.org> - 2.56.1-2
 - Add --disable-silent-rules
 

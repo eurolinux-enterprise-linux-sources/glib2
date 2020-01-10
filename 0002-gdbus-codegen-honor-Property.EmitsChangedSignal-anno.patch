@@ -1,0 +1,613 @@
+From e3b4e15cef15fc51114318f2335212971aa967db Mon Sep 17 00:00:00 2001
+From: Thomas Jost <schnouki@schnouki.net>
+Date: Thu, 13 Dec 2018 03:06:02 -0800
+Subject: [PATCH 2/2] gdbus-codegen: honor "Property.EmitsChangedSignal"
+ annotations
+
+Co-Authored-by: Andy Holmes <andrew.g.r.holmes@gmail.com>
+---
+ gio/gdbus-2.0/codegen/codegen.py   | 18 ++++++++++-----
+ gio/gdbus-2.0/codegen/dbustypes.py |  7 ++++++
+ gio/tests/gdbus-test-codegen.c     | 36 +++++++++++++++++++++++++-----
+ gio/tests/test-codegen.xml         |  6 +++++
+ 4 files changed, 56 insertions(+), 11 deletions(-)
+
+diff --git a/gio/gdbus-2.0/codegen/codegen.py b/gio/gdbus-2.0/codegen/codegen.py
+index f6892af95..442bd3f5d 100644
+--- a/gio/gdbus-2.0/codegen/codegen.py
++++ b/gio/gdbus-2.0/codegen/codegen.py
+@@ -638,61 +638,62 @@ class CodeGenerator:
+                            '#  include <gio/gunixfdlist.h>\n'
+                            '#endif\n'
+                            '\n')
+ 
+         self.outfile.write('typedef struct\n'
+                            '{\n'
+                            '  GDBusArgInfo parent_struct;\n'
+                            '  gboolean use_gvariant;\n'
+                            '} _ExtendedGDBusArgInfo;\n'
+                            '\n')
+ 
+         self.outfile.write('typedef struct\n'
+                            '{\n'
+                            '  GDBusMethodInfo parent_struct;\n'
+                            '  const gchar *signal_name;\n'
+                            '  gboolean pass_fdlist;\n'
+                            '} _ExtendedGDBusMethodInfo;\n'
+                            '\n')
+ 
+         self.outfile.write('typedef struct\n'
+                            '{\n'
+                            '  GDBusSignalInfo parent_struct;\n'
+                            '  const gchar *signal_name;\n'
+                            '} _ExtendedGDBusSignalInfo;\n'
+                            '\n')
+ 
+         self.outfile.write('typedef struct\n'
+                            '{\n'
+                            '  GDBusPropertyInfo parent_struct;\n'
+                            '  const gchar *hyphen_name;\n'
+-                           '  gboolean use_gvariant;\n'
++                           '  guint use_gvariant : 1;\n'
++                           '  guint emits_changed_signal : 1;\n'
+                            '} _ExtendedGDBusPropertyInfo;\n'
+                            '\n')
+ 
+         self.outfile.write('typedef struct\n'
+                            '{\n'
+                            '  GDBusInterfaceInfo parent_struct;\n'
+                            '  const gchar *hyphen_name;\n'
+                            '} _ExtendedGDBusInterfaceInfo;\n'
+                            '\n')
+ 
+         self.outfile.write('typedef struct\n'
+                            '{\n'
+                            '  const _ExtendedGDBusPropertyInfo *info;\n'
+                            '  guint prop_id;\n'
+                            '  GValue orig_value; /* the value before the change */\n'
+                            '} ChangedProperty;\n'
+                            '\n'
+                            'static void\n'
+                            '_changed_property_free (ChangedProperty *data)\n'
+                            '{\n'
+                            '  g_value_unset (&data->orig_value);\n'
+                            '  g_free (data);\n'
+                            '}\n'
+                            '\n')
+ 
+         self.outfile.write('static gboolean\n'
+                            '_g_strv_equal0 (gchar **a, gchar **b)\n'
+                            '{\n'
+                            '  gboolean ret = FALSE;\n'
+                            '  guint n;\n'
+@@ -933,63 +934,67 @@ class CodeGenerator:
+                                    '\n')
+ 
+             # ---
+ 
+             if len(i.properties) > 0:
+                 for p in i.properties:
+                     if p.readable and p.writable:
+                         access = 'G_DBUS_PROPERTY_INFO_FLAGS_READABLE | G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE'
+                     elif p.readable:
+                         access = 'G_DBUS_PROPERTY_INFO_FLAGS_READABLE'
+                     elif p.writable:
+                         access = 'G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE'
+                     else:
+                         access = 'G_DBUS_PROPERTY_INFO_FLAGS_NONE'
+                     num_anno = self.generate_annotations('_%s_property_%s_annotation_info'%(i.name_lower, p.name_lower), p.annotations)
+                     self.outfile.write('static const _ExtendedGDBusPropertyInfo _%s_property_info_%s =\n'
+                                        '{\n'
+                                        '  {\n'
+                                        '    -1,\n'
+                                        '    (gchar *) "%s",\n'
+                                        '    (gchar *) "%s",\n'
+                                        '    %s,\n'%(i.name_lower, p.name_lower, p.name, p.arg.signature, access))
+                     if num_anno == 0:
+                         self.outfile.write('    NULL\n')
+                     else:
+                         self.outfile.write('    (GDBusAnnotationInfo **) &_%s_property_%s_annotation_info_pointers\n'%(i.name_lower, p.name_lower))
+                     self.outfile.write('  },\n'
+                                        '  "%s",\n'
+                                        %(p.name_hyphen))
+                     if not utils.lookup_annotation(p.annotations, 'org.gtk.GDBus.C.ForceGVariant'):
+-                        self.outfile.write('  FALSE\n')
++                        self.outfile.write('  FALSE,\n')
+                     else:
++                        self.outfile.write('  TRUE,\n')
++                    if p.emits_changed_signal:
+                         self.outfile.write('  TRUE\n')
++                    else:
++                        self.outfile.write('  FALSE\n')
+                     self.outfile.write('};\n'
+                                        '\n')
+ 
+                 self.outfile.write('static const GDBusPropertyInfo * const _%s_property_info_pointers[] =\n'
+                                    '{\n'%(i.name_lower))
+                 for p in i.properties:
+                     self.outfile.write('  &_%s_property_info_%s.parent_struct,\n'%(i.name_lower, p.name_lower))
+                 self.outfile.write('  NULL\n'
+                                    '};\n'
+                                    '\n')
+ 
+             num_anno = self.generate_annotations('_%s_annotation_info'%(i.name_lower), i.annotations)
+             self.outfile.write('static const _ExtendedGDBusInterfaceInfo _%s_interface_info =\n'
+                                '{\n'
+                                '  {\n'
+                                '    -1,\n'
+                                '    (gchar *) "%s",\n'%(i.name_lower, i.name))
+             if len(i.methods) == 0:
+                 self.outfile.write('    NULL,\n')
+             else:
+                 self.outfile.write('    (GDBusMethodInfo **) &_%s_method_info_pointers,\n'%(i.name_lower))
+             if len(i.signals) == 0:
+                 self.outfile.write('    NULL,\n')
+             else:
+                 self.outfile.write('    (GDBusSignalInfo **) &_%s_signal_info_pointers,\n'%(i.name_lower))
+             if len(i.properties) == 0:
+                 self.outfile.write('    NULL,\n')
+             else:
+                 self.outfile.write('    (GDBusPropertyInfo **) &_%s_property_info_pointers,\n'%(i.name_lower))
+             if num_anno == 0:
+@@ -2568,68 +2573,71 @@ class CodeGenerator:
+             # this allows use of g_object_freeze_notify()/g_object_thaw_notify() ...
+             # This is useful when updating several properties from another thread than
+             # where the idle will be emitted from
+             self.outfile.write('static void\n'
+                                '%s_skeleton_notify (GObject      *object,\n'
+                                '  GParamSpec *pspec G_GNUC_UNUSED)\n'
+                                '{\n'
+                                '  %sSkeleton *skeleton = %s%s_SKELETON (object);\n'
+                                '  g_mutex_lock (&skeleton->priv->lock);\n'
+                                '  if (skeleton->priv->changed_properties != NULL &&\n'
+                                '      skeleton->priv->changed_properties_idle_source == NULL)\n'
+                                '    {\n'
+                                '      skeleton->priv->changed_properties_idle_source = g_idle_source_new ();\n'
+                                '      g_source_set_priority (skeleton->priv->changed_properties_idle_source, G_PRIORITY_DEFAULT);\n'
+                                '      g_source_set_callback (skeleton->priv->changed_properties_idle_source, _%s_emit_changed, g_object_ref (skeleton), (GDestroyNotify) g_object_unref);\n'
+                                '      g_source_set_name (skeleton->priv->changed_properties_idle_source, "[generated] _%s_emit_changed");\n'
+                                '      g_source_attach (skeleton->priv->changed_properties_idle_source, skeleton->priv->context);\n'
+                                '      g_source_unref (skeleton->priv->changed_properties_idle_source);\n'
+                                '    }\n'
+                                '  g_mutex_unlock (&skeleton->priv->lock);\n'
+                                '}\n'
+                                '\n'
+                                %(i.name_lower, i.camel_name, i.ns_upper, i.name_upper, i.name_lower, i.name_lower))
+ 
+             self.outfile.write('static void\n'
+                                '%s_skeleton_set_property (GObject      *object,\n'
+                                '  guint         prop_id,\n'
+                                '  const GValue *value,\n'
+                                '  GParamSpec   *pspec)\n'
+                                '{\n'%(i.name_lower))
+-            self.outfile.write('  %sSkeleton *skeleton = %s%s_SKELETON (object);\n'
++            self.outfile.write('  const _ExtendedGDBusPropertyInfo *info;\n'
++                               '  %sSkeleton *skeleton = %s%s_SKELETON (object);\n'
+                                '  g_assert (prop_id != 0 && prop_id - 1 < %d);\n'
++                               '  info = (const _ExtendedGDBusPropertyInfo *) _%s_property_info_pointers[prop_id - 1];\n'
+                                '  g_mutex_lock (&skeleton->priv->lock);\n'
+                                '  g_object_freeze_notify (object);\n'
+                                '  if (!_g_value_equal (value, &skeleton->priv->properties[prop_id - 1]))\n'
+                                '    {\n'
+-                               '      if (g_dbus_interface_skeleton_get_connection (G_DBUS_INTERFACE_SKELETON (skeleton)) != NULL)\n'
+-                               '        _%s_schedule_emit_changed (skeleton, (const _ExtendedGDBusPropertyInfo *) _%s_property_info_pointers[prop_id - 1], prop_id, &skeleton->priv->properties[prop_id - 1]);\n'
++                               '      if (g_dbus_interface_skeleton_get_connection (G_DBUS_INTERFACE_SKELETON (skeleton)) != NULL &&\n'
++                               '          info->emits_changed_signal)\n'
++                               '        _%s_schedule_emit_changed (skeleton, info, prop_id, &skeleton->priv->properties[prop_id - 1]);\n'
+                                '      g_value_copy (value, &skeleton->priv->properties[prop_id - 1]);\n'
+                                '      g_object_notify_by_pspec (object, pspec);\n'
+                                '    }\n'
+                                '  g_mutex_unlock (&skeleton->priv->lock);\n'
+                                '  g_object_thaw_notify (object);\n'
+                                %(i.camel_name, i.ns_upper, i.name_upper, len(i.properties), i.name_lower, i.name_lower))
+             self.outfile.write('}\n'
+                                '\n')
+ 
+         self.outfile.write('static void\n'
+                            '%s_skeleton_init (%sSkeleton *skeleton)\n'
+                            '{\n'
+                            '#if GLIB_VERSION_MAX_ALLOWED >= GLIB_VERSION_2_38\n'
+                            '  skeleton->priv = %s_skeleton_get_instance_private (skeleton);\n'
+                            '#else\n'
+                            '  skeleton->priv = G_TYPE_INSTANCE_GET_PRIVATE (skeleton, %sTYPE_%s_SKELETON, %sSkeletonPrivate);\n'
+                            '#endif\n\n'
+                            %(i.name_lower, i.camel_name,
+                              i.name_lower,
+                              i.ns_upper, i.name_upper, i.camel_name))
+         self.outfile.write('  g_mutex_init (&skeleton->priv->lock);\n')
+         self.outfile.write('  skeleton->priv->context = g_main_context_ref_thread_default ();\n')
+         if len(i.properties) > 0:
+             self.outfile.write('  skeleton->priv->properties = g_new0 (GValue, %d);\n'%(len(i.properties)))
+             n = 0
+             for p in i.properties:
+                 self.outfile.write('  g_value_init (&skeleton->priv->properties[%d], %s);\n'%(n, p.arg.gtype))
+                 n += 1
+         self.outfile.write('}\n'
+                            '\n')
+diff --git a/gio/gdbus-2.0/codegen/dbustypes.py b/gio/gdbus-2.0/codegen/dbustypes.py
+index bfc69f596..359880ff7 100644
+--- a/gio/gdbus-2.0/codegen/dbustypes.py
++++ b/gio/gdbus-2.0/codegen/dbustypes.py
+@@ -300,89 +300,96 @@ class Signal:
+         arg_count = 0
+         for a in self.args:
+             a.post_process(interface_prefix, cns, cns_upper, cns_lower, arg_count)
+             arg_count += 1
+ 
+         if utils.lookup_annotation(self.annotations, 'org.freedesktop.DBus.Deprecated') == 'true':
+             self.deprecated = True
+ 
+ class Property:
+     def __init__(self, name, signature, access):
+         self.name = name
+         self.signature = signature
+         self.access = access
+         self.annotations = []
+         self.arg = Arg('value', self.signature)
+         self.arg.annotations = self.annotations
+         self.readable = False
+         self.writable = False
+         if self.access == 'readwrite':
+             self.readable = True
+             self.writable = True
+         elif self.access == 'read':
+             self.readable = True
+         elif self.access == 'write':
+             self.writable = True
+         else:
+             print_error('Invalid access type "{}"'.format(self.access))
+         self.doc_string = ''
+         self.since = ''
+         self.deprecated = False
++        self.emits_changed_signal = True
+ 
+     def post_process(self, interface_prefix, cns, cns_upper, cns_lower, containing_iface):
+         if len(self.doc_string) == 0:
+             self.doc_string = utils.lookup_docs(self.annotations)
+         if len(self.since) == 0:
+             self.since = utils.lookup_since(self.annotations)
+             if len(self.since) == 0:
+                 self.since = containing_iface.since
+ 
+         name = self.name
+         overridden_name = utils.lookup_annotation(self.annotations, 'org.gtk.GDBus.C.Name')
+         if utils.is_ugly_case(overridden_name):
+             self.name_lower = overridden_name.lower()
+         else:
+             if overridden_name:
+                 name = overridden_name
+             self.name_lower = utils.camel_case_to_uscore(name).lower().replace('-', '_')
+         self.name_hyphen = self.name_lower.replace('_', '-')
+         # don't clash with the GType getter, e.g.: GType foo_bar_get_type (void); G_GNUC_CONST
+         if self.name_lower == 'type':
+             self.name_lower = 'type_'
+ 
+         # recalculate arg
+         self.arg.annotations = self.annotations
+         self.arg.post_process(interface_prefix, cns, cns_upper, cns_lower, 0)
+ 
+         if utils.lookup_annotation(self.annotations, 'org.freedesktop.DBus.Deprecated') == 'true':
+             self.deprecated = True
+ 
++        # FIXME: for now we only support 'false' and 'const' on the signal itself, see #674913 and
++        # http://dbus.freedesktop.org/doc/dbus-specification.html#introspection-format
++        # for details
++        if utils.lookup_annotation(self.annotations, 'org.freedesktop.DBus.Property.EmitsChangedSignal') in ('false', 'const'):
++            self.emits_changed_signal = False
++
+ class Interface:
+     def __init__(self, name):
+         self.name = name
+         self.methods = []
+         self.signals = []
+         self.properties = []
+         self.annotations = []
+         self.doc_string = ''
+         self.doc_string_brief = ''
+         self.since = ''
+         self.deprecated = False
+ 
+     def post_process(self, interface_prefix, c_namespace):
+         if len(self.doc_string) == 0:
+             self.doc_string = utils.lookup_docs(self.annotations)
+         if len(self.doc_string_brief) == 0:
+             self.doc_string_brief = utils.lookup_brief_docs(self.annotations)
+         if len(self.since) == 0:
+             self.since = utils.lookup_since(self.annotations)
+ 
+         if len(c_namespace) > 0:
+             if utils.is_ugly_case(c_namespace):
+                 cns = c_namespace.replace('_', '')
+                 cns_upper = c_namespace.upper() + '_'
+                 cns_lower = c_namespace.lower() + '_'
+             else:
+                 cns = c_namespace
+                 cns_upper = utils.camel_case_to_uscore(c_namespace).upper() + '_'
+                 cns_lower = utils.camel_case_to_uscore(c_namespace).lower() + '_'
+         else:
+diff --git a/gio/tests/gdbus-test-codegen.c b/gio/tests/gdbus-test-codegen.c
+index 1c4e83c4c..c906d05ae 100644
+--- a/gio/tests/gdbus-test-codegen.c
++++ b/gio/tests/gdbus-test-codegen.c
+@@ -1740,103 +1740,127 @@ on_object_proxy_added (GDBusObjectManagerClient  *manager,
+                        gpointer            user_data)
+ {
+   OMData *om_data = user_data;
+   om_data->num_object_proxy_added_signals += 1;
+   g_signal_connect (object_proxy,
+                     "interface-added",
+                     G_CALLBACK (on_interface_added),
+                     om_data);
+   g_signal_connect (object_proxy,
+                     "interface-removed",
+                     G_CALLBACK (on_interface_removed),
+                     om_data);
+ }
+ 
+ static void
+ on_object_proxy_removed (GDBusObjectManagerClient  *manager,
+                          GDBusObjectProxy   *object_proxy,
+                          gpointer            user_data)
+ {
+   OMData *om_data = user_data;
+   om_data->num_object_proxy_removed_signals += 1;
+   g_assert_cmpint (g_signal_handlers_disconnect_by_func (object_proxy,
+                                                          G_CALLBACK (on_interface_added),
+                                                          om_data), ==, 1);
+   g_assert_cmpint (g_signal_handlers_disconnect_by_func (object_proxy,
+                                                          G_CALLBACK (on_interface_removed),
+                                                          om_data), ==, 1);
+ }
+ 
+ static void
+-property_d_changed (GObject    *object,
+-		    GParamSpec *pspec,
+-		    gpointer    user_data)
++property_changed (GObject    *object,
++		  GParamSpec *pspec,
++		  gpointer    user_data)
+ {
+   gboolean *changed = user_data;
+ 
+   *changed = TRUE;
+ }
+ 
+ static void
+ om_check_property_and_signal_emission (GMainLoop  *loop,
+                                        FooiGenBar *skeleton,
+                                        FooiGenBar *proxy)
+ {
+   gboolean d_changed = FALSE;
++  gboolean quiet_changed = FALSE;
++  gboolean quiet_too_changed = FALSE;
+   guint handler;
+ 
+   /* First PropertiesChanged */
+   g_assert_cmpint (foo_igen_bar_get_i (skeleton), ==, 0);
+   g_assert_cmpint (foo_igen_bar_get_i (proxy), ==, 0);
+   foo_igen_bar_set_i (skeleton, 1);
+   _g_assert_property_notify (proxy, "i");
+   g_assert_cmpint (foo_igen_bar_get_i (skeleton), ==, 1);
+   g_assert_cmpint (foo_igen_bar_get_i (proxy), ==, 1);
+ 
+   /* Double-check the gdouble case */
+   g_assert_cmpfloat (foo_igen_bar_get_d (skeleton), ==, 0.0);
+   g_assert_cmpfloat (foo_igen_bar_get_d (proxy), ==, 0.0);
+   foo_igen_bar_set_d (skeleton, 1.0);
+   _g_assert_property_notify (proxy, "d");
+ 
+   /* Verify that re-setting it to the same value doesn't cause a
+    * notify on the proxy, by taking advantage of the fact that
+    * notifications are serialized.
+    */
+   handler = g_signal_connect (proxy, "notify::d",
+-			      G_CALLBACK (property_d_changed), &d_changed);
++			      G_CALLBACK (property_changed), &d_changed);
+   foo_igen_bar_set_d (skeleton, 1.0);
+   foo_igen_bar_set_i (skeleton, 2);
+   _g_assert_property_notify (proxy, "i");
+   g_assert (d_changed == FALSE);
+   g_signal_handler_disconnect (proxy, handler);
+ 
++  /* Verify that re-setting a property with the "EmitsChangedSignal"
++   * set to false doesn't emit a signal. */
++  handler = g_signal_connect (proxy, "notify::quiet",
++			      G_CALLBACK (property_changed), &quiet_changed);
++  foo_igen_bar_set_quiet (skeleton, "hush!");
++  foo_igen_bar_set_i (skeleton, 3);
++  _g_assert_property_notify (proxy, "i");
++  g_assert (quiet_changed == FALSE);
++  g_assert_cmpstr (foo_igen_bar_get_quiet (skeleton), ==, "hush!");
++  g_signal_handler_disconnect (proxy, handler);
++
++  /* Also verify that re-setting a property with the "EmitsChangedSignal"
++   * set to 'const' doesn't emit a signal. */
++  handler = g_signal_connect (proxy, "notify::quiet-too",
++			      G_CALLBACK (property_changed), &quiet_changed);
++  foo_igen_bar_set_quiet_too (skeleton, "hush too!");
++  foo_igen_bar_set_i (skeleton, 4);
++  _g_assert_property_notify (proxy, "i");
++  g_assert (quiet_too_changed == FALSE);
++  g_assert_cmpstr (foo_igen_bar_get_quiet_too (skeleton), ==, "hush too!");
++  g_signal_handler_disconnect (proxy, handler);
++
+   /* Then just a regular signal */
+   foo_igen_bar_emit_another_signal (skeleton, "word");
+   _g_assert_signal_received (proxy, "another-signal");
+ }
+ 
+ static void
+ check_object_manager (void)
+ {
+   FooiGenObjectSkeleton *o = NULL;
+   FooiGenObjectSkeleton *o2 = NULL;
+   FooiGenObjectSkeleton *o3 = NULL;
+   GDBusInterfaceSkeleton *i;
+   GDBusConnection *c;
+   GDBusObjectManagerServer *manager = NULL;
+   GDBusNodeInfo *info;
+   GError *error;
+   GMainLoop *loop;
+   OMData *om_data = NULL;
+   guint om_signal_id = -1;
+   GDBusObjectManager *pm = NULL;
+   GList *object_proxies;
+   GList *proxies;
+   GDBusObject *op;
+   GDBusProxy *p;
+   FooiGenBar *bar_skeleton;
+   GDBusInterface *iface;
+   gchar *path, *name, *name_owner;
+   GDBusConnection *c2;
+   GDBusObjectManagerClientFlags flags;
+ 
+@@ -2124,73 +2148,73 @@ check_object_manager (void)
+                     "({objectpath '/managed/first': {'com.acme.Coyote': {'Mood': <''>}}},)");
+ 
+   /* -------------------------------------------------- */
+ 
+   /* create a new object with two interfaces */
+   o2 = foo_igen_object_skeleton_new ("/managed/second");
+   i = G_DBUS_INTERFACE_SKELETON (foo_igen_bar_skeleton_new ());
+   bar_skeleton = FOO_IGEN_BAR (i); /* save for later test */
+   foo_igen_object_skeleton_set_bar (o2, FOO_IGEN_BAR (i));
+   g_clear_object (&i);
+   i = G_DBUS_INTERFACE_SKELETON (foo_igen_bat_skeleton_new ());
+   foo_igen_object_skeleton_set_bat (o2, FOO_IGEN_BAT (i));
+   g_clear_object (&i);
+   /* ... add it */
+   g_dbus_object_manager_server_export (manager, G_DBUS_OBJECT_SKELETON (o2));
+   /* ... check we get the InterfacesAdded with _two_ interfaces */
+   om_data->state = 101;
+   g_main_loop_run (om_data->loop);
+   g_assert_cmpint (om_data->state, ==, 102);
+   g_assert_cmpint (om_data->num_object_proxy_added_signals, ==, 5);
+   g_assert_cmpint (om_data->num_object_proxy_removed_signals, ==, 3);
+   g_assert_cmpint (om_data->num_interface_added_signals, ==, 1);
+   g_assert_cmpint (om_data->num_interface_removed_signals, ==, 1);
+ 
+   /* -------------------------------------------------- */
+ 
+   /* Now that we have a couple of objects with interfaces, check
+    * that ObjectManager.GetManagedObjects() works
+    */
+   om_check_get_all (c, loop,
+-                    "({objectpath '/managed/first': {'com.acme.Coyote': {'Mood': <''>}}, '/managed/second': {'org.project.Bar': {'y': <byte 0x00>, 'b': <false>, 'n': <int16 0>, 'q': <uint16 0>, 'i': <0>, 'u': <uint32 0>, 'x': <int64 0>, 't': <uint64 0>, 'd': <0.0>, 's': <''>, 'o': <objectpath '/'>, 'g': <signature ''>, 'ay': <b''>, 'as': <@as []>, 'aay': <@aay []>, 'ao': <@ao []>, 'ag': <@ag []>, 'FinallyNormalName': <''>, 'ReadonlyProperty': <''>, 'unset_i': <0>, 'unset_d': <0.0>, 'unset_s': <''>, 'unset_o': <objectpath '/'>, 'unset_g': <signature ''>, 'unset_ay': <b''>, 'unset_as': <@as []>, 'unset_ao': <@ao []>, 'unset_ag': <@ag []>, 'unset_struct': <(0, 0.0, '', objectpath '/', signature '', @ay [], @as [], @ao [], @ag [])>}, 'org.project.Bat': {'force_i': <0>, 'force_s': <''>, 'force_ay': <@ay []>, 'force_struct': <(0,)>}}},)");
++                    "({objectpath '/managed/first': {'com.acme.Coyote': {'Mood': <''>}}, '/managed/second': {'org.project.Bar': {'y': <byte 0x00>, 'b': <false>, 'n': <int16 0>, 'q': <uint16 0>, 'i': <0>, 'u': <uint32 0>, 'x': <int64 0>, 't': <uint64 0>, 'd': <0.0>, 's': <''>, 'o': <objectpath '/'>, 'g': <signature ''>, 'ay': <b''>, 'as': <@as []>, 'aay': <@aay []>, 'ao': <@ao []>, 'ag': <@ag []>, 'FinallyNormalName': <''>, 'ReadonlyProperty': <''>, 'quiet': <''>, 'quiet_too': <''>, 'unset_i': <0>, 'unset_d': <0.0>, 'unset_s': <''>, 'unset_o': <objectpath '/'>, 'unset_g': <signature ''>, 'unset_ay': <b''>, 'unset_as': <@as []>, 'unset_ao': <@ao []>, 'unset_ag': <@ag []>, 'unset_struct': <(0, 0.0, '', objectpath '/', signature '', @ay [], @as [], @ao [], @ag [])>}, 'org.project.Bat': {'force_i': <0>, 'force_s': <''>, 'force_ay': <@ay []>, 'force_struct': <(0,)>}}},)");
+ 
+   /* Set connection to NULL, causing everything to be unexported.. verify this.. and
+    * then set the connection back.. and then check things still work
+    */
+   g_dbus_object_manager_server_set_connection (manager, NULL);
+   info = introspect (c, g_dbus_connection_get_unique_name (c), "/managed", loop);
+   g_assert_cmpint (count_interfaces (info), ==, 0); /* nothing */
+   g_dbus_node_info_unref (info);
+ 
+   g_dbus_object_manager_server_set_connection (manager, c);
+   om_check_get_all (c, loop,
+-                    "({objectpath '/managed/first': {'com.acme.Coyote': {'Mood': <''>}}, '/managed/second': {'org.project.Bar': {'y': <byte 0x00>, 'b': <false>, 'n': <int16 0>, 'q': <uint16 0>, 'i': <0>, 'u': <uint32 0>, 'x': <int64 0>, 't': <uint64 0>, 'd': <0.0>, 's': <''>, 'o': <objectpath '/'>, 'g': <signature ''>, 'ay': <b''>, 'as': <@as []>, 'aay': <@aay []>, 'ao': <@ao []>, 'ag': <@ag []>, 'FinallyNormalName': <''>, 'ReadonlyProperty': <''>, 'unset_i': <0>, 'unset_d': <0.0>, 'unset_s': <''>, 'unset_o': <objectpath '/'>, 'unset_g': <signature ''>, 'unset_ay': <b''>, 'unset_as': <@as []>, 'unset_ao': <@ao []>, 'unset_ag': <@ag []>, 'unset_struct': <(0, 0.0, '', objectpath '/', signature '', @ay [], @as [], @ao [], @ag [])>}, 'org.project.Bat': {'force_i': <0>, 'force_s': <''>, 'force_ay': <@ay []>, 'force_struct': <(0,)>}}},)");
++                    "({objectpath '/managed/first': {'com.acme.Coyote': {'Mood': <''>}}, '/managed/second': {'org.project.Bar': {'y': <byte 0x00>, 'b': <false>, 'n': <int16 0>, 'q': <uint16 0>, 'i': <0>, 'u': <uint32 0>, 'x': <int64 0>, 't': <uint64 0>, 'd': <0.0>, 's': <''>, 'o': <objectpath '/'>, 'g': <signature ''>, 'ay': <b''>, 'as': <@as []>, 'aay': <@aay []>, 'ao': <@ao []>, 'ag': <@ag []>, 'FinallyNormalName': <''>, 'ReadonlyProperty': <''>, 'quiet': <''>, 'quiet_too': <''>, 'unset_i': <0>, 'unset_d': <0.0>, 'unset_s': <''>, 'unset_o': <objectpath '/'>, 'unset_g': <signature ''>, 'unset_ay': <b''>, 'unset_as': <@as []>, 'unset_ao': <@ao []>, 'unset_ag': <@ag []>, 'unset_struct': <(0, 0.0, '', objectpath '/', signature '', @ay [], @as [], @ao [], @ag [])>}, 'org.project.Bat': {'force_i': <0>, 'force_s': <''>, 'force_ay': <@ay []>, 'force_struct': <(0,)>}}},)");
+ 
+   /* Also check that the ObjectManagerClient returns these objects - and
+    * that they are of the right GType cf. what was requested via
+    * the generated ::get-proxy-type signal handler
+    */
+   object_proxies = g_dbus_object_manager_get_objects (pm);
+   g_assert (g_list_length (object_proxies) == 2);
+   g_list_free_full (object_proxies, g_object_unref);
+   op = g_dbus_object_manager_get_object (pm, "/managed/first");
+   g_assert (op != NULL);
+   g_assert (FOO_IGEN_IS_OBJECT_PROXY (op));
+   g_assert_cmpstr (g_dbus_object_get_object_path (op), ==, "/managed/first");
+   proxies = g_dbus_object_get_interfaces (op);
+   g_assert (g_list_length (proxies) == 1);
+   g_list_free_full (proxies, g_object_unref);
+   p = G_DBUS_PROXY (foo_igen_object_get_com_acme_coyote (FOO_IGEN_OBJECT (op)));
+   g_assert (p != NULL);
+   g_assert_cmpint (G_TYPE_FROM_INSTANCE (p), ==, FOO_IGEN_TYPE_COM_ACME_COYOTE_PROXY);
+   g_assert (g_type_is_a (G_TYPE_FROM_INSTANCE (p), FOO_IGEN_TYPE_COM_ACME_COYOTE));
+   g_clear_object (&p);
+   p = (GDBusProxy *) g_dbus_object_get_interface (op, "org.project.NonExisting");
+   g_assert (p == NULL);
+   g_clear_object (&op);
+ 
+   /* -- */
+   op = g_dbus_object_manager_get_object (pm, "/managed/second");
+   g_assert (op != NULL);
+   g_assert (FOO_IGEN_IS_OBJECT_PROXY (op));
+   g_assert_cmpstr (g_dbus_object_get_object_path (op), ==, "/managed/second");
+   proxies = g_dbus_object_get_interfaces (op);
+diff --git a/gio/tests/test-codegen.xml b/gio/tests/test-codegen.xml
+index 885a21f77..39d8769c7 100644
+--- a/gio/tests/test-codegen.xml
++++ b/gio/tests/test-codegen.xml
+@@ -79,60 +79,66 @@
+       <arg type="aay" name="array_of_bytestrings" />
+       <arg type="a{s(ii)}" name="dict_s_to_pairs" />
+     </signal>
+ 
+     <signal name="AnotherSignal">
+       <arg type="s" name="word" />
+     </signal>
+ 
+     <property name="y" type="y" access="readwrite">
+       <annotation name="org.gtk.GDBus.DocString" value="&lt;para&gt;Property docs, yah...&lt;/para&gt;&lt;para&gt;Second paragraph.&lt;/para&gt;"/>
+     </property>
+     <property name="b" type="b" access="readwrite"/>
+     <property name="n" type="n" access="readwrite"/>
+     <property name="q" type="q" access="readwrite"/>
+     <property name="i" type="i" access="readwrite"/>
+     <property name="u" type="u" access="readwrite"/>
+     <property name="x" type="x" access="readwrite"/>
+     <property name="t" type="t" access="readwrite"/>
+     <property name="d" type="d" access="readwrite"/>
+     <property name="s" type="s" access="readwrite"/>
+     <property name="o" type="o" access="readwrite"/>
+     <property name="g" type="g" access="readwrite"/>
+     <property name="ay" type="ay" access="readwrite"/>
+     <property name="as" type="as" access="readwrite"/>
+     <property name="aay" type="aay" access="readwrite"/>
+     <property name="ao" type="ao" access="readwrite"/>
+     <property name="ag" type="ag" access="readwrite"/>
+     <property name="FinallyNormalName" type="s" access="readwrite"/>
+     <property name="ReadonlyProperty" type="s" access="read"/>
+     <property name="WriteonlyProperty" type="s" access="write"/>
++    <property name="quiet" type="s" access="readwrite">
++      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
++    </property>
++    <property name="quiet_too" type="s" access="readwrite">
++      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="const"/>
++    </property>
+ 
+     <!-- unset properties -->
+     <property name="unset_i" type="i" access="readwrite"/>
+     <property name="unset_d" type="d" access="readwrite"/>
+     <property name="unset_s" type="s" access="readwrite"/>
+     <property name="unset_o" type="o" access="readwrite"/>
+     <property name="unset_g" type="g" access="readwrite"/>
+     <property name="unset_ay" type="ay" access="readwrite"/>
+     <property name="unset_as" type="as" access="readwrite"/>
+     <property name="unset_ao" type="ao" access="readwrite"/>
+     <property name="unset_ag" type="ag" access="readwrite"/>
+     <property name="unset_struct" type="(idsogayasaoag)" access="readwrite"/>
+   </interface> <!-- End org.project.Bar -->
+ 
+   <!-- Namespaced -->
+   <interface name="org.project.Bar.Frobnicator">
+     <method name="RandomMethod"/>
+   </interface>
+ 
+   <!-- Empty -->
+   <interface name="org.project.Baz">
+   </interface>
+ 
+   <!-- Outside D-Bus prefix -->
+   <interface name="com.acme.Coyote">
+     <method name="Run"/>
+     <method name="Sleep"/>
+     <method name="Attack"/>
+     <signal name="Surprised"/>
+     <property name="Mood" type="s" access="read"/>
+-- 
+2.21.0
+

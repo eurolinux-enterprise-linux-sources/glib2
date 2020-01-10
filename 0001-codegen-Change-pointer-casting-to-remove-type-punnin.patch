@@ -1,0 +1,396 @@
+From 04e6f6ec79ed653ef691c7c6ac5f7ae7c40433aa Mon Sep 17 00:00:00 2001
+From: Robert Ancell <robert.ancell@canonical.com>
+Date: Fri, 7 Sep 2018 10:19:05 +1200
+Subject: [PATCH 1/2] codegen: Change pointer casting to remove type-punning
+ warnings
+
+The existing code was generating code with undefined results that modern compilers warn about:
+
+accounts-generated.c:204:23: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+     (GDBusArgInfo **) &_accounts_accounts_method_info_list_cached_users_OUT_ARG_pointers,
+---
+ gio/gdbus-2.0/codegen/codegen.py | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/gio/gdbus-2.0/codegen/codegen.py b/gio/gdbus-2.0/codegen/codegen.py
+index d98f8973b..f6892af95 100644
+--- a/gio/gdbus-2.0/codegen/codegen.py
++++ b/gio/gdbus-2.0/codegen/codegen.py
+@@ -817,186 +817,186 @@ class CodeGenerator:
+                 self.outfile.write('  &%s_%d,\n'%(prefix, m))
+                 m += 1
+             self.outfile.write('  NULL\n'
+                                '};\n'
+                                '\n')
+         return n
+ 
+     def generate_args(self, prefix, args):
+         for a in args:
+             num_anno = self.generate_annotations('%s_arg_%s_annotation_info'%(prefix, a.name), a.annotations)
+ 
+             self.outfile.write('static const _ExtendedGDBusArgInfo %s_%s =\n'
+                                '{\n'
+                                '  {\n'
+                                '    -1,\n'
+                                '    (gchar *) "%s",\n'
+                                '    (gchar *) "%s",\n'%(prefix, a.name, a.name, a.signature))
+             if num_anno == 0:
+                 self.outfile.write('    NULL\n')
+             else:
+                 self.outfile.write('    (GDBusAnnotationInfo **) &%s_arg_%s_annotation_info_pointers\n'%(prefix, a.name))
+             self.outfile.write('  },\n')
+             if not utils.lookup_annotation(a.annotations, 'org.gtk.GDBus.C.ForceGVariant'):
+                 self.outfile.write('  FALSE\n')
+             else:
+                 self.outfile.write('  TRUE\n')
+             self.outfile.write('};\n'
+                                '\n')
+ 
+         if len(args) > 0:
+-            self.outfile.write('static const _ExtendedGDBusArgInfo * const %s_pointers[] =\n'
++            self.outfile.write('static const GDBusArgInfo * const %s_pointers[] =\n'
+                              '{\n'%(prefix))
+             for a in args:
+-                self.outfile.write('  &%s_%s,\n'%(prefix, a.name))
++                self.outfile.write('  &%s_%s.parent_struct,\n'%(prefix, a.name))
+             self.outfile.write('  NULL\n'
+                                '};\n'
+                                '\n')
+ 
+     def generate_introspection_for_interface(self, i):
+             self.outfile.write('/* ---- Introspection data for %s ---- */\n'
+                                '\n'%(i.name))
+ 
+             if len(i.methods) > 0:
+                 for m in i.methods:
+                     unix_fd = False
+                     if utils.lookup_annotation(m.annotations, 'org.gtk.GDBus.C.UnixFD'):
+                         unix_fd = True
+                     self.generate_args('_%s_method_info_%s_IN_ARG'%(i.name_lower, m.name_lower), m.in_args)
+                     self.generate_args('_%s_method_info_%s_OUT_ARG'%(i.name_lower, m.name_lower), m.out_args)
+ 
+                     num_anno = self.generate_annotations('_%s_method_%s_annotation_info'%(i.name_lower, m.name_lower), m.annotations)
+ 
+                     self.outfile.write('static const _ExtendedGDBusMethodInfo _%s_method_info_%s =\n'
+                                        '{\n'
+                                        '  {\n'
+                                        '    -1,\n'
+                                        '    (gchar *) "%s",\n'%(i.name_lower, m.name_lower, m.name))
+                     if len(m.in_args) == 0:
+                         self.outfile.write('    NULL,\n')
+                     else:
+                         self.outfile.write('    (GDBusArgInfo **) &_%s_method_info_%s_IN_ARG_pointers,\n'%(i.name_lower, m.name_lower))
+                     if len(m.out_args) == 0:
+                         self.outfile.write('    NULL,\n')
+                     else:
+                         self.outfile.write('    (GDBusArgInfo **) &_%s_method_info_%s_OUT_ARG_pointers,\n'%(i.name_lower, m.name_lower))
+                     if num_anno == 0:
+                         self.outfile.write('    NULL\n')
+                     else:
+                         self.outfile.write('    (GDBusAnnotationInfo **) &_%s_method_%s_annotation_info_pointers\n'%(i.name_lower, m.name_lower))
+                     self.outfile.write('  },\n'
+                                        '  "handle-%s",\n'
+                                        '  %s\n'
+                                        %(m.name_hyphen, 'TRUE' if unix_fd else 'FALSE'))
+                     self.outfile.write('};\n'
+                                        '\n')
+ 
+-                self.outfile.write('static const _ExtendedGDBusMethodInfo * const _%s_method_info_pointers[] =\n'
++                self.outfile.write('static const GDBusMethodInfo * const _%s_method_info_pointers[] =\n'
+                                    '{\n'%(i.name_lower))
+                 for m in i.methods:
+-                    self.outfile.write('  &_%s_method_info_%s,\n'%(i.name_lower, m.name_lower))
++                    self.outfile.write('  &_%s_method_info_%s.parent_struct,\n'%(i.name_lower, m.name_lower))
+                 self.outfile.write('  NULL\n'
+                                    '};\n'
+                                    '\n')
+ 
+             # ---
+ 
+             if len(i.signals) > 0:
+                 for s in i.signals:
+                     self.generate_args('_%s_signal_info_%s_ARG'%(i.name_lower, s.name_lower), s.args)
+ 
+                     num_anno = self.generate_annotations('_%s_signal_%s_annotation_info'%(i.name_lower, s.name_lower), s.annotations)
+                     self.outfile.write('static const _ExtendedGDBusSignalInfo _%s_signal_info_%s =\n'
+                                        '{\n'
+                                        '  {\n'
+                                        '    -1,\n'
+                                        '    (gchar *) "%s",\n'%(i.name_lower, s.name_lower, s.name))
+                     if len(s.args) == 0:
+                         self.outfile.write('    NULL,\n')
+                     else:
+                         self.outfile.write('    (GDBusArgInfo **) &_%s_signal_info_%s_ARG_pointers,\n'%(i.name_lower, s.name_lower))
+                     if num_anno == 0:
+                         self.outfile.write('    NULL\n')
+                     else:
+                         self.outfile.write('    (GDBusAnnotationInfo **) &_%s_signal_%s_annotation_info_pointers\n'%(i.name_lower, s.name_lower))
+                     self.outfile.write('  },\n'
+                                        '  "%s"\n'
+                                        %(s.name_hyphen))
+                     self.outfile.write('};\n'
+                                        '\n')
+ 
+-                self.outfile.write('static const _ExtendedGDBusSignalInfo * const _%s_signal_info_pointers[] =\n'
++                self.outfile.write('static const GDBusSignalInfo * const _%s_signal_info_pointers[] =\n'
+                                    '{\n'%(i.name_lower))
+                 for s in i.signals:
+-                    self.outfile.write('  &_%s_signal_info_%s,\n'%(i.name_lower, s.name_lower))
++                    self.outfile.write('  &_%s_signal_info_%s.parent_struct,\n'%(i.name_lower, s.name_lower))
+                 self.outfile.write('  NULL\n'
+                                    '};\n'
+                                    '\n')
+ 
+             # ---
+ 
+             if len(i.properties) > 0:
+                 for p in i.properties:
+                     if p.readable and p.writable:
+                         access = 'G_DBUS_PROPERTY_INFO_FLAGS_READABLE | G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE'
+                     elif p.readable:
+                         access = 'G_DBUS_PROPERTY_INFO_FLAGS_READABLE'
+                     elif p.writable:
+                         access = 'G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE'
+                     else:
+                         access = 'G_DBUS_PROPERTY_INFO_FLAGS_NONE'
+                     num_anno = self.generate_annotations('_%s_property_%s_annotation_info'%(i.name_lower, p.name_lower), p.annotations)
+                     self.outfile.write('static const _ExtendedGDBusPropertyInfo _%s_property_info_%s =\n'
+                                        '{\n'
+                                        '  {\n'
+                                        '    -1,\n'
+                                        '    (gchar *) "%s",\n'
+                                        '    (gchar *) "%s",\n'
+                                        '    %s,\n'%(i.name_lower, p.name_lower, p.name, p.arg.signature, access))
+                     if num_anno == 0:
+                         self.outfile.write('    NULL\n')
+                     else:
+                         self.outfile.write('    (GDBusAnnotationInfo **) &_%s_property_%s_annotation_info_pointers\n'%(i.name_lower, p.name_lower))
+                     self.outfile.write('  },\n'
+                                        '  "%s",\n'
+                                        %(p.name_hyphen))
+                     if not utils.lookup_annotation(p.annotations, 'org.gtk.GDBus.C.ForceGVariant'):
+                         self.outfile.write('  FALSE\n')
+                     else:
+                         self.outfile.write('  TRUE\n')
+                     self.outfile.write('};\n'
+                                        '\n')
+ 
+-                self.outfile.write('static const _ExtendedGDBusPropertyInfo * const _%s_property_info_pointers[] =\n'
++                self.outfile.write('static const GDBusPropertyInfo * const _%s_property_info_pointers[] =\n'
+                                    '{\n'%(i.name_lower))
+                 for p in i.properties:
+-                    self.outfile.write('  &_%s_property_info_%s,\n'%(i.name_lower, p.name_lower))
++                    self.outfile.write('  &_%s_property_info_%s.parent_struct,\n'%(i.name_lower, p.name_lower))
+                 self.outfile.write('  NULL\n'
+                                    '};\n'
+                                    '\n')
+ 
+             num_anno = self.generate_annotations('_%s_annotation_info'%(i.name_lower), i.annotations)
+             self.outfile.write('static const _ExtendedGDBusInterfaceInfo _%s_interface_info =\n'
+                                '{\n'
+                                '  {\n'
+                                '    -1,\n'
+                                '    (gchar *) "%s",\n'%(i.name_lower, i.name))
+             if len(i.methods) == 0:
+                 self.outfile.write('    NULL,\n')
+             else:
+                 self.outfile.write('    (GDBusMethodInfo **) &_%s_method_info_pointers,\n'%(i.name_lower))
+             if len(i.signals) == 0:
+                 self.outfile.write('    NULL,\n')
+             else:
+                 self.outfile.write('    (GDBusSignalInfo **) &_%s_signal_info_pointers,\n'%(i.name_lower))
+             if len(i.properties) == 0:
+                 self.outfile.write('    NULL,\n')
+             else:
+                 self.outfile.write('    (GDBusPropertyInfo **) &_%s_property_info_pointers,\n'%(i.name_lower))
+             if num_anno == 0:
+                 self.outfile.write('    NULL\n')
+             else:
+                 self.outfile.write('    (GDBusAnnotationInfo **) &_%s_annotation_info_pointers\n'%(i.name_lower))
+             self.outfile.write('  },\n'
+                                '  "%s",\n'
+                                '};\n'
+                                '\n'
+@@ -1636,114 +1636,114 @@ class CodeGenerator:
+         self.outfile.write('#else\n')
+         self.outfile.write('G_DEFINE_TYPE_WITH_CODE (%sProxy, %s_proxy, G_TYPE_DBUS_PROXY,\n'%(i.camel_name, i.name_lower))
+         self.outfile.write('                         G_IMPLEMENT_INTERFACE (%sTYPE_%s, %s_proxy_iface_init))\n\n'%(i.ns_upper, i.name_upper, i.name_lower))
+         self.outfile.write('#endif\n')
+ 
+         # finalize
+         self.outfile.write('static void\n'
+                            '%s_proxy_finalize (GObject *object)\n'
+                            '{\n'%(i.name_lower))
+         self.outfile.write('  %sProxy *proxy = %s%s_PROXY (object);\n'%(i.camel_name, i.ns_upper, i.name_upper))
+         self.outfile.write('  g_datalist_clear (&proxy->priv->qdata);\n')
+         self.outfile.write('  G_OBJECT_CLASS (%s_proxy_parent_class)->finalize (object);\n'
+                            '}\n'
+                            '\n'%(i.name_lower))
+ 
+         # property accessors
+         #
+         # Note that we are guaranteed that prop_id starts at 1 and is
+         # laid out in the same order as introspection data pointers
+         #
+         self.outfile.write('static void\n'
+                            '%s_proxy_get_property (GObject      *object,\n'
+                            '  guint         prop_id,\n'
+                            '  GValue       *value,\n'
+                            '  GParamSpec   *pspec G_GNUC_UNUSED)\n'
+                            '{\n'%(i.name_lower))
+         if len(i.properties) > 0:
+             self.outfile.write('  const _ExtendedGDBusPropertyInfo *info;\n'
+                                '  GVariant *variant;\n'
+                                '  g_assert (prop_id != 0 && prop_id - 1 < %d);\n'
+-                               '  info = _%s_property_info_pointers[prop_id - 1];\n'
++                               '  info = (const _ExtendedGDBusPropertyInfo *) _%s_property_info_pointers[prop_id - 1];\n'
+                                '  variant = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (object), info->parent_struct.name);\n'
+                                '  if (info->use_gvariant)\n'
+                                '    {\n'
+                                '      g_value_set_variant (value, variant);\n'
+                                '    }\n'
+                                '  else\n'
+                                '    {\n'
+                                # could be that we don't have the value in cache - in that case, we do
+                                # nothing and the user gets the default value for the GType
+                                '      if (variant != NULL)\n'
+                                '        g_dbus_gvariant_to_gvalue (variant, value);\n'
+                                '    }\n'
+                                '  if (variant != NULL)\n'
+                                '    g_variant_unref (variant);\n'
+                                %(len(i.properties), i.name_lower))
+         self.outfile.write('}\n'
+                            '\n')
+         if len(i.properties) > 0:
+             self.outfile.write('static void\n'
+                                '%s_proxy_set_property_cb (GDBusProxy *proxy,\n'
+                                '  GAsyncResult *res,\n'
+                                '  gpointer      user_data)\n'
+                                '{\n'%(i.name_lower))
+             self.outfile.write('  const _ExtendedGDBusPropertyInfo *info = user_data;\n'
+                                '  GError *error;\n'
+                                '  GVariant *_ret;\n'
+                                '  error = NULL;\n'
+                                '  _ret = g_dbus_proxy_call_finish (proxy, res, &error);\n'
+                                '  if (!_ret)\n'
+                                '    {\n'
+                                '      g_warning ("Error setting property \'%%s\' on interface %s: %%s (%%s, %%d)",\n'
+                                '                 info->parent_struct.name, \n'
+                                '                 error->message, g_quark_to_string (error->domain), error->code);\n'
+                                '      g_error_free (error);\n'
+                                '    }\n'
+                                '  else\n'
+                                '    {\n'
+                                '      g_variant_unref (_ret);\n'
+                                '    }\n'
+                                %(i.name))
+             self.outfile.write('}\n'
+                                '\n')
+         self.outfile.write('static void\n'
+                            '%s_proxy_set_property (GObject      *object,\n'
+                            '  guint         prop_id,\n'
+                            '  const GValue *value,\n'
+                            '  GParamSpec   *pspec G_GNUC_UNUSED)\n'
+                            '{\n'%(i.name_lower))
+         if len(i.properties) > 0:
+             self.outfile.write('  const _ExtendedGDBusPropertyInfo *info;\n'
+                                '  GVariant *variant;\n'
+                                '  g_assert (prop_id != 0 && prop_id - 1 < %d);\n'
+-                               '  info = _%s_property_info_pointers[prop_id - 1];\n'
++                               '  info = (const _ExtendedGDBusPropertyInfo *) _%s_property_info_pointers[prop_id - 1];\n'
+                                '  variant = g_dbus_gvalue_to_gvariant (value, G_VARIANT_TYPE (info->parent_struct.signature));\n'
+                                '  g_dbus_proxy_call (G_DBUS_PROXY (object),\n'
+                                '    "org.freedesktop.DBus.Properties.Set",\n'
+                                '    g_variant_new ("(ssv)", "%s", info->parent_struct.name, variant),\n'
+                                '    G_DBUS_CALL_FLAGS_NONE,\n'
+                                '    -1,\n'
+                                '    NULL, (GAsyncReadyCallback) %s_proxy_set_property_cb, (GDBusPropertyInfo *) &info->parent_struct);\n'
+                                '  g_variant_unref (variant);\n'
+                                %(len(i.properties), i.name_lower, i.name, i.name_lower))
+         self.outfile.write('}\n'
+                            '\n')
+ 
+         # signal received
+         self.outfile.write('static void\n'
+                            '%s_proxy_g_signal (GDBusProxy *proxy,\n'
+                            '  const gchar *sender_name G_GNUC_UNUSED,\n'
+                            '  const gchar *signal_name,\n'
+                            '  GVariant *parameters)\n'
+                            '{\n'%(i.name_lower))
+         self.outfile.write('  _ExtendedGDBusSignalInfo *info;\n'
+                            '  GVariantIter iter;\n'
+                            '  GVariant *child;\n'
+                            '  GValue *paramv;\n'
+                            '  gsize num_params;\n'
+                            '  gsize n;\n'
+                            '  guint signal_id;\n');
+         # Note: info could be NULL if we are talking to a newer version of the interface
+         self.outfile.write('  info = (_ExtendedGDBusSignalInfo *) g_dbus_interface_info_lookup_signal ((GDBusInterfaceInfo *) &_%s_interface_info.parent_struct, signal_name);\n'
+                            '  if (info == NULL)\n'
+                            '    return;\n'
+@@ -2575,61 +2575,61 @@ class CodeGenerator:
+                                '  %sSkeleton *skeleton = %s%s_SKELETON (object);\n'
+                                '  g_mutex_lock (&skeleton->priv->lock);\n'
+                                '  if (skeleton->priv->changed_properties != NULL &&\n'
+                                '      skeleton->priv->changed_properties_idle_source == NULL)\n'
+                                '    {\n'
+                                '      skeleton->priv->changed_properties_idle_source = g_idle_source_new ();\n'
+                                '      g_source_set_priority (skeleton->priv->changed_properties_idle_source, G_PRIORITY_DEFAULT);\n'
+                                '      g_source_set_callback (skeleton->priv->changed_properties_idle_source, _%s_emit_changed, g_object_ref (skeleton), (GDestroyNotify) g_object_unref);\n'
+                                '      g_source_set_name (skeleton->priv->changed_properties_idle_source, "[generated] _%s_emit_changed");\n'
+                                '      g_source_attach (skeleton->priv->changed_properties_idle_source, skeleton->priv->context);\n'
+                                '      g_source_unref (skeleton->priv->changed_properties_idle_source);\n'
+                                '    }\n'
+                                '  g_mutex_unlock (&skeleton->priv->lock);\n'
+                                '}\n'
+                                '\n'
+                                %(i.name_lower, i.camel_name, i.ns_upper, i.name_upper, i.name_lower, i.name_lower))
+ 
+             self.outfile.write('static void\n'
+                                '%s_skeleton_set_property (GObject      *object,\n'
+                                '  guint         prop_id,\n'
+                                '  const GValue *value,\n'
+                                '  GParamSpec   *pspec)\n'
+                                '{\n'%(i.name_lower))
+             self.outfile.write('  %sSkeleton *skeleton = %s%s_SKELETON (object);\n'
+                                '  g_assert (prop_id != 0 && prop_id - 1 < %d);\n'
+                                '  g_mutex_lock (&skeleton->priv->lock);\n'
+                                '  g_object_freeze_notify (object);\n'
+                                '  if (!_g_value_equal (value, &skeleton->priv->properties[prop_id - 1]))\n'
+                                '    {\n'
+                                '      if (g_dbus_interface_skeleton_get_connection (G_DBUS_INTERFACE_SKELETON (skeleton)) != NULL)\n'
+-                               '        _%s_schedule_emit_changed (skeleton, _%s_property_info_pointers[prop_id - 1], prop_id, &skeleton->priv->properties[prop_id - 1]);\n'
++                               '        _%s_schedule_emit_changed (skeleton, (const _ExtendedGDBusPropertyInfo *) _%s_property_info_pointers[prop_id - 1], prop_id, &skeleton->priv->properties[prop_id - 1]);\n'
+                                '      g_value_copy (value, &skeleton->priv->properties[prop_id - 1]);\n'
+                                '      g_object_notify_by_pspec (object, pspec);\n'
+                                '    }\n'
+                                '  g_mutex_unlock (&skeleton->priv->lock);\n'
+                                '  g_object_thaw_notify (object);\n'
+                                %(i.camel_name, i.ns_upper, i.name_upper, len(i.properties), i.name_lower, i.name_lower))
+             self.outfile.write('}\n'
+                                '\n')
+ 
+         self.outfile.write('static void\n'
+                            '%s_skeleton_init (%sSkeleton *skeleton)\n'
+                            '{\n'
+                            '#if GLIB_VERSION_MAX_ALLOWED >= GLIB_VERSION_2_38\n'
+                            '  skeleton->priv = %s_skeleton_get_instance_private (skeleton);\n'
+                            '#else\n'
+                            '  skeleton->priv = G_TYPE_INSTANCE_GET_PRIVATE (skeleton, %sTYPE_%s_SKELETON, %sSkeletonPrivate);\n'
+                            '#endif\n\n'
+                            %(i.name_lower, i.camel_name,
+                              i.name_lower,
+                              i.ns_upper, i.name_upper, i.camel_name))
+         self.outfile.write('  g_mutex_init (&skeleton->priv->lock);\n')
+         self.outfile.write('  skeleton->priv->context = g_main_context_ref_thread_default ();\n')
+         if len(i.properties) > 0:
+             self.outfile.write('  skeleton->priv->properties = g_new0 (GValue, %d);\n'%(len(i.properties)))
+             n = 0
+             for p in i.properties:
+                 self.outfile.write('  g_value_init (&skeleton->priv->properties[%d], %s);\n'%(n, p.arg.gtype))
+                 n += 1
+         self.outfile.write('}\n'
+                            '\n')
+-- 
+2.21.0
+
